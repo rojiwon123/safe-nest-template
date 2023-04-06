@@ -6,3 +6,5 @@ db
 packages
 
 src/api/functional
+
+!src/infrastructure/DB
