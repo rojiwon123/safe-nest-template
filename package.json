@@ -1,0 +1,69 @@
+{
+  "name": "nestia-template",
+  "version": "0.0.0",
+  "description": "nestia를 적용한 nestjs 서버",
+  "main": "build/main",
+  "scripts": {
+    "build": "rimraf build && ttsc -p ./tsconfig.build.json",
+    "build:api": "rimraf packages/api/lib && npm run sdk && ttsc -p ./tsconfig.api.json",
+    "dev": "npm run build && NODE_ENV=development node build/main",
+    "start": "NODE_ENV=production node build/main",
+    "test": "rimraf tbuild && ttsc -p ./tsconfig.test.json && NODE_ENV=test node tbuild/test",
+    "swagger": "NODE_ENV=development nestia swagger",
+    "sdk": "rimraf ./src/api/functional && NODE_ENV=development nestia sdk && find ./src/api -type f -exec sed -i '' 's/\\r$//' {} \\;",
+    "nestia": "npm run swagger ; npm run sdk",
+    "schema": "ls ./prisma/schema/*.prisma | xargs cat > ./prisma/schema.prisma",
+    "db:update": "rimraf db && npm run schema && prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:dashboard": "prisma studio"
+  },
+  "author": "industriously",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-industriously:industriously/nestia-template.git"
+  },
+  "keywords": [
+    "nestjs",
+    "nestia"
+  ],
+  "dependencies": {
+    "@nestia/core": "^1.0.18",
+    "@nestjs/common": "^9.4.0",
+    "@nestjs/core": "^9.4.0",
+    "@nestjs/platform-express": "^9.4.0",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
+    "helmet": "^6.0.1",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.0",
+    "typia": "^3.7.1"
+  },
+  "devDependencies": {
+    "@nestia/e2e": "^0.1.8",
+    "@nestia/sdk": "^1.0.19",
+    "@prisma/client": "^4.12.0",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.37.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "nestia": "^4.0.10",
+    "prettier": "^2.8.7",
+    "prisma": "^4.12.0",
+    "rimraf": "^4.4.1",
+    "source-map-support": "^0.5.21",
+    "ts-loader": "^9.4.2",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "ttypescript": "^1.5.15",
+    "typescript": "^4.9.5",
+    "typescript-transform-paths": "^3.4.6"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  }
+}

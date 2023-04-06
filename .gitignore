@@ -1,0 +1,16 @@
+node_modules
+
+# build
+
+build
+tbuild
+packages/api/lib
+
+# log
+
+test_log.md
+
+# env
+
+.env
+.env.*

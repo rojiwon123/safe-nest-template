@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.1",
+  "servers": [
+    {
+      "url": "https://localhost:4000/",
+      "description": "insert your server url"
+    }
+  ],
+  "info": {
+    "version": "0.1.0",
+    "title": "NestJS Template"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "x-nestia-encrypted": false
+          }
+        },
+        "description": "",
+        "x-nestia-namespace": "check",
+        "x-nestia-jsDocTags": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "bearer": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ]
+}

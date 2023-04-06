@@ -1,0 +1,68 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PORT: 4000
+  DATABASE_URL: mysql://test:test@localhost:3306/test
+
+permissions:
+  pull-requests: write
+
+jobs:
+  Test_Report:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        env:
+          MYSQL_USER: test
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_PASSWORD: test
+          MYSQL_DATABASE: test
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@main
+
+      - name: Install
+        run: npm ci
+
+      - name: Setup DB
+        run: npm run db:deploy
+
+      - name: Test 🧪
+        run: npm run test
+
+      - name: Create or Update PR Comment 💬
+        uses: actions/github-script@main
+        if: github.event.pull_request
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const cmts = await github.rest.issues.listComments({ issue_number, owner, repo });
+
+            const comment = cmts.data.find(cmt => cmt.user.login === 'github-actions[bot]');
+
+            const fs = require('fs');
+            const path = './test_log.md';
+            const body = fs.readFileSync(path, 'utf8');
+            comment
+                ? github.rest.issues.updateComment({ comment_id: comment.id, owner, repo, body })
+                : github.rest.issues.createComment({ issue_number, owner, repo, body });
