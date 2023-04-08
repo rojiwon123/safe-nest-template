@@ -1,4 +1,3 @@
-import { IEnv } from "@INTERFACE/common";
 import dotenv from "dotenv";
 import typia from "typia";
 
@@ -23,3 +22,8 @@ const init = () => {
       };
 };
 export const Configuration: IEnv = init();
+
+interface IEnv {
+  readonly NODE_ENV: "development" | "production" | "test";
+  readonly PORT: string | number;
+}
