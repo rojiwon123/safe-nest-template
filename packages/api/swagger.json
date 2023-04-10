@@ -11,24 +11,116 @@
     "title": "NestJS Template"
   },
   "paths": {
-    "/": {
-      "get": {
+    "/sign-in/oauth": {
+      "post": {
         "tags": [],
         "parameters": [],
+        "requestBody": {
+          "description": "oauth code & oauth type",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IAccessor.IOauthSignIn"
+              }
+            }
+          },
+          "required": true,
+          "x-nestia-encrypted": false
+        },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "사용자 인증 정보",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAccessor"
+                }
+              }
+            },
             "x-nestia-encrypted": false
           }
         },
-        "description": "",
-        "x-nestia-namespace": "check",
-        "x-nestia-jsDocTags": []
+        "description": "oauth 로그인 API",
+        "x-nestia-namespace": "sign-in.oauth.signIn",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "body",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "oauth code & oauth type",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "returns",
+            "text": [
+              {
+                "text": "사용자 인증 정보",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
       }
     }
   },
   "components": {
-    "schemas": {},
+    "schemas": {
+      "IAccessor.IOauthSignIn": {
+        "type": "object",
+        "properties": {
+          "oauth_type": {
+            "type": "string",
+            "enum": [
+              "google"
+            ],
+            "nullable": false,
+            "x-typia-required": true
+          },
+          "code": {
+            "type": "string",
+            "nullable": false,
+            "x-typia-required": true
+          }
+        },
+        "nullable": false,
+        "required": [
+          "oauth_type",
+          "code"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IAccessor": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "nullable": false,
+            "x-typia-required": true
+          },
+          "refresh_token": {
+            "type": "string",
+            "nullable": false,
+            "x-typia-required": true
+          }
+        },
+        "nullable": false,
+        "required": [
+          "access_token",
+          "refresh_token"
+        ],
+        "x-typia-jsDocTags": []
+      }
+    },
     "securitySchemes": {
       "bearer": {
         "type": "apiKey",
