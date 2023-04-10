@@ -1,12 +1,12 @@
 import type nestia from "@nestia/sdk";
 
 const NESTIA_CONFIG: nestia.INestiaConfig = {
-  input: "src/controller",
+  input: "src/controllers",
   output: "src/api",
   json: true,
   primitive: false,
   swagger: {
-    output: "swagger.json",
+    output: "packages/api/swagger.json",
     security: {
       bearer: {
         type: "apiKey",

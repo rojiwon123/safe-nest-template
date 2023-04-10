@@ -24,4 +24,4 @@ Nestia와 prisma를 미리 적용한 템플릿 프로젝트
 
 ## API 문서
 
-- [View in the `Swagger Editor`](https://editor.swagger.io/?url=https://raw.githubusercontent.com/industriously/nestia-template/main/swagger.json)
+- [View in the `Swagger Editor`](https://editor.swagger.io/?url=https://raw.githubusercontent.com/industriously/nestia-template/main/packages/api/swagger.json)
