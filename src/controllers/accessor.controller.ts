@@ -1,7 +1,7 @@
 import { IAccessor } from "@DTO/user/accessor";
 import { TypedBody } from "@nestia/core";
 import { Controller, Post } from "@nestjs/common";
-import { AccessorService } from "src/app/user";
+import { AccessorService } from "@APP/user";
 
 @Controller()
 export class AccessorController {

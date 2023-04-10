@@ -8,7 +8,7 @@ import {
   CUSTOM_ROUTE_ARGS_METADATA,
   ROUTE_ARGS_METADATA
 } from "@nestjs/common/constants";
-import { isString, isStringArray, isUndefined } from "src/utils";
+import { isString, isStringArray, isUndefined } from "@UTIL";
 import { Request } from "express";
 
 interface QueryTypeOptions {

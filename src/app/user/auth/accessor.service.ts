@@ -1,7 +1,7 @@
 import { Google } from "@devts/nestjs-auth";
 import { IAccessor } from "@DTO/user/accessor";
 import { UnauthorizedException } from "@nestjs/common";
-import { throwIf } from "src/utils";
+import { throwIf } from "@UTIL";
 import { pipe } from "rxjs";
 import typia from "typia";
 import { GoogleStrategy } from "./strategy/google.strategy";
