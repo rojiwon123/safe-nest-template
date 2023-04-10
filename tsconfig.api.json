@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-      "target": "ES5",
+      "removeComments": false,
+      "target": "ES6",
       "declaration": true,
       "outDir": "./packages/api/lib",
-      "downlevelIteration": true,
       "lib": [
           "DOM",
           "ES2015",
