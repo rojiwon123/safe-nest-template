@@ -1,8 +1,7 @@
 import { Google, StrategyException } from "@devts/nestjs-auth";
 import { IAccessor } from "@DTO/user/accessor";
 import { Configuration } from "@INFRA/config";
-import { BadRequestException, UnauthorizedException } from "@nestjs/common";
-import { Request } from "express";
+import { UnauthorizedException } from "@nestjs/common";
 import typia from "typia";
 import { OAUTH_PROFILE } from "./oauth.profile.key";
 
@@ -29,14 +28,6 @@ export class GoogleStrategy extends Google.AbstractStrategy<
     throw new UnauthorizedException(message);
   }
 
-  override getCode(request: Request): string {
-    const code = (request.body as any)?.code;
-    if (typeof code !== "string") {
-      throw new BadRequestException("'code' in body is invalid.");
-    }
-    return code;
-  }
-
   validate(identity: Google.IdToken<"email" | "profile">): boolean {
     if (!typia.is(identity)) {
       this.throw({ message: "Insufficient user information." });
@@ -47,11 +38,14 @@ export class GoogleStrategy extends Google.AbstractStrategy<
   transform(
     identity: Google.IdToken<"email" | "profile">
   ): IAccessor.IOauthProfile {
-    const { name, email, sub } = identity;
+    const { sub, name, email, email_verified } = identity;
+    if (!email_verified) {
+      this.throw({ message: "google email is not verified." });
+    }
     return {
+      sub,
       name,
       email,
-      sub,
       oauth_type: "google"
     };
   }
