@@ -1,3 +1,5 @@
+import { isNull } from "./is";
+
 export const toThrow = (exception: unknown): never => {
   throw exception;
 };
@@ -13,3 +15,8 @@ export const throwIf: throwIf =
   (predicate: (input: unknown) => boolean, exception: unknown) =>
   (input: unknown) =>
     predicate(input) ? toThrow(exception) : input;
+
+export const throwIfNull =
+  <T>(exception: unknown) =>
+  (input: T | null) =>
+    isNull(input) ? toThrow(exception) : input;

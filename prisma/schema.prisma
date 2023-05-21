@@ -1,16 +1,21 @@
+datasource database {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
   output   = "../db"
 }
 
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
-model User {
-  id    String @id
-  name  String
-  email String
+model UserModel {
+  id         String    @id
+  created_at DateTime  @database.Timestamptz
+  updated_at DateTime  @database.Timestamptz
+  is_deleted Boolean
+  deleted_at DateTime? @database.Timestamptz
+  name       String
+  email      String
 
   @@map("users")
 }

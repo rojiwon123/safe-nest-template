@@ -3,16 +3,16 @@ module.exports = {
   parserOptions: {
     project: "tsconfig.json",
     tsconfigRootDir: __dirname,
-    sourceType: "module",
+    sourceType: "module"
   },
   plugins: ["@typescript-eslint/eslint-plugin"],
   extends: [
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended",
+    "plugin:prettier/recommended"
   ],
   root: true,
   env: {
-    node: true,
+    node: true
   },
   ignorePatterns: [".eslintrc.js", "*.config.js"],
   rules: {
@@ -23,6 +23,6 @@ module.exports = {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-empty-interface": "off",
-    "@typescript-eslint/no-empty-function": "off",
-  },
+    "@typescript-eslint/no-empty-function": "off"
+  }
 };

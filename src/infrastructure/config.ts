@@ -26,8 +26,5 @@ export const Configuration: IEnv = init();
 interface IEnv {
   readonly NODE_ENV: "development" | "production" | "test";
   readonly PORT: string | number;
-
-  readonly GOOGLE_CLIENT_ID: string;
-  readonly GOOGLE_CLIENT_SECRET: string;
-  readonly GOOGLE_REDIRECT_URI: string;
+  readonly DATABASE_URL: string;
 }

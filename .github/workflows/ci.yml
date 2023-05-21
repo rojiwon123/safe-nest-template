@@ -2,13 +2,13 @@ name: Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main, develop]
 
 env:
   PORT: 4000
-  DATABASE_URL: mysql://test:test@localhost:3306/test
+  DATABASE_URL: postgresql://test:test@localhost:5432/test
 
 permissions:
   pull-requests: write
@@ -16,25 +16,26 @@ permissions:
 jobs:
   Test_Report:
     runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'hotfix/') == false
 
     services:
-      mysql:
-        image: mysql:8
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+      postgres:
+        image: postgres:14
         env:
-          MYSQL_USER: test
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_PASSWORD: test
-          MYSQL_DATABASE: test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [18.x, 19.x, 20.x]
 
     steps:
       - name: Checkout 🛎️

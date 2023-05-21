@@ -2,52 +2,82 @@
   "openapi": "3.0.1",
   "servers": [
     {
-      "url": "https://localhost:4000/",
-      "description": "insert your server url"
+      "url": "https://localhost:4000",
+      "description": "Local Server"
     }
   ],
   "info": {
-    "version": "0.1.0",
-    "title": "NestJS Template"
+    "version": "0.0.1",
+    "title": "Server Title",
+    "description": "Service Description"
   },
   "paths": {
-    "/sign-in/oauth": {
-      "post": {
-        "tags": [],
-        "parameters": [],
-        "requestBody": {
-          "description": "oauth code & oauth type",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IAccessor.IOauthSignIn"
-              }
-            }
-          },
-          "required": true,
-          "x-nestia-encrypted": false
-        },
+    "/users/{user_id}": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "user id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
         "responses": {
-          "201": {
-            "description": "사용자 인증 정보",
+          "200": {
+            "description": "user info",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IAccessor"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/INormalUser"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IAdmin"
+                    }
+                  ]
                 }
               }
             },
             "x-nestia-encrypted": false
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
-        "description": "oauth 로그인 API",
-        "x-nestia-namespace": "sign-in.oauth.signIn",
+        "summary": "user find by user id",
+        "description": "get user info by user id\n@summary user find by user id\n@tag users\n@param user_id user id\n@return user info\n@throw 404 Not Found",
+        "x-nestia-namespace": "users.getOne",
         "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "user find by user id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "users",
+                "kind": "text"
+              }
+            ]
+          },
           {
             "name": "param",
             "text": [
               {
-                "text": "body",
+                "text": "user_id",
                 "kind": "parameterName"
               },
               {
@@ -55,16 +85,25 @@
                 "kind": "space"
               },
               {
-                "text": "oauth code & oauth type",
+                "text": "user id",
                 "kind": "text"
               }
             ]
           },
           {
-            "name": "returns",
+            "name": "return",
             "text": [
               {
-                "text": "사용자 인증 정보",
+                "text": "user info",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "throw",
+            "text": [
+              {
+                "text": "404 Not Found",
                 "kind": "text"
               }
             ]
@@ -75,48 +114,213 @@
   },
   "components": {
     "schemas": {
-      "IAccessor.IOauthSignIn": {
+      "INormalUser": {
         "type": "object",
         "properties": {
-          "oauth_type": {
+          "type": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
             "type": "string",
             "enum": [
-              "google"
-            ],
-            "nullable": false,
-            "x-typia-required": true
+              "normal"
+            ]
           },
-          "code": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "name": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "email": {
+            "description": "@format email",
+            "x-typia-metaTags": [
+              {
+                "kind": "format",
+                "value": "email"
+              }
+            ],
+            "x-typia-jsDocTags": [
+              {
+                "name": "format",
+                "text": [
+                  {
+                    "text": "email",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": false,
             "type": "string",
-            "nullable": false,
-            "x-typia-required": true
+            "format": "email"
+          },
+          "created_at": {
+            "description": "@format date-time",
+            "x-typia-metaTags": [
+              {
+                "kind": "format",
+                "value": "datetime"
+              }
+            ],
+            "x-typia-jsDocTags": [
+              {
+                "name": "format",
+                "text": [
+                  {
+                    "text": "date-time",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "description": "@format date-time",
+            "x-typia-metaTags": [
+              {
+                "kind": "format",
+                "value": "datetime"
+              }
+            ],
+            "x-typia-jsDocTags": [
+              {
+                "name": "format",
+                "text": [
+                  {
+                    "text": "date-time",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time"
           }
         },
         "nullable": false,
         "required": [
-          "oauth_type",
-          "code"
+          "type",
+          "id",
+          "name",
+          "email",
+          "created_at",
+          "updated_at"
         ],
         "x-typia-jsDocTags": []
       },
-      "IAccessor": {
+      "IAdmin": {
         "type": "object",
         "properties": {
-          "access_token": {
+          "type": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
             "type": "string",
-            "nullable": false,
-            "x-typia-required": true
+            "enum": [
+              "admin"
+            ]
           },
-          "refresh_token": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "name": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "email": {
+            "description": "@format email",
+            "x-typia-metaTags": [
+              {
+                "kind": "format",
+                "value": "email"
+              }
+            ],
+            "x-typia-jsDocTags": [
+              {
+                "name": "format",
+                "text": [
+                  {
+                    "text": "email",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": false,
             "type": "string",
-            "nullable": false,
-            "x-typia-required": true
+            "format": "email"
+          },
+          "created_at": {
+            "description": "@format date-time",
+            "x-typia-metaTags": [
+              {
+                "kind": "format",
+                "value": "datetime"
+              }
+            ],
+            "x-typia-jsDocTags": [
+              {
+                "name": "format",
+                "text": [
+                  {
+                    "text": "date-time",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "description": "@format date-time",
+            "x-typia-metaTags": [
+              {
+                "kind": "format",
+                "value": "datetime"
+              }
+            ],
+            "x-typia-jsDocTags": [
+              {
+                "name": "format",
+                "text": [
+                  {
+                    "text": "date-time",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time"
           }
         },
         "nullable": false,
         "required": [
-          "access_token",
-          "refresh_token"
+          "type",
+          "id",
+          "name",
+          "email",
+          "created_at",
+          "updated_at"
         ],
         "x-typia-jsDocTags": []
       }
