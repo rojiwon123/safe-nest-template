@@ -41,7 +41,7 @@
     "nestia"
   ],
   "dependencies": {
-    "@devts/authjs": "^0.0.2",
+    "@devts/authjs": "^0.0.13",
     "@fxts/core": "^0.15.1",
     "@nestia/core": "^1.2.2",
     "@nestjs/common": "^9.4.1",

@@ -12,6 +12,32 @@
     "description": "Service Description"
   },
   "paths": {
+    "/auth/sign-in/kakao": {
+      "post": {
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IAuthentication.ISignIn"
+              }
+            }
+          },
+          "required": true,
+          "x-nestia-encrypted": false
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "x-nestia-encrypted": false
+          }
+        },
+        "x-nestia-namespace": "auth.sign-in.kakao.execute",
+        "x-nestia-jsDocTags": []
+      }
+    },
     "/users/{user_id}": {
       "get": {
         "tags": [
@@ -114,6 +140,21 @@
   },
   "components": {
     "schemas": {
+      "IAuthentication.ISignIn": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "code"
+        ],
+        "x-typia-jsDocTags": []
+      },
       "INormalUser": {
         "type": "object",
         "properties": {

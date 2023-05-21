@@ -27,4 +27,8 @@ interface IEnv {
   readonly NODE_ENV: "development" | "production" | "test";
   readonly PORT: string | number;
   readonly DATABASE_URL: string;
+
+  readonly KAKAO_CLIENT_ID: string;
+  readonly KAKAO_CLIENT_SECRET: string;
+  readonly KAKAO_REDIRECT_URI: string;
 }
