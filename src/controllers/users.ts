@@ -6,7 +6,6 @@ import { User } from "@PROVIDER/user";
 @Controller("users")
 export class UsersController {
   /**
-   * get user info by user id
    * @summary user find by user id
    * @tag users
    * @param user_id user id

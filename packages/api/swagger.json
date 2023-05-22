@@ -34,6 +34,7 @@
             "x-nestia-encrypted": false
           }
         },
+        "description": "",
         "x-nestia-namespace": "auth.sign-in.kakao.execute",
         "x-nestia-jsDocTags": []
       }
@@ -78,7 +79,7 @@
           }
         },
         "summary": "user find by user id",
-        "description": "get user info by user id\n@summary user find by user id\n@tag users\n@param user_id user id\n@return user info\n@throw 404 Not Found",
+        "description": "",
         "x-nestia-namespace": "users.getOne",
         "x-nestia-jsDocTags": [
           {
