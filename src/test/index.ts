@@ -5,7 +5,8 @@ import { IConnection } from "@nestia/fetcher";
 import { createWriteStream } from "fs";
 import path from "path";
 import stripAnsi from "strip-ansi";
-import { internal } from "./internal";
+import { mockAll } from "./mock";
+import { removeAll, seedAll } from "./seed";
 
 const logger = createWriteStream(path.join(__dirname, "./../../test_log.md"), {
   flags: "w"
@@ -18,7 +19,7 @@ process.stdout.write = (str: string) => {
   return write(str);
 };
 
-async function test(connection: IConnection): Promise<void> {
+async function test(connection: IConnection): Promise<0 | 1> {
   const report = await DynamicExecutor.validate({
     prefix: "test",
     parameters: () => [connection]
@@ -45,8 +46,9 @@ async function test(connection: IConnection): Promise<void> {
     logger.write(
       "\nTotal Test Time: $`\\color{#ffff00}\\text{" +
         `${report.time.toLocaleString()}` +
-        "}`$\n"
+        "}`$ms\n"
     );
+    return 0;
   } else {
     write(`\n\x1b[31m${executions.length} Tests have Failed\x1b[0m\n`);
     logger.write(
@@ -71,29 +73,34 @@ async function test(connection: IConnection): Promise<void> {
         console.error(error);
       });
     });
+    return 1;
   }
 }
 
 async function run(): Promise<void> {
-  const app = await Backend.start({ logger: ["error"] });
+  const app = await Backend.start({ logger: false });
   const connection: IConnection = {
     host: `http://localhost:${Configuration.PORT}`
   };
+  await mockAll(connection);
 
-  await internal.seed(connection);
-
-  internal.mock();
+  await seedAll(connection);
 
   console.log("# Test Report");
   logger.write("\n<details>\n<summary>detail test case</summary>\n\n");
 
-  await test(connection).catch(console.error);
+  const state = await test(connection).catch((err) => {
+    console.error(err);
+    return 1 as const;
+  });
 
   logger.end();
 
-  await internal.truncate();
+  await removeAll();
 
   await Backend.end(app);
+
+  process.exit(state);
 }
 
 run().catch((err) => {

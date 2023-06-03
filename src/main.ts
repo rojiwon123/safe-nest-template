@@ -1,7 +1,6 @@
-import { Logger } from "@INFRA/logger";
 import { Backend } from "./application";
 
 Backend.start({
-  logger: Logger.get(),
+  logger: false,
   cors: { credentials: true }
 });

@@ -10,22 +10,20 @@ const init = () => {
       dotenv.config({ path: ".env.test" });
       break;
     case "production":
-    default:
-      // not use .env file
       break;
+    default:
+      throw Error("NODE_ENV should be one of (development|production|test)");
   }
 
   return process.env.NODE_ENV === "test"
-    ? ({ ...process.env } as unknown as IEnv)
-    : {
-        ...typia.assert<IEnv>(process.env)
-      };
+    ? ({ ...process.env, PORT: 4000 } as unknown as IEnv)
+    : typia.assert<IEnv>({ ...process.env, PORT: 4000 });
 };
 export const Configuration: IEnv = init();
 
 interface IEnv {
   readonly NODE_ENV: "development" | "production" | "test";
-  readonly PORT: string | number;
+  readonly PORT: 4000;
   readonly DATABASE_URL: string;
 
   readonly KAKAO_CLIENT_ID: string;

@@ -12,9 +12,8 @@ import { catchError, Observable, throwError } from "rxjs";
 export class LoggerInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
-      catchError((err) => {
-        if (!(err instanceof HttpException))
-          Logger.get().error(err, context.getHandler().name);
+      catchError((err: Error) => {
+        if (!(err instanceof HttpException)) Logger.get().error(err.stack);
         return throwError(() => err);
       })
     );

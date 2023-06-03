@@ -1,14 +1,18 @@
 import { isNumber, isString } from "@fxts/core";
 
-export const isNull = (input: unknown): input is null => input === null;
+type Include<T, U> = T extends U ? T : never;
 
-export const isNotNull = <T>(input: T | null): input is T => !isNull(input);
+export const isNull = <T>(input: T): input is Include<T, null> =>
+  input === null;
 
-export const isArray = (input: unknown): input is unknown[] =>
+export const isNotNull = <T>(input: T): input is Extract<T, null> =>
+  !isNull(input);
+
+export const isArray = <T>(input: T): input is Include<T, unknown[]> =>
   Array.isArray(input);
 
-export const isStringArray = (input: unknown): input is string[] =>
+export const isStringArray = <T>(input: T): input is Include<T, string[]> =>
   isArray(input) && input.every(isString);
 
-export const isNumberArray = (input: unknown): input is number[] =>
-  isArray(input) && isNumber(input);
+export const isNumberArray = <T>(input: T): input is Include<T, number[]> =>
+  isArray(input) && input.every(isNumber);

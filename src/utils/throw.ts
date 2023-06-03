@@ -18,5 +18,5 @@ export const throwIf: throwIf =
 
 export const throwIfNull =
   <T>(exception: unknown) =>
-  (input: T | null) =>
-    isNull(input) ? toThrow(exception) : input;
+  (input: T): Extract<T, null> =>
+    isNull(input) ? toThrow(exception) : (input as Extract<T, null>);

@@ -54,7 +54,8 @@
     "rxjs": "^7.8.1",
     "schemix": "^1.12.0",
     "ts-patch": "^2.1.0",
-    "typia": "^3.8.9"
+    "typia": "^3.8.9",
+    "winston": "^3.9.0"
   },
   "devDependencies": {
     "@nestia/e2e": "^0.2.3",

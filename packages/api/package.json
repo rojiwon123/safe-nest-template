@@ -1,19 +1,19 @@
 {
-  "name": "@zipzoong/sdk",
-  "version": "0.1.2",
-  "description": "SDK for Zipzoong API",
+  "name": "@project/sdk",
+  "version": "0.0.1",
+  "description": "SDK for REST API",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zipzoong/zipzoong-backend"
+    "url": "https://github.com/industriously/nestia-template"
   },
   "author": "industriously",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zipzoong/zipzoong-backend/issues"
+    "url": "https://github.com/industriously/nestia-template/issues"
   },
-  "homepage": "https://github.com/zipzoong/zipzoong-backend#readme",
+  "homepage": "https://github.com/industriously/nestia-template#readme",
   "dependencies": {
     "@nestia/fetcher": "^1.2.2",
     "typia": "^3.8.9"
