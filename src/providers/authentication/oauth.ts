@@ -16,17 +16,7 @@ export const Oauth = {
   async kakao(code: string) {
     const tokens = await kakao_getTokens(code);
     if (isError(tokens)) throw Exception.AuthenticationFail;
-    const me = await Kakao.getMe({
-      secure_resource: true,
-      property_keys: [
-        "kakao_account.birthday",
-        "kakao_account.email",
-        "kakao_account.gender",
-        "kakao_account.name",
-        "kakao_account.profile",
-        "kakao_account.age_range"
-      ]
-    })(tokens.result.access_token);
+    const me = await Kakao.getMe(tokens.result.access_token);
     if (isError(me)) throw Exception.AuthenticationFail;
     return me.result;
   },
