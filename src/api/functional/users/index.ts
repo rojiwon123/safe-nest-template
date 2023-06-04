@@ -10,9 +10,9 @@ import type { IConnection } from "@nestia/fetcher";
 import type { IUser } from "./../../structures/user/user";
 
 /**
+ * this is sample api
  * @summary user find by user id
  * @tag users
- * @param connection connection Information of the remote HTTP(s) server with headers (+encryption password)
  * @param user_id user id
  * @return user info
  * @throw 404 Not Found

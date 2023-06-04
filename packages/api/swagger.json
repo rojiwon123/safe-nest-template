@@ -34,7 +34,6 @@
             "x-nestia-encrypted": false
           }
         },
-        "description": "",
         "x-nestia-namespace": "auth.sign-in.kakao.execute",
         "x-nestia-jsDocTags": []
       }
@@ -61,14 +60,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/INormalUser"
-                    },
-                    {
-                      "$ref": "#/components/schemas/IAdmin"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/IUser"
                 }
               }
             },
@@ -79,7 +71,7 @@
           }
         },
         "summary": "user find by user id",
-        "description": "",
+        "description": "this is sample api\n@summary user find by user id\n@tag users\n@param user_id user id\n@return user info\n@throw 404 Not Found",
         "x-nestia-namespace": "users.getOne",
         "x-nestia-jsDocTags": [
           {
@@ -155,6 +147,16 @@
           "code"
         ],
         "x-typia-jsDocTags": []
+      },
+      "IUser": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/INormalUser"
+          },
+          {
+            "$ref": "#/components/schemas/IAdmin"
+          }
+        ]
       },
       "INormalUser": {
         "type": "object",
