@@ -12,6 +12,23 @@ export namespace IUser {
     /** @format email */
     readonly email: string;
   }
+
+  export interface Password {
+    password: string;
+  }
+
+  // swagger build fail, nonsensibl intersection type detected
+  export type ICreate1 = Pick<IBase<"normal">, "name" | "email"> & {
+    password: string;
+  };
+
+  // swagger build fail, nonsensibl intersection type detected
+  export type ICreate2 = Pick<IBase<"normal">, "name" | "email"> & Password;
+
+  // swagger build success
+  export interface ICreate3
+    extends Pick<IBase<"normal">, "name" | "email">,
+      Password {}
 }
 
 export interface INormalUser extends IUser.IBase<"normal"> {}

@@ -1,5 +1,5 @@
 import { IUser } from "@DTO/user/user";
-import { TypedParam, TypedRoute } from "@nestia/core";
+import { TypedBody, TypedParam, TypedRoute } from "@nestia/core";
 import { Controller } from "@nestjs/common";
 import { User } from "@PROVIDER/user";
 
@@ -16,5 +16,10 @@ export class UsersController {
   @TypedRoute.Get(":user_id")
   getOne(@TypedParam("user_id") user_id: string): Promise<IUser> {
     return User.Service.getOne(user_id);
+  }
+
+  @TypedRoute.Post()
+  async create(@TypedBody() body: IUser.ICreate1): Promise<void> {
+    return;
   }
 }
