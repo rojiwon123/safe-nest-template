@@ -21,8 +21,11 @@ export namespace Crypto {
     }: {
         plain: string;
         key: string;
-    }): IResult<string, null> => {
+    }): IResult<string, "key Invalid" | "Unexpected Error"> => {
         try {
+            if (key.length !== 32)
+                return Result.Error.map("key Invalid" as const);
+
             const iv = crypto.randomBytes(IV_LEN);
             const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
                 authTagLength: TAG_LEN,
@@ -36,7 +39,7 @@ export namespace Crypto {
                 )}.${encrypted}`,
             );
         } catch {
-            return Result.Error.map(null);
+            return Result.Error.map("Unexpected Error" as const);
         }
     };
 
@@ -55,11 +58,17 @@ export namespace Crypto {
     }: {
         token: string;
         key: string;
-    }): IResult<string, null> => {
+    }): IResult<
+        string,
+        "key Invalid" | "Token Invalid" | "Unexpected Error"
+    > => {
         try {
+            if (key.length !== 32)
+                return Result.Error.map("key Invalid" as const);
+
             const [iv, tag, encrypted] = token.split(".");
             if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Result.Error.map(null);
+                return Result.Error.map("Token Invalid" as const);
 
             const decipher = crypto
                 .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
@@ -70,7 +79,7 @@ export namespace Crypto {
                     decipher.final("utf8"),
             );
         } catch {
-            return Result.Error.map(null);
+            return Result.Error.map("Unexpected Error" as const);
         }
     };
 }
