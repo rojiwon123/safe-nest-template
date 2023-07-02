@@ -1,8 +1,6 @@
-name: Test
+name: Test ✅
 
 on:
-    push:
-        branches: [main]
     pull_request:
         branches: [main, develop]
 
@@ -51,8 +49,8 @@ jobs:
               run: npm run test
 
             - name: Create or Update PR Comment 💬
+              if: matrix.node-version == '18.x'
               uses: actions/github-script@main
-              if: github.event.pull_request
               with:
                   script: |
                       const { owner, repo } = context.repo;
