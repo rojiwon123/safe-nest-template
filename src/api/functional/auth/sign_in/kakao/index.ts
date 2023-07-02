@@ -8,6 +8,7 @@ import { Fetcher } from "@nestia/fetcher";
 import type { IConnection } from "@nestia/fetcher";
 import typia from "typia";
 
+import { NestiaSimulator } from "./../../../../utils/NestiaSimulator";
 import type { IAuthentication } from "./../../../../structures/authentication";
 
 /**
@@ -19,14 +20,19 @@ export async function execute(
     connection: IConnection,
     body: IAuthentication.ISignIn,
 ): Promise<void> {
-    return Fetcher.fetch(
-        connection,
-        execute.ENCRYPTED,
-        execute.METHOD,
-        execute.path(),
-        body,
-        execute.stringify,
-    );
+    return !!connection.simulate
+        ? execute.simulate(
+              connection,
+              body,
+          )
+        : Fetcher.fetch(
+              connection,
+              execute.ENCRYPTED,
+              execute.METHOD,
+              execute.path(),
+              body,
+              execute.stringify,
+          );
 }
 export namespace execute {
     export type Input = IAuthentication.ISignIn;
@@ -40,6 +46,17 @@ export namespace execute {
 
     export const path = (): string => {
         return `/auth/sign-in/kakao`;
+    }
+    export const simulate = async (
+        connection: IConnection,
+        body: execute.Input,
+    ): Promise<void> => {
+        const assert = NestiaSimulator.assert({
+            method: METHOD,
+            host: connection.host,
+            path: path()
+        });
+        assert.body(() => typia.assert(body));
     }
     export const stringify = (input: Input) => typia.assertStringify(input);
 }

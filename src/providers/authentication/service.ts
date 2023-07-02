@@ -1,18 +1,29 @@
-import { IAuthentication } from "@DTO/authentication";
 import { pipe } from "@fxts/core";
-import { Oauth } from "./oauth";
+import { IAuthentication } from "@APP/api/structures/authentication";
+import { Oauth } from "@APP/externals/oauth";
+import { Exception } from "./exception";
+import { pick } from "@APP/utils";
 
 export namespace Service {
-  export const signIn = (input: IAuthentication.ISignIn) =>
-    pipe(
-      input.code,
+    export const signIn = async (input: IAuthentication.ISignIn) => {
+        try {
+            return await pipe(
+                input.code,
 
-      Oauth.kakao,
+                Oauth.Kakao.getTokens,
 
-      (input) => {
-        console.log(input);
-      }
-    );
+                pick("access_token"),
 
-  export const LoginUrl = { kakao: Oauth.kakao_login_url };
+                Oauth.Kakao.getMe,
+
+                (response) => {
+                    console.log(response);
+                },
+            );
+        } catch {
+            throw Exception.Unauthorized("Authentication Fail");
+        }
+    };
+
+    export const getLoginUrl = { kakao: Oauth.Kakao.LoginUri };
 }

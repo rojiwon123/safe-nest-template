@@ -1,5 +1,7 @@
 import { NotFoundException } from "@nestjs/common";
 
 export namespace Exception {
-  export const NotFound = new NotFoundException("User Not Found");
+    type NotFoundMessage = "User Not Found";
+    export const NotFound = (message: NotFoundMessage) =>
+        new NotFoundException(message);
 }

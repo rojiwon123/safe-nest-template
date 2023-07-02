@@ -1,69 +1,69 @@
 name: Test
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main, develop]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main, develop]
 
 env:
-  PORT: 4000
-  DATABASE_URL: postgresql://test:test@localhost:5432/test
+    PORT: 4000
+    DATABASE_URL: postgresql://test:test@localhost:5432/test
 
 permissions:
-  pull-requests: write
+    pull-requests: write
 
 jobs:
-  Test_Report:
-    runs-on: ubuntu-latest
-    if: startsWith(github.head_ref, 'hotfix/') == false
+    Test_Report:
+        runs-on: ubuntu-latest
+        if: startsWith(github.head_ref, 'hotfix/') == false
 
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+        services:
+            postgres:
+                image: postgres:14
+                env:
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd="pg_isready"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
 
-    strategy:
-      matrix:
-        node-version: [18.x, 19.x, 20.x]
+        strategy:
+            matrix:
+                node-version: [18.x, 19.x, 20.x]
 
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@main
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
 
-      - name: Install
-        run: npm ci
+            - name: Install
+              run: npm ci
 
-      - name: Setup DB
-        run: npm run db:deploy
+            - name: Setup DB
+              run: npm run db:deploy
 
-      - name: Test 🧪
-        run: npm run test
+            - name: Test 🧪
+              run: npm run test
 
-      - name: Create or Update PR Comment 💬
-        uses: actions/github-script@main
-        if: github.event.pull_request
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const issue_number = context.issue.number;
-            const cmts = await github.rest.issues.listComments({ issue_number, owner, repo });
+            - name: Create or Update PR Comment 💬
+              uses: actions/github-script@main
+              if: github.event.pull_request
+              with:
+                  script: |
+                      const { owner, repo } = context.repo;
+                      const issue_number = context.issue.number;
+                      const cmts = await github.rest.issues.listComments({ issue_number, owner, repo });
 
-            const comment = cmts.data.find(cmt => cmt.user.login === 'github-actions[bot]');
+                      const comment = cmts.data.find(cmt => cmt.user.login === 'github-actions[bot]');
 
-            const fs = require('fs');
-            const path = './test_log.md';
-            const body = fs.readFileSync(path, 'utf8');
-            comment
-                ? github.rest.issues.updateComment({ comment_id: comment.id, owner, repo, body })
-                : github.rest.issues.createComment({ issue_number, owner, repo, body });
+                      const fs = require('fs');
+                      const path = './test_log.md';
+                      const body = fs.readFileSync(path, 'utf8');
+                      comment
+                          ? github.rest.issues.updateComment({ comment_id: comment.id, owner, repo, body })
+                          : github.rest.issues.createComment({ issue_number, owner, repo, body });

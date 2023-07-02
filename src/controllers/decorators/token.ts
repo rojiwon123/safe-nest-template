@@ -1,28 +1,47 @@
-import { isNull, throwIf } from "@UTIL";
-import { isUndefined, pipe } from "@fxts/core";
+import { isNull, isUndefined, negate, pipe } from "@fxts/core";
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 import {
-  extract_authorization_header,
-  extract_token,
-  validate_token_type
+    extract_authorization_header,
+    extract_token,
+    validate_token_type,
 } from "./internal";
 import { Exception } from "./exception";
+import { skip, throwError } from "@APP/utils";
 
 export const Token = (token_type: "basic" | "bearer" = "bearer") =>
-  createParamDecorator((type: "basic" | "bearer", ctx: ExecutionContext) =>
-    pipe(
-      ctx,
+    createParamDecorator((type: "basic" | "bearer", ctx: ExecutionContext) =>
+        pipe(
+            ctx,
 
-      extract_authorization_header,
+            extract_authorization_header,
 
-      throwIf(isUndefined, Exception.AuthorizationRequired),
+            skip(
+                negate(isUndefined),
+                throwError(() =>
+                    Exception.Unauthorized("Authorization Header Required"),
+                ),
+            ),
 
-      validate_token_type(type),
+            validate_token_type(type),
 
-      throwIf(isNull, Exception.AuthorizationInvalid),
+            skip(
+                negate(isNull),
+                throwError(() =>
+                    Exception.Unauthorized(
+                        "Value of Authorization Header Invalid",
+                    ),
+                ),
+            ),
 
-      extract_token,
+            extract_token,
 
-      throwIf(isUndefined, Exception.AuthorizationInvalid)
-    )
-  )(token_type);
+            skip(
+                negate(isUndefined),
+                throwError(() =>
+                    Exception.Unauthorized(
+                        "Value of Authorization Header Invalid",
+                    ),
+                ),
+            ),
+        ),
+    )(token_type);

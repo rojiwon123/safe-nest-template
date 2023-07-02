@@ -1,5 +1,5 @@
 export namespace IAuthentication {
-  export interface ISignIn {
-    code: string;
-  }
+    export interface ISignIn {
+        code: string;
+    }
 }

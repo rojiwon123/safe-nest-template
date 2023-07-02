@@ -8,6 +8,7 @@ import { Fetcher } from "@nestia/fetcher";
 import type { IConnection } from "@nestia/fetcher";
 import typia from "typia";
 
+import { NestiaSimulator } from "./../../utils/NestiaSimulator";
 import type { IUser } from "./../../structures/user/user";
 
 /**
@@ -26,12 +27,17 @@ export async function getOne(
     connection: IConnection,
     user_id: string,
 ): Promise<getOne.Output> {
-    return Fetcher.fetch(
-        connection,
-        getOne.ENCRYPTED,
-        getOne.METHOD,
-        getOne.path(user_id),
-    );
+    return !!connection.simulate
+        ? getOne.simulate(
+              connection,
+              user_id,
+          )
+        : Fetcher.fetch(
+              connection,
+              getOne.ENCRYPTED,
+              getOne.METHOD,
+              getOne.path(user_id),
+          );
 }
 export namespace getOne {
     export type Output = IUser;
@@ -46,6 +52,25 @@ export namespace getOne {
     export const path = (user_id: string): string => {
         return `/users/${encodeURIComponent(user_id ?? "null")}`;
     }
+    export const random = (g?: Partial<typia.IRandomGenerator>): Output =>
+        typia.random<Output>(g);
+    export const simulate = async (
+        connection: IConnection,
+        user_id: string,
+    ): Promise<Output> => {
+        const assert = NestiaSimulator.assert({
+            method: METHOD,
+            host: connection.host,
+            path: path(user_id)
+        });
+        assert.param("user_id")("string")(() => typia.assert(user_id));
+        return random(
+            typeof connection.simulate === 'object' &&
+                connection.simulate !== null
+                ? connection.simulate
+                : undefined
+        );
+    }
 }
 
 /**
@@ -57,14 +82,19 @@ export async function create(
     connection: IConnection,
     body: IUser.ICreate1,
 ): Promise<void> {
-    return Fetcher.fetch(
-        connection,
-        create.ENCRYPTED,
-        create.METHOD,
-        create.path(),
-        body,
-        create.stringify,
-    );
+    return !!connection.simulate
+        ? create.simulate(
+              connection,
+              body,
+          )
+        : Fetcher.fetch(
+              connection,
+              create.ENCRYPTED,
+              create.METHOD,
+              create.path(),
+              body,
+              create.stringify,
+          );
 }
 export namespace create {
     export type Input = IUser.ICreate1;
@@ -78,6 +108,17 @@ export namespace create {
 
     export const path = (): string => {
         return `/users`;
+    }
+    export const simulate = async (
+        connection: IConnection,
+        body: create.Input,
+    ): Promise<void> => {
+        const assert = NestiaSimulator.assert({
+            method: METHOD,
+            host: connection.host,
+            path: path()
+        });
+        assert.body(() => typia.assert(body));
     }
     export const stringify = (input: Input) => typia.assertStringify(input);
 }

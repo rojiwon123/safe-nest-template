@@ -1,11 +1,10 @@
 import { UnauthorizedException } from "@nestjs/common";
 
 export namespace Exception {
-  export const AuthorizationRequired = new UnauthorizedException(
-    "Authorization Header Required"
-  );
+    type UnauthorizedMessage =
+        | "Authorization Header Required"
+        | "Value of Authorization Header Invalid";
 
-  export const AuthorizationInvalid = new UnauthorizedException(
-    "Value of Authorization Header Invalid"
-  );
+    export const Unauthorized = (message: UnauthorizedMessage) =>
+        new UnauthorizedException(message);
 }
