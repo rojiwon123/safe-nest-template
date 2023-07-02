@@ -18,7 +18,7 @@ Nestia와 prisma를 미리 적용한 템플릿 프로젝트
 -   ts 타입 시스템을 최대한 활용
 
     -   typia를 통한 ts 타입시스템 기반의 타입 검증
-    -   interface 형식의 DTO 정의
+    -   nestia를 통한 interface 형식의 DTO 적용
     -   strict 모드!!
 
 -   문서 자동화
@@ -44,3 +44,8 @@ npx @PROJECT/swagger swagger
 ```bash
 npm i @PROJECT/sdk
 ```
+
+## Appendix
+
+-   [Nestia 공식 가이드](https://nestia.io/docs/)
+-   [Typia 공식 가이드](https://typia.io/docs/)
