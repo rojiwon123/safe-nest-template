@@ -17,7 +17,7 @@ import {
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 
-const logger = createWriteStream(path.join(__dirname, "./../test_log.md"), {
+const logger = createWriteStream(path.join(__dirname, "./../../test_log.md"), {
     flags: "w",
 });
 
