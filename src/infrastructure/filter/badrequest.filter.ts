@@ -3,22 +3,21 @@ import {
     ExceptionFilter,
     Catch,
     ArgumentsHost,
-    HttpException,
+    BadRequestException,
 } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
+@Catch(BadRequestException)
+export class BadRequestExceptionFilter implements ExceptionFilter {
     constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-    catch(exception: HttpException, host: ArgumentsHost) {
+    catch(exception: BadRequestException, host: ArgumentsHost) {
         const { httpAdapter } = this.httpAdapterHost;
         const ctx = host.switchToHttp();
         httpAdapter.reply(
             ctx.getResponse(),
             {
-                code:
-                    (exception.cause as string | undefined) ?? "INVALID_INPUT",
+                cause: "INVALID_INPUT",
                 message: exception.message,
             } satisfies IFailure,
             exception.getStatus(),

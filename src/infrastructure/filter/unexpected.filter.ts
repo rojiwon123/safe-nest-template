@@ -6,18 +6,20 @@ import {
     HttpStatus,
 } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
+import { Logger } from "../logger";
 
 @Catch()
-export class AllExceptionFilter implements ExceptionFilter {
+export class UnExpectedExceptionFilter implements ExceptionFilter {
     constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-    catch(_: unknown, host: ArgumentsHost) {
+    catch(exception: unknown, host: ArgumentsHost) {
         const { httpAdapter } = this.httpAdapterHost;
         const ctx = host.switchToHttp();
+        Logger.get().error((exception as Error).stack ?? exception);
         httpAdapter.reply(
             ctx.getResponse(),
             {
-                code: "INTERNAL_ERROR",
+                cause: "INTERNAL_ERROR",
                 message: "알 수 없는 오류가 발생했습니다.",
             } satisfies IFailure,
             HttpStatus.INTERNAL_SERVER_ERROR,
