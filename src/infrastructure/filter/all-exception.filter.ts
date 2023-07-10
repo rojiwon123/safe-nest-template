@@ -1,3 +1,4 @@
+import { IFailure } from "@APP/api/types";
 import {
     ExceptionFilter,
     Catch,
@@ -15,7 +16,10 @@ export class AllExceptionFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
         httpAdapter.reply(
             ctx.getResponse(),
-            "알 수 없는 오류가 발생했습니다.",
+            {
+                code: "INTERNAL_ERROR",
+                message: "알 수 없는 오류가 발생했습니다.",
+            } satisfies IFailure,
             HttpStatus.INTERNAL_SERVER_ERROR,
         );
     }

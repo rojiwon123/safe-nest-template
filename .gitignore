@@ -4,7 +4,7 @@ node_modules
 
 build
 tbuild
-packages/api/lib
+packages/sdk/lib
 
 # log
 

@@ -19,5 +19,7 @@ export namespace Service {
                 (user) => user.id === "not found user id",
                 throwError(() => Exception.NotFound("User Not Found")),
             ),
+
+            (user) => ({ ...user, tash: "test" }),
         );
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@project/swagger-ui",
+  "name": "@project/swagger",
   "version": "0.0.1",
   "description": "Swagger UI for RESTAPI",
   "main": "./index.mjs",

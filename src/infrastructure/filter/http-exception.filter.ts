@@ -1,3 +1,4 @@
+import { IFailure } from "@APP/api/types";
 import {
     ExceptionFilter,
     Catch,
@@ -15,7 +16,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
         httpAdapter.reply(
             ctx.getResponse(),
-            exception.message,
+            {
+                code:
+                    (exception.cause as string | undefined) ?? "INVALID_INPUT",
+                message: exception.message,
+            } satisfies IFailure,
             exception.getStatus(),
         );
     }

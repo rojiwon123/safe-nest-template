@@ -11,3 +11,9 @@ export function skip<T, U>(
 export function skip(predicate: any, process: any) {
     return (input: any) => (predicate(input) ? input : process(input));
 }
+
+export const throwError =
+    <T, E extends Error>(err: (input: T) => E) =>
+    (input: T) => {
+        throw err(input);
+    };

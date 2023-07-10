@@ -11,13 +11,10 @@ export const UpdatedAt = createMixin((mixin) => {
 });
 
 export const DeletedAt = createMixin((mixin) => {
-    mixin
-        .mixin(UpdatedAt)
-        .boolean("is_deleted")
-        .dateTime("deleted_at", {
-            optional: true,
-            raw: "@database.Timestamptz",
-        });
+    mixin.mixin(UpdatedAt).boolean("is_deleted").dateTime("deleted_at", {
+        optional: true,
+        raw: "@database.Timestamptz",
+    });
 });
 
 export const Entity = createMixin((mixin) => {
