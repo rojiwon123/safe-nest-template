@@ -3,7 +3,7 @@ import type nestia from "@nestia/sdk";
 const NESTIA_CONFIG: nestia.INestiaConfig = {
     input: {
         include: ["src/controllers"],
-        exclude: ["src/**/*.internal.ts", "src/**/*.document.ts"],
+        exclude: ["src/**/*.document.ts"],
     },
     output: "src/api",
     json: true,

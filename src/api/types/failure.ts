@@ -1,4 +1,4 @@
 export interface IFailure {
-    readonly code: string;
+    readonly cause: string;
     readonly message: string;
 }

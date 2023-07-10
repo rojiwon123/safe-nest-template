@@ -6,7 +6,7 @@ import typia from "typia";
 
 export const test_failure =
     <T = void>(api: (input: T) => Promise<unknown>) =>
-    (expected: { status: HttpStatus; code: string; message: string }) =>
+    (status: HttpStatus, expected: IFailure) =>
     async (input: T) => {
         try {
             await api(input);
@@ -15,10 +15,10 @@ export const test_failure =
             if (!(error instanceof HttpError)) {
                 throw error;
             }
-            const { code, message } = typia.assertParse<IFailure>(
-                error.message,
+            assert.strictEqual(error.status, status);
+            assert.deepStrictEqual(
+                typia.assertParse<IFailure>(error.message),
+                expected,
             );
-            const actual = { status: error.status, code, message };
-            assert.deepStrictEqual(actual, expected);
         }
     };

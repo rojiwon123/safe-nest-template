@@ -1,14 +1,14 @@
 import { Module } from "@nestjs/common";
-import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
-import { AllExceptionFilter } from "./filter/all-exception.filter";
-import { HttpExceptionFilter } from "./filter/http-exception.filter";
-import { LoggerInterceptor } from "./interceptor/logger.interceptor";
+import { APP_FILTER } from "@nestjs/core";
+import { UnExpectedExceptionFilter } from "./filter/unexpected.filter";
+import { BadRequestExceptionFilter } from "./filter/badrequest.filter";
+import { FailureFilter } from "./filter/failure.filter";
 
 @Module({
     providers: [
-        { provide: APP_FILTER, useClass: AllExceptionFilter },
-        { provide: APP_FILTER, useClass: HttpExceptionFilter },
-        { provide: APP_INTERCEPTOR, useClass: LoggerInterceptor }, // first
+        { provide: APP_FILTER, useClass: UnExpectedExceptionFilter },
+        { provide: APP_FILTER, useClass: FailureFilter },
+        { provide: APP_FILTER, useClass: BadRequestExceptionFilter },
     ],
 })
 export class InfraModule {}
