@@ -50,9 +50,6 @@ export type UserModel = runtime.Types.DefaultSelection<UserModelPayload>
 export class PrismaClient<
   T extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
   U = 'log' extends keyof T ? T['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<T['log']> : never : never,
-  GlobalReject extends Prisma.RejectOnNotFound | Prisma.RejectPerOperation | false | undefined = 'rejectOnNotFound' extends keyof T
-    ? T['rejectOnNotFound']
-    : false,
   ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -73,7 +70,7 @@ export class PrismaClient<
    */
 
   constructor(optionsArg ?: Prisma.Subset<T, Prisma.PrismaClientOptions>);
-  $on<V extends (U | 'beforeExit')>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : V extends 'beforeExit' ? () => Promise<void> : Prisma.LogEvent) => void): void;
+  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): void;
 
   /**
    * Connect with the database
@@ -166,7 +163,7 @@ export class PrismaClient<
     * const userModels = await prisma.userModel.findMany()
     * ```
     */
-  get userModel(): Prisma.UserModelDelegate<GlobalReject, ExtArgs>;
+  get userModel(): Prisma.UserModelDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -224,8 +221,8 @@ export namespace Prisma {
   export type Exact<T, W> = $Public.Exact<T, W>
 
   /**
-   * Prisma Client JS version: 4.16.2
-   * Query Engine version: 4bc8b6e1b66cb932731fb1bdbbc550d1e010de81
+   * Prisma Client JS version: 5.0.0
+   * Query Engine version: 6b0aef69b7cdfc787f822ecd7cdc76d5f1991584
    */
   export type PrismaVersion = {
     client: string
@@ -634,9 +631,9 @@ export namespace Prisma {
   type MaybeTupleToUnion<T> = T extends any[] ? TupleToUnion<T> : T
 
   /**
-   * Like `Pick`, but with an array
+   * Like `Pick`, but additionally can also accept an array of keys
    */
-  type PickArray<T, K extends Array<keyof T>> = Prisma__Pick<T, TupleToUnion<K>>
+  type PickEnumerable<T, K extends Enumerable<keyof T> | keyof T> = Prisma__Pick<T, MaybeTupleToUnion<K>>
 
   /**
    * Exclude all keys with underscores
@@ -673,6 +670,7 @@ export namespace Prisma {
     model: {
       UserModel: {
         payload: UserModelPayload<ExtArgs>
+        fields: Prisma.UserModelFieldRefs
         operations: {
           findUnique: {
             args: Prisma.UserModelFindUniqueArgs<ExtArgs>,
@@ -762,45 +760,9 @@ export namespace Prisma {
   }
   export const defineExtension: $Extensions.ExtendsHook<'define', Prisma.TypeMapCb, $Extensions.DefaultArgs>
   export type DefaultPrismaClient = PrismaClient
-  export type RejectOnNotFound = boolean | ((error: Error) => Error)
-  export type RejectPerModel = { [P in ModelName]?: RejectOnNotFound }
-  export type RejectPerOperation =  { [P in "findUnique" | "findFirst"]?: RejectPerModel | RejectOnNotFound } 
-  type IsReject<T> = T extends true ? True : T extends (err: Error) => Error ? True : False
-  export type HasReject<
-    GlobalRejectSettings extends Prisma.PrismaClientOptions['rejectOnNotFound'],
-    LocalRejectSettings,
-    Action extends PrismaAction,
-    Model extends ModelName
-  > = LocalRejectSettings extends RejectOnNotFound
-    ? IsReject<LocalRejectSettings>
-    : GlobalRejectSettings extends RejectPerOperation
-    ? Action extends keyof GlobalRejectSettings
-      ? GlobalRejectSettings[Action] extends RejectOnNotFound
-        ? IsReject<GlobalRejectSettings[Action]>
-        : GlobalRejectSettings[Action] extends RejectPerModel
-        ? Model extends keyof GlobalRejectSettings[Action]
-          ? IsReject<GlobalRejectSettings[Action][Model]>
-          : False
-        : False
-      : False
-    : IsReject<GlobalRejectSettings>
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
 
   export interface PrismaClientOptions {
-    /**
-     * Configure findUnique/findFirst to throw an error if the query returns null. 
-     * @deprecated since 4.0.0. Use `findUniqueOrThrow`/`findFirstOrThrow` methods instead.
-     * @example
-     * ```
-     * // Reject on both findUnique/findFirst
-     * rejectOnNotFound: true
-     * // Reject only on findFirst with a custom error
-     * rejectOnNotFound: { findFirst: (err) => new Error("Custom Error")}
-     * // Reject on user.findUnique with a custom error
-     * rejectOnNotFound: { findUnique: {User: (err) => new Error("User not found")}}
-     * ```
-     */
-    rejectOnNotFound?: RejectOnNotFound | RejectPerOperation
     /**
      * Overwrites the datasource url from your schema.prisma file
      */
@@ -1001,7 +963,7 @@ export namespace Prisma {
      * 
      * Determine the order of UserModels to fetch.
      */
-    orderBy?: Enumerable<UserModelOrderByWithRelationInput>
+    orderBy?: UserModelOrderByWithRelationInput | UserModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
@@ -1053,8 +1015,8 @@ export namespace Prisma {
 
   export type UserModelGroupByArgs<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> = {
     where?: UserModelWhereInput
-    orderBy?: Enumerable<UserModelOrderByWithAggregationInput>
-    by: UserModelScalarFieldEnum[]
+    orderBy?: UserModelOrderByWithAggregationInput | UserModelOrderByWithAggregationInput[]
+    by: UserModelScalarFieldEnum[] | UserModelScalarFieldEnum
     having?: UserModelScalarWhereWithAggregatesInput
     take?: number
     skip?: number
@@ -1079,7 +1041,7 @@ export namespace Prisma {
 
   type GetUserModelGroupByPayload<T extends UserModelGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickArray<UserModelGroupByOutputType, T['by']> &
+      PickEnumerable<UserModelGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof UserModelGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
@@ -1119,7 +1081,7 @@ export namespace Prisma {
       select?: UserModelCountAggregateInputType | true
     }
 
-  export interface UserModelDelegate<GlobalRejectSettings extends Prisma.RejectOnNotFound | Prisma.RejectPerOperation | false | undefined, ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> {
+  export interface UserModelDelegate<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserModel'], meta: { name: 'UserModel' } }
     /**
      * Find zero or one UserModel that matches the filter.
@@ -1132,9 +1094,9 @@ export namespace Prisma {
      *   }
      * })
     **/
-    findUnique<T extends UserModelFindUniqueArgs<ExtArgs>, LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+    findUnique<T extends UserModelFindUniqueArgs<ExtArgs>>(
       args: SelectSubset<T, UserModelFindUniqueArgs<ExtArgs>>
-    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findUnique', 'UserModel'> extends True ? Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findUnique', never>, never, ExtArgs> : Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findUnique', never> | null, null, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
 
     /**
      * Find one UserModel that matches the filter or throw an error  with `error.code='P2025'` 
@@ -1150,7 +1112,7 @@ export namespace Prisma {
     **/
     findUniqueOrThrow<T extends UserModelFindUniqueOrThrowArgs<ExtArgs>>(
       args?: SelectSubset<T, UserModelFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findUniqueOrThrow', never>, never, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
 
     /**
      * Find the first UserModel that matches the filter.
@@ -1165,13 +1127,13 @@ export namespace Prisma {
      *   }
      * })
     **/
-    findFirst<T extends UserModelFindFirstArgs<ExtArgs>, LocalRejectSettings = T["rejectOnNotFound"] extends RejectOnNotFound ? T['rejectOnNotFound'] : undefined>(
+    findFirst<T extends UserModelFindFirstArgs<ExtArgs>>(
       args?: SelectSubset<T, UserModelFindFirstArgs<ExtArgs>>
-    ): HasReject<GlobalRejectSettings, LocalRejectSettings, 'findFirst', 'UserModel'> extends True ? Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findFirst', never>, never, ExtArgs> : Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findFirst', never> | null, null, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
 
     /**
      * Find the first UserModel that matches the filter or
-     * throw `NotFoundError` if no matches were found.
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
      * @param {UserModelFindFirstOrThrowArgs} args - Arguments to find a UserModel
@@ -1185,7 +1147,7 @@ export namespace Prisma {
     **/
     findFirstOrThrow<T extends UserModelFindFirstOrThrowArgs<ExtArgs>>(
       args?: SelectSubset<T, UserModelFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findFirstOrThrow', never>, never, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
 
     /**
      * Find zero or more UserModels that matches the filter.
@@ -1205,7 +1167,7 @@ export namespace Prisma {
     **/
     findMany<T extends UserModelFindManyArgs<ExtArgs>>(
       args?: SelectSubset<T, UserModelFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findMany', never>>
+    ): Prisma.PrismaPromise<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'findMany'>>
 
     /**
      * Create a UserModel.
@@ -1221,7 +1183,7 @@ export namespace Prisma {
     **/
     create<T extends UserModelCreateArgs<ExtArgs>>(
       args: SelectSubset<T, UserModelCreateArgs<ExtArgs>>
-    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'create', never>, never, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
 
     /**
      * Create many UserModels.
@@ -1253,7 +1215,7 @@ export namespace Prisma {
     **/
     delete<T extends UserModelDeleteArgs<ExtArgs>>(
       args: SelectSubset<T, UserModelDeleteArgs<ExtArgs>>
-    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'delete', never>, never, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
 
     /**
      * Update one UserModel.
@@ -1272,7 +1234,7 @@ export namespace Prisma {
     **/
     update<T extends UserModelUpdateArgs<ExtArgs>>(
       args: SelectSubset<T, UserModelUpdateArgs<ExtArgs>>
-    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'update', never>, never, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
 
     /**
      * Delete zero or more UserModels.
@@ -1330,7 +1292,7 @@ export namespace Prisma {
     **/
     upsert<T extends UserModelUpsertArgs<ExtArgs>>(
       args: SelectSubset<T, UserModelUpsertArgs<ExtArgs>>
-    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'upsert', never>, never, ExtArgs>
+    ): Prisma__UserModelClient<$Types.GetResult<UserModelPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
 
     /**
      * Count the number of UserModels.
@@ -1409,7 +1371,7 @@ export namespace Prisma {
         ? { orderBy: UserModelGroupByArgs['orderBy'] }
         : { orderBy?: UserModelGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends TupleToUnion<T['by']>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
       HavingFields extends GetHavingFields<T['having']>,
       HavingValid extends Has<ByFields, HavingFields>,
@@ -1457,7 +1419,10 @@ export namespace Prisma {
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
     >(args: SubsetIntersection<T, UserModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-
+  /**
+   * Fields of the UserModel model
+   */
+  readonly fields: UserModelFieldRefs;
   }
 
   /**
@@ -1507,12 +1472,26 @@ export namespace Prisma {
 
 
 
+  /**
+   * Fields of the UserModel model
+   */ 
+  interface UserModelFieldRefs {
+    readonly id: FieldRef<"UserModel", 'String'>
+    readonly created_at: FieldRef<"UserModel", 'DateTime'>
+    readonly updated_at: FieldRef<"UserModel", 'DateTime'>
+    readonly is_deleted: FieldRef<"UserModel", 'Boolean'>
+    readonly deleted_at: FieldRef<"UserModel", 'DateTime'>
+    readonly name: FieldRef<"UserModel", 'String'>
+    readonly email: FieldRef<"UserModel", 'String'>
+  }
+    
+
   // Custom InputTypes
 
   /**
-   * UserModel base type for findUnique actions
+   * UserModel findUnique
    */
-  export type UserModelFindUniqueArgsBase<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> = {
+  export type UserModelFindUniqueArgs<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the UserModel
      */
@@ -1523,17 +1502,6 @@ export namespace Prisma {
     where: UserModelWhereUniqueInput
   }
 
-  /**
-   * UserModel findUnique
-   */
-  export interface UserModelFindUniqueArgs<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> extends UserModelFindUniqueArgsBase<ExtArgs> {
-   /**
-    * Throw an Error if query returns no results
-    * @deprecated since 4.0.0: use `findUniqueOrThrow` method instead
-    */
-    rejectOnNotFound?: RejectOnNotFound
-  }
-      
 
   /**
    * UserModel findUniqueOrThrow
@@ -1551,9 +1519,9 @@ export namespace Prisma {
 
 
   /**
-   * UserModel base type for findFirst actions
+   * UserModel findFirst
    */
-  export type UserModelFindFirstArgsBase<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> = {
+  export type UserModelFindFirstArgs<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the UserModel
      */
@@ -1567,7 +1535,7 @@ export namespace Prisma {
      * 
      * Determine the order of UserModels to fetch.
      */
-    orderBy?: Enumerable<UserModelOrderByWithRelationInput>
+    orderBy?: UserModelOrderByWithRelationInput | UserModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
@@ -1591,20 +1559,9 @@ export namespace Prisma {
      * 
      * Filter by unique combinations of UserModels.
      */
-    distinct?: Enumerable<UserModelScalarFieldEnum>
+    distinct?: UserModelScalarFieldEnum | UserModelScalarFieldEnum[]
   }
 
-  /**
-   * UserModel findFirst
-   */
-  export interface UserModelFindFirstArgs<ExtArgs extends $Extensions.Args = $Extensions.DefaultArgs> extends UserModelFindFirstArgsBase<ExtArgs> {
-   /**
-    * Throw an Error if query returns no results
-    * @deprecated since 4.0.0: use `findFirstOrThrow` method instead
-    */
-    rejectOnNotFound?: RejectOnNotFound
-  }
-      
 
   /**
    * UserModel findFirstOrThrow
@@ -1623,7 +1580,7 @@ export namespace Prisma {
      * 
      * Determine the order of UserModels to fetch.
      */
-    orderBy?: Enumerable<UserModelOrderByWithRelationInput>
+    orderBy?: UserModelOrderByWithRelationInput | UserModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
@@ -1647,7 +1604,7 @@ export namespace Prisma {
      * 
      * Filter by unique combinations of UserModels.
      */
-    distinct?: Enumerable<UserModelScalarFieldEnum>
+    distinct?: UserModelScalarFieldEnum | UserModelScalarFieldEnum[]
   }
 
 
@@ -1668,7 +1625,7 @@ export namespace Prisma {
      * 
      * Determine the order of UserModels to fetch.
      */
-    orderBy?: Enumerable<UserModelOrderByWithRelationInput>
+    orderBy?: UserModelOrderByWithRelationInput | UserModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
@@ -1687,7 +1644,7 @@ export namespace Prisma {
      * Skip the first `n` UserModels.
      */
     skip?: number
-    distinct?: Enumerable<UserModelScalarFieldEnum>
+    distinct?: UserModelScalarFieldEnum | UserModelScalarFieldEnum[]
   }
 
 
@@ -1713,7 +1670,7 @@ export namespace Prisma {
     /**
      * The data used to create many UserModels.
      */
-    data: Enumerable<UserModelCreateManyInput>
+    data: UserModelCreateManyInput | UserModelCreateManyInput[]
     skipDuplicates?: boolean
   }
 
@@ -1865,21 +1822,73 @@ export namespace Prisma {
 
 
   /**
+   * Field references 
+   */
+
+
+  /**
+   * Reference to a field of type 'String'
+   */
+  export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+  /**
+   * Reference to a field of type 'String[]'
+   */
+  export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime'
+   */
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime[]'
+   */
+  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+  /**
    * Deep Input Types
    */
 
 
   export type UserModelWhereInput = {
-    AND?: Enumerable<UserModelWhereInput>
-    OR?: Enumerable<UserModelWhereInput>
-    NOT?: Enumerable<UserModelWhereInput>
-    id?: StringFilter | string
-    created_at?: DateTimeFilter | Date | string
-    updated_at?: DateTimeFilter | Date | string
-    is_deleted?: BoolFilter | boolean
-    deleted_at?: DateTimeNullableFilter | Date | string | null
-    name?: StringFilter | string
-    email?: StringFilter | string
+    AND?: UserModelWhereInput | UserModelWhereInput[]
+    OR?: UserModelWhereInput[]
+    NOT?: UserModelWhereInput | UserModelWhereInput[]
+    id?: StringFilter<"UserModel"> | string
+    created_at?: DateTimeFilter<"UserModel"> | Date | string
+    updated_at?: DateTimeFilter<"UserModel"> | Date | string
+    is_deleted?: BoolFilter<"UserModel"> | boolean
+    deleted_at?: DateTimeNullableFilter<"UserModel"> | Date | string | null
+    name?: StringFilter<"UserModel"> | string
+    email?: StringFilter<"UserModel"> | string
   }
 
   export type UserModelOrderByWithRelationInput = {
@@ -1892,9 +1901,18 @@ export namespace Prisma {
     email?: SortOrder
   }
 
-  export type UserModelWhereUniqueInput = {
+  export type UserModelWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-  }
+    AND?: UserModelWhereInput | UserModelWhereInput[]
+    OR?: UserModelWhereInput[]
+    NOT?: UserModelWhereInput | UserModelWhereInput[]
+    created_at?: DateTimeFilter<"UserModel"> | Date | string
+    updated_at?: DateTimeFilter<"UserModel"> | Date | string
+    is_deleted?: BoolFilter<"UserModel"> | boolean
+    deleted_at?: DateTimeNullableFilter<"UserModel"> | Date | string | null
+    name?: StringFilter<"UserModel"> | string
+    email?: StringFilter<"UserModel"> | string
+  }, "id">
 
   export type UserModelOrderByWithAggregationInput = {
     id?: SortOrder
@@ -1910,16 +1928,16 @@ export namespace Prisma {
   }
 
   export type UserModelScalarWhereWithAggregatesInput = {
-    AND?: Enumerable<UserModelScalarWhereWithAggregatesInput>
-    OR?: Enumerable<UserModelScalarWhereWithAggregatesInput>
-    NOT?: Enumerable<UserModelScalarWhereWithAggregatesInput>
-    id?: StringWithAggregatesFilter | string
-    created_at?: DateTimeWithAggregatesFilter | Date | string
-    updated_at?: DateTimeWithAggregatesFilter | Date | string
-    is_deleted?: BoolWithAggregatesFilter | boolean
-    deleted_at?: DateTimeNullableWithAggregatesFilter | Date | string | null
-    name?: StringWithAggregatesFilter | string
-    email?: StringWithAggregatesFilter | string
+    AND?: UserModelScalarWhereWithAggregatesInput | UserModelScalarWhereWithAggregatesInput[]
+    OR?: UserModelScalarWhereWithAggregatesInput[]
+    NOT?: UserModelScalarWhereWithAggregatesInput | UserModelScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"UserModel"> | string
+    created_at?: DateTimeWithAggregatesFilter<"UserModel"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"UserModel"> | Date | string
+    is_deleted?: BoolWithAggregatesFilter<"UserModel"> | boolean
+    deleted_at?: DateTimeNullableWithAggregatesFilter<"UserModel"> | Date | string | null
+    name?: StringWithAggregatesFilter<"UserModel"> | string
+    email?: StringWithAggregatesFilter<"UserModel"> | string
   }
 
   export type UserModelCreateInput = {
@@ -1992,46 +2010,46 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
   }
 
-  export type StringFilter = {
-    equals?: string
-    in?: Enumerable<string> | string
-    notIn?: Enumerable<string> | string
-    lt?: string
-    lte?: string
-    gt?: string
-    gte?: string
-    contains?: string
-    startsWith?: string
-    endsWith?: string
+  export type StringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
-    not?: NestedStringFilter | string
+    not?: NestedStringFilter<$PrismaModel> | string
   }
 
-  export type DateTimeFilter = {
-    equals?: Date | string
-    in?: Enumerable<Date> | Enumerable<string> | Date | string
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeFilter | Date | string
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type BoolFilter = {
-    equals?: boolean
-    not?: NestedBoolFilter | boolean
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type DateTimeNullableFilter = {
-    equals?: Date | string | null
-    in?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeNullableFilter | Date | string | null
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type SortOrderInput = {
@@ -2069,58 +2087,58 @@ export namespace Prisma {
     email?: SortOrder
   }
 
-  export type StringWithAggregatesFilter = {
-    equals?: string
-    in?: Enumerable<string> | string
-    notIn?: Enumerable<string> | string
-    lt?: string
-    lte?: string
-    gt?: string
-    gte?: string
-    contains?: string
-    startsWith?: string
-    endsWith?: string
+  export type StringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
-    not?: NestedStringWithAggregatesFilter | string
-    _count?: NestedIntFilter
-    _min?: NestedStringFilter
-    _max?: NestedStringFilter
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type DateTimeWithAggregatesFilter = {
-    equals?: Date | string
-    in?: Enumerable<Date> | Enumerable<string> | Date | string
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeWithAggregatesFilter | Date | string
-    _count?: NestedIntFilter
-    _min?: NestedDateTimeFilter
-    _max?: NestedDateTimeFilter
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type BoolWithAggregatesFilter = {
-    equals?: boolean
-    not?: NestedBoolWithAggregatesFilter | boolean
-    _count?: NestedIntFilter
-    _min?: NestedBoolFilter
-    _max?: NestedBoolFilter
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
-  export type DateTimeNullableWithAggregatesFilter = {
-    equals?: Date | string | null
-    in?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeNullableWithAggregatesFilter | Date | string | null
-    _count?: NestedIntNullableFilter
-    _min?: NestedDateTimeNullableFilter
-    _max?: NestedDateTimeNullableFilter
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -2139,120 +2157,120 @@ export namespace Prisma {
     set?: Date | string | null
   }
 
-  export type NestedStringFilter = {
-    equals?: string
-    in?: Enumerable<string> | string
-    notIn?: Enumerable<string> | string
-    lt?: string
-    lte?: string
-    gt?: string
-    gte?: string
-    contains?: string
-    startsWith?: string
-    endsWith?: string
-    not?: NestedStringFilter | string
+  export type NestedStringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringFilter<$PrismaModel> | string
   }
 
-  export type NestedDateTimeFilter = {
-    equals?: Date | string
-    in?: Enumerable<Date> | Enumerable<string> | Date | string
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeFilter | Date | string
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type NestedBoolFilter = {
-    equals?: boolean
-    not?: NestedBoolFilter | boolean
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type NestedDateTimeNullableFilter = {
-    equals?: Date | string | null
-    in?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeNullableFilter | Date | string | null
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type NestedStringWithAggregatesFilter = {
-    equals?: string
-    in?: Enumerable<string> | string
-    notIn?: Enumerable<string> | string
-    lt?: string
-    lte?: string
-    gt?: string
-    gte?: string
-    contains?: string
-    startsWith?: string
-    endsWith?: string
-    not?: NestedStringWithAggregatesFilter | string
-    _count?: NestedIntFilter
-    _min?: NestedStringFilter
-    _max?: NestedStringFilter
+  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type NestedIntFilter = {
-    equals?: number
-    in?: Enumerable<number> | number
-    notIn?: Enumerable<number> | number
-    lt?: number
-    lte?: number
-    gt?: number
-    gte?: number
-    not?: NestedIntFilter | number
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type NestedDateTimeWithAggregatesFilter = {
-    equals?: Date | string
-    in?: Enumerable<Date> | Enumerable<string> | Date | string
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeWithAggregatesFilter | Date | string
-    _count?: NestedIntFilter
-    _min?: NestedDateTimeFilter
-    _max?: NestedDateTimeFilter
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type NestedBoolWithAggregatesFilter = {
-    equals?: boolean
-    not?: NestedBoolWithAggregatesFilter | boolean
-    _count?: NestedIntFilter
-    _min?: NestedBoolFilter
-    _max?: NestedBoolFilter
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter = {
-    equals?: Date | string | null
-    in?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    notIn?: Enumerable<Date> | Enumerable<string> | Date | string | null
-    lt?: Date | string
-    lte?: Date | string
-    gt?: Date | string
-    gte?: Date | string
-    not?: NestedDateTimeNullableWithAggregatesFilter | Date | string | null
-    _count?: NestedIntNullableFilter
-    _min?: NestedDateTimeNullableFilter
-    _max?: NestedDateTimeNullableFilter
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter = {
-    equals?: number | null
-    in?: Enumerable<number> | number | null
-    notIn?: Enumerable<number> | number | null
-    lt?: number
-    lte?: number
-    gt?: number
-    gte?: number
-    not?: NestedIntNullableFilter | number | null
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
 
