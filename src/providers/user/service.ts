@@ -7,6 +7,9 @@ import { throwError } from "@APP/utils";
 import { BIZUser } from "./biz_user";
 
 export namespace Service {
+    export const getFalse = (): false => !BIZUser.Service.getTrue();
+    export const flip = (get: () => boolean) => () => !get();
+
     /**
      * @throw Not Found
      */
@@ -23,7 +26,4 @@ export namespace Service {
 
             (user) => ({ ...user, tash: "test" }),
         );
-
-    export const getFalse = () => false as const;
-    export const getTrue = (): true => !BIZUser.Service.getFalse();
 }
