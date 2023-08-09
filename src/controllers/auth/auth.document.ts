@@ -1,7 +1,8 @@
-import { Authentication } from "@APP/providers/authentication";
 import { TypedRoute } from "@nestia/core";
 import { Controller, Res } from "@nestjs/common";
 import { Response } from "express";
+
+import { Authentication } from "@APP/providers/authentication";
 
 @Controller("auth/oauth")
 export class AuthOauthController {

@@ -1,9 +1,8 @@
-import typia from "typia";
-import { Exception } from "./exception";
-import { IUser } from "@APP/api/structures/user/user";
-import { Mutable } from "@APP/api/types";
 import { pipe, throwIf } from "@fxts/core";
-import { throwError } from "@APP/utils";
+import typia from "typia";
+
+import { IUser } from "@APP/api/structures/user/user";
+
 import { BIZUser } from "./biz_user";
 
 export namespace Service {
@@ -17,12 +16,9 @@ export namespace Service {
         pipe(
             user_id,
 
-            (id) => ({ ...typia.random<Mutable<IUser>>(), id }),
+            (id) => ({ ...typia.random<IUser>(), id }),
 
-            throwIf(
-                (user) => user.id === "not found user id",
-                throwError(() => Exception.NotFound("User Not Found")),
-            ),
+            throwIf((user) => user.id === "not found user id"),
 
             (user) => ({ ...user, tash: "test" }),
         );

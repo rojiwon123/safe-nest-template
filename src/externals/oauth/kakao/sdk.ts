@@ -1,6 +1,8 @@
 import { Fetcher } from "@nestia/fetcher";
-import { IMeResponse, IKakaoOauth2Options, ITokens } from "./interface";
+
 import { Configuration } from "@APP/infrastructure/config";
+
+import { IKakaoOauth2Options, IMeResponse, ITokens } from "./interface";
 
 export namespace Kakao {
     const AUTH_URL = "https://kauth.kakao.com";

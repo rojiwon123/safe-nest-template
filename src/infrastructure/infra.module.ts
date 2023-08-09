@@ -1,8 +1,9 @@
 import { Module } from "@nestjs/common";
 import { APP_FILTER } from "@nestjs/core";
-import { UnExpectedExceptionFilter } from "./filter/unexpected.filter";
+
 import { BadRequestExceptionFilter } from "./filter/badrequest.filter";
 import { FailureFilter } from "./filter/failure.filter";
+import { UnExpectedExceptionFilter } from "./filter/unexpected.filter";
 
 @Module({
     providers: [

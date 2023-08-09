@@ -1,6 +1,7 @@
-import { Failure } from "@APP/utils/failure";
-import { ExceptionFilter, Catch, ArgumentsHost } from "@nestjs/common";
+import { ArgumentsHost, Catch, ExceptionFilter } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
+
+import { Failure } from "@APP/utils/failure";
 
 @Catch(Failure)
 export class FailureFilter implements ExceptionFilter {

@@ -1,8 +1,9 @@
-import { IFailure } from "@APP/api/types";
 import { HttpError } from "@nestia/fetcher";
 import { HttpStatus } from "@nestjs/common";
 import assert from "assert";
 import typia from "typia";
+
+import { IFailure } from "@APP/api/types";
 
 export const test_failure =
     <T = void>(api: (input: T) => Promise<unknown>) =>

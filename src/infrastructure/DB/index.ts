@@ -1,4 +1,5 @@
 import { PrismaClient } from "@PRISMA";
+
 import { Configuration } from "../config";
 
 export const prisma = new PrismaClient({

@@ -1,11 +1,13 @@
-import { IFailure } from "@APP/api/types";
 import {
-    ExceptionFilter,
-    Catch,
     ArgumentsHost,
+    Catch,
+    ExceptionFilter,
     HttpStatus,
 } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
+
+import { IFailure } from "@APP/api/types";
+
 import { Logger } from "../logger";
 
 @Catch()

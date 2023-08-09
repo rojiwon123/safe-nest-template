@@ -1,8 +1,3 @@
-import stripAnsi from "strip-ansi";
-import { createWriteStream } from "fs";
-import path from "path";
-import { IConnection } from "@nestia/fetcher";
-import { DynamicExecutor } from "@nestia/e2e";
 import {
     each,
     filter,
@@ -14,6 +9,12 @@ import {
     sort,
     toArray,
 } from "@fxts/core";
+import { DynamicExecutor } from "@nestia/e2e";
+import { IConnection } from "@nestia/fetcher";
+import { createWriteStream } from "fs";
+import path from "path";
+import stripAnsi from "strip-ansi";
+
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 

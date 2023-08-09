@@ -1,8 +1,10 @@
 import { pipe } from "@fxts/core";
+
 import { IAuthentication } from "@APP/api/structures/authentication";
 import { Oauth } from "@APP/externals/oauth";
-import { Exception } from "./exception";
 import { pick } from "@APP/utils";
+
+import { Exception } from "./exception";
 
 export namespace Service {
     export const signIn = async (input: IAuthentication.ISignIn) => {

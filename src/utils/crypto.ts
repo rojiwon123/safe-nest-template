@@ -1,8 +1,7 @@
 import { isUndefined } from "@fxts/core";
-
 import crypto from "crypto";
+
 import { Result } from "./result";
-import { IResult } from "@APP/api/types";
 
 export namespace Crypto {
     const IV_LEN = 12;
@@ -15,13 +14,7 @@ export namespace Crypto {
      *
      * 암호화 형식에 맞지 않는 key를 입력했거나 기타 이유로 암호화에 실패할 수 있다.
      */
-    export const encrypt = ({
-        plain,
-        key,
-    }: {
-        plain: string;
-        key: string;
-    }): IResult<string, "key Invalid" | "Unexpected Error"> => {
+    export const encrypt = ({ plain, key }: { plain: string; key: string }) => {
         try {
             if (key.length !== 32)
                 return Result.Error.map("key Invalid" as const);
@@ -52,16 +45,7 @@ export namespace Crypto {
      *
      * 복호화에 실패할 수 있다.
      */
-    export const decrypt = ({
-        token,
-        key,
-    }: {
-        token: string;
-        key: string;
-    }): IResult<
-        string,
-        "key Invalid" | "Token Invalid" | "Unexpected Error"
-    > => {
+    export const decrypt = ({ token, key }: { token: string; key: string }) => {
         try {
             if (key.length !== 32)
                 return Result.Error.map("key Invalid" as const);

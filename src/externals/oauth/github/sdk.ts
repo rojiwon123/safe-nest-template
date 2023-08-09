@@ -1,4 +1,5 @@
 import { Fetcher } from "@nestia/fetcher";
+
 import { IEmail, IGithubOauth2Options, ITokens, IUser } from "./interface";
 
 export namespace Github {

@@ -1,8 +1,10 @@
-import * as map from "./../../utils/map";
-import { Oauth } from "@APP/externals/oauth";
-import { mocker } from "./mocker";
 import typia from "typia";
+
+import { Oauth } from "@APP/externals/oauth";
 import { IMeResponse, ITokens } from "@APP/externals/oauth/kakao/interface";
+
+import * as map from "./../../utils/map";
+import { mocker } from "./mocker";
 
 export const mock = async () => {
     mocker({

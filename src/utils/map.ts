@@ -1,8 +1,3 @@
-import { isNull } from "@fxts/core";
-
-export const nullToUndefined = <T>(input: T | null): T | undefined =>
-    isNull(input) ? undefined : input;
-
 export const pick =
     <T extends object, K extends keyof T>(key: K) =>
     (obj: T) =>

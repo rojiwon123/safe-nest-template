@@ -1,8 +1,9 @@
+import { TypedParam, TypedRoute } from "@nestia/core";
+import { Controller } from "@nestjs/common";
+
 import { IUser } from "@APP/api/structures/user/user";
 import { User } from "@APP/providers/user";
 import { BIZUser } from "@APP/providers/user/biz_user";
-import { TypedParam, TypedRoute } from "@nestia/core";
-import { Controller } from "@nestjs/common";
 
 @Controller("users")
 export class UsersController {

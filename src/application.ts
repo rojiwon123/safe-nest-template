@@ -3,9 +3,10 @@ import { INestApplication, NestApplicationOptions } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
+
+import { prisma } from "./infrastructure/DB";
 import { Configuration } from "./infrastructure/config";
 import { InfraModule } from "./infrastructure/infra.module";
-import { prisma } from "./infrastructure/DB";
 
 export namespace Backend {
     export const start = async (

@@ -1,6 +1,6 @@
 import { Backend } from "./application";
 
-Backend.start({
+void Backend.start({
     logger: false,
     cors: { credentials: true },
 });

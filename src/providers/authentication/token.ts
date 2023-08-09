@@ -1,8 +1,10 @@
-import { IResult } from "@APP/api/types";
-import { IToken } from "./interface";
-import { Crypto, DateMapper, Result } from "@APP/utils";
-import { Configuration } from "@APP/infrastructure/config";
 import typia from "typia";
+
+import { IResult } from "@APP/api/types";
+import { Configuration } from "@APP/infrastructure/config";
+import { Crypto, DateMapper, Result } from "@APP/utils";
+
+import { IToken } from "./interface";
 
 export namespace Token {
     const hour = 1000 * 60 * 60 * 1;

@@ -1,5 +1,6 @@
 import { LoggerService } from "@nestjs/common";
 import winston from "winston";
+
 import { Configuration } from "./config";
 
 export namespace Logger {

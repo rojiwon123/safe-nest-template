@@ -1,4 +1,5 @@
 import { createModel } from "schemix";
+
 import { Entity } from "../mixins";
 
 export const User = createModel("UserModel", (model) => {

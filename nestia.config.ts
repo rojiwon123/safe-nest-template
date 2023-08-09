@@ -1,15 +1,13 @@
 import type nestia from "@nestia/sdk";
 
 const NESTIA_CONFIG: nestia.INestiaConfig = {
-    input: {
-        include: ["src/controllers"],
-        exclude: ["src/**/*.document.ts"],
-    },
+    input: "src/controllers",
     output: "src/api",
-    json: true,
+    json: false,
     primitive: false,
     simulate: true,
     swagger: {
+        decompose: true,
         output: "packages/swagger/swagger.json",
         info: {
             version: "0.0.1",

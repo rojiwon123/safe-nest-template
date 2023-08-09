@@ -1,11 +1,12 @@
-import { IFailure } from "@APP/api/types";
 import {
-    ExceptionFilter,
-    Catch,
     ArgumentsHost,
     BadRequestException,
+    Catch,
+    ExceptionFilter,
 } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
+
+import { IFailure } from "@APP/api/types";
 
 @Catch(BadRequestException)
 export class BadRequestExceptionFilter implements ExceptionFilter {
