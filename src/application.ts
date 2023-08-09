@@ -4,9 +4,12 @@ import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
+import { DateMapper } from "@APP/utils";
+
 import { prisma } from "./infrastructure/DB";
 import { Configuration } from "./infrastructure/config";
 import { InfraModule } from "./infrastructure/infra.module";
+import { Logger } from "./infrastructure/logger";
 
 export namespace Backend {
     export const start = async (
@@ -30,12 +33,13 @@ export namespace Backend {
             await end(app);
             process.exit(0);
         });
-
+        Logger.info(`Server start ${DateMapper.toISO()}`);
         return app;
     };
 
     export const end = async (app: INestApplication) => {
         await app.close();
         await prisma.$disconnect();
+        Logger.info(`Server end ${DateMapper.toISO()}`);
     };
 }

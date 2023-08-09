@@ -9,76 +9,40 @@
   "info": {
     "version": "0.0.1",
     "title": "Server Title",
-    "description": "Service Description"
+    "description": "Service Description",
+    "license": {
+      "name": "UNLICENSED"
+    }
   },
   "paths": {
-    "/auth/sign-in/kakao": {
-      "post": {
-        "tags": [],
-        "parameters": [],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IAuthentication.ISignIn"
-              }
-            }
-          },
-          "required": true,
-          "x-nestia-encrypted": false
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "x-nestia-encrypted": false
-          }
-        },
-        "x-nestia-namespace": "auth.sign-in.kakao.execute",
-        "x-nestia-jsDocTags": []
-      }
-    },
-    "/users/{user_id}": {
+    "/auth/oauth/kakao": {
       "get": {
         "tags": [
-          "users"
+          "authentication"
         ],
-        "parameters": [
-          {
-            "name": "user_id",
-            "in": "path",
-            "description": "user id",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "user info",
+            "description": "카카오 인증 페이지 주소",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IUser"
+                  "type": "string"
                 }
               }
             },
             "x-nestia-encrypted": false
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
-        "summary": "user find by user id",
-        "description": "this is sample api\n@summary user find by user id\n@tag users\n@param user_id user id\n@return user info\n@throw 404 Not Found",
-        "x-nestia-namespace": "users.getOne",
+        "summary": "카카오 인증 페이지 주소 요청",
+        "description": "카카오 인증 로그인 페이지 주소 요청",
+        "x-nestia-namespace": "auth.oauth.kakao.getKakaoLoginUrl",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "user find by user id",
+                "text": "카카오 인증 페이지 주소 요청",
                 "kind": "text"
               }
             ]
@@ -87,24 +51,7 @@
             "name": "tag",
             "text": [
               {
-                "text": "users",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "user_id",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "user id",
+                "text": "authentication",
                 "kind": "text"
               }
             ]
@@ -113,76 +60,158 @@
             "name": "return",
             "text": [
               {
-                "text": "user info",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "throw",
-            "text": [
-              {
-                "text": "404 Not Found",
+                "text": "카카오 인증 페이지 주소",
                 "kind": "text"
               }
             ]
           }
-        ]
+        ],
+        "x-nestia-method": "GET"
       }
     },
-    "/users": {
+    "/auth/oauth/github": {
       "get": {
-        "tags": [],
+        "tags": [
+          "authentication"
+        ],
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "깃허브 인증 페이지 주소",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "boolean"
+                  "type": "string"
                 }
               }
             },
             "x-nestia-encrypted": false
           }
         },
-        "x-nestia-namespace": "users.test",
-        "x-nestia-jsDocTags": []
+        "summary": "깃허브 인증 페이지 주소 요청",
+        "description": "깃허브 인증 로그인 페이지 주소 요청",
+        "x-nestia-namespace": "auth.oauth.github.getGithubLoginUrl",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "깃허브 인증 페이지 주소 요청",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "authentication",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "깃허브 인증 페이지 주소",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/users/normals/{normal_id}": {
+      "get": {
+        "tags": [
+          "normals"
+        ],
+        "parameters": [
+          {
+            "name": "normal_id",
+            "in": "path",
+            "description": "사용자 id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "일반 사용자 공개 정보",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/INormal.IPublicProfile"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          }
+        },
+        "summary": "일반 사용자 공개 프로필 정보 요청",
+        "description": "일반 사용자 공개 프로필 정보 요청 API",
+        "x-nestia-namespace": "users.normals.getOne",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "일반 사용자 공개 프로필 정보 요청",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "normals",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "normal_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "사용자 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "일반 사용자 공개 정보",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
       }
     }
   },
   "components": {
     "schemas": {
-      "IAuthentication.ISignIn": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          }
-        },
-        "nullable": false,
-        "required": [
-          "code"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IUser": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/INormalUser"
-          },
-          {
-            "$ref": "#/components/schemas/IAdmin"
-          }
-        ]
-      },
-      "INormalUser": {
+      "INormal.IPublicProfile": {
         "type": "object",
         "properties": {
           "type": {
+            "description": "사용자 유형",
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
@@ -191,216 +220,43 @@
             ]
           },
           "id": {
+            "description": "사용자 식별 정보",
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string"
           },
           "name": {
+            "description": "사용자명",
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string"
-          },
-          "email": {
-            "description": "@format email",
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "email"
-              }
-            ],
-            "x-typia-jsDocTags": [
-              {
-                "name": "format",
-                "text": [
-                  {
-                    "text": "email",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "email"
-          },
-          "created_at": {
-            "description": "@format date-time",
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "datetime"
-              }
-            ],
-            "x-typia-jsDocTags": [
-              {
-                "name": "format",
-                "text": [
-                  {
-                    "text": "date-time",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "description": "@format date-time",
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "datetime"
-              }
-            ],
-            "x-typia-jsDocTags": [
-              {
-                "name": "format",
-                "text": [
-                  {
-                    "text": "date-time",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time"
           }
         },
         "nullable": false,
         "required": [
           "type",
           "id",
-          "name",
-          "email",
-          "created_at",
-          "updated_at"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IAdmin": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "enum": [
-              "admin"
-            ]
-          },
-          "id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          },
-          "name": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          },
-          "email": {
-            "description": "@format email",
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "email"
-              }
-            ],
-            "x-typia-jsDocTags": [
-              {
-                "name": "format",
-                "text": [
-                  {
-                    "text": "email",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "email"
-          },
-          "created_at": {
-            "description": "@format date-time",
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "datetime"
-              }
-            ],
-            "x-typia-jsDocTags": [
-              {
-                "name": "format",
-                "text": [
-                  {
-                    "text": "date-time",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "description": "@format date-time",
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "datetime"
-              }
-            ],
-            "x-typia-jsDocTags": [
-              {
-                "name": "format",
-                "text": [
-                  {
-                    "text": "date-time",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "nullable": false,
-        "required": [
-          "type",
-          "id",
-          "name",
-          "email",
-          "created_at",
-          "updated_at"
+          "name"
         ],
         "x-typia-jsDocTags": []
       }
     },
     "securitySchemes": {
-      "bearer": {
+      "account": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      },
+      "access": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      },
+      "refresh": {
         "type": "apiKey",
         "name": "Authorization",
         "in": "header"
       }
     }
-  },
-  "security": [
-    {
-      "bearer": []
-    }
-  ]
+  }
 }

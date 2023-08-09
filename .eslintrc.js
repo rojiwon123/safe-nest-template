@@ -23,7 +23,6 @@ module.exports = {
         // extension rules
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/no-throw-literal": "error",
-        "@typescript-eslint/no-unused-expressions": "error",
         "@typescript-eslint/no-unused-vars": "error",
     },
 };

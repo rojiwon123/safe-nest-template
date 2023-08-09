@@ -3,7 +3,7 @@ export type Result<T, E> = Result.Ok<T> | Result.Error<E>;
 export namespace Result {
     export interface Ok<T> {
         readonly type: "ok";
-        readonly result: T;
+        readonly ok: T;
     }
 
     export namespace Ok {
@@ -11,12 +11,12 @@ export namespace Result {
             result: Result<T, E>,
         ): result is Result.Ok<T> => result.type === "ok";
 
-        export const map = <T>(result: T): Result.Ok<T> => ({
+        export const map = <T>(ok: T): Result.Ok<T> => ({
             type: "ok",
-            result,
+            ok,
         });
 
-        export const flatten = <T>(ok: Result.Ok<T>): T => ok.result;
+        export const flatten = <T>(ok: Result.Ok<T>): T => ok.ok;
 
         export const lift =
             <T, R>(mapper: (input: T) => R) =>
@@ -31,7 +31,7 @@ export namespace Result {
 
     export interface Error<E> {
         readonly type: "error";
-        readonly result: E;
+        readonly error: E;
     }
 
     export namespace Error {
@@ -39,12 +39,12 @@ export namespace Result {
             result: Result<T, E>,
         ): result is Result.Error<E> => result.type === "error";
 
-        export const map = <E>(result: E): Result.Error<E> => ({
+        export const map = <E>(error: E): Result.Error<E> => ({
             type: "error",
-            result,
+            error,
         });
 
-        export const flatten = <E>(error: Result.Error<E>): E => error.result;
+        export const flatten = <E>(error: Result.Error<E>): E => error.error;
 
         export const lift =
             <T, R>(mapper: (input: T) => R) =>

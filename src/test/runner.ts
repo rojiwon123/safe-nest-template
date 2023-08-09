@@ -18,13 +18,13 @@ import stripAnsi from "strip-ansi";
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 
-const logger = createWriteStream(path.join(__dirname, "./../../test_log.md"), {
+const Logger = createWriteStream(path.join(__dirname, "./../../test_log.txt"), {
     flags: "w",
 });
 
 const write = process.stdout.write.bind(process.stdout);
 process.stdout.write = (str: string) => {
-    logger.write(stripAnsi(str));
+    Logger.write(stripAnsi(str));
     return write(str);
 };
 
@@ -33,11 +33,6 @@ const test = async (connection: IConnection): Promise<0 | -1> => {
         prefix: "test",
         parameters: () => [connection],
     })(__dirname + "/features");
-
-    const a: Error | null = {} as any;
-    if (negate(isNull)(a)) {
-        a;
-    }
 
     const executions = pipe(
         report.executions,
@@ -53,14 +48,16 @@ const test = async (connection: IConnection): Promise<0 | -1> => {
         toArray,
     );
 
-    logger.write("\n</details>");
+    Logger.write("\n</details>\n");
     console.log();
 
     if (isEmpty(executions)) {
         console.log("✅ \x1b[32mAll Tests Passed\x1b[0m");
+        console.log();
         console.log(`Test Count: \x1b[36m${report.executions.length}\x1b[0m`);
+        console.log();
         console.log(
-            `Total Test Time: \x1b[33m${report.time.toLocaleString()}\x1b[0mms`,
+            `Total Test Time: \x1b[33m${report.time.toLocaleString()}\x1b[0m ms`,
         );
         return 0;
     } else {
@@ -99,14 +96,14 @@ export const run = async () => {
     };
 
     console.log("# Test Report");
-    logger.write("\n<details>\n<summary>detail test case</summary>\n\n");
+    Logger.write("\n<details>\n<summary>detail test case</summary>\n\n");
 
     const code = await test(connection).catch((err) => {
         console.log(err);
         return -1 as const;
     });
 
-    logger.end();
+    Logger.end();
 
     await Backend.end(app);
 

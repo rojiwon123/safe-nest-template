@@ -1,6 +1,7 @@
 import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
 
+import { ExternalFailure, InternalFailure } from "./error";
 import { Result } from "./result";
 
 export namespace Crypto {
@@ -14,11 +15,14 @@ export namespace Crypto {
      *
      * 암호화 형식에 맞지 않는 key를 입력했거나 기타 이유로 암호화에 실패할 수 있다.
      */
-    export const encrypt = ({ plain, key }: { plain: string; key: string }) => {
+    export const encrypt = ({
+        plain,
+        key,
+    }: {
+        plain: string;
+        key: string;
+    }): Result<string, ExternalFailure<"Crypto.encrypt">> => {
         try {
-            if (key.length !== 32)
-                return Result.Error.map("key Invalid" as const);
-
             const iv = crypto.randomBytes(IV_LEN);
             const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
                 authTagLength: TAG_LEN,
@@ -31,8 +35,10 @@ export namespace Crypto {
                     "base64",
                 )}.${encrypted}`,
             );
-        } catch {
-            return Result.Error.map("Unexpected Error" as const);
+        } catch (error) {
+            return Result.Error.map(
+                ExternalFailure.get("Crypto.encrypt", error),
+            );
         }
     };
 
@@ -44,15 +50,23 @@ export namespace Crypto {
      * {@link encrypt}로 암호화한 문자열을 plain text로 해독한다.
      *
      * 복호화에 실패할 수 있다.
+     *
+     * 잘못된 토큰을 전달시 INVALID_TOKEN 에러를 리턴한다.
      */
-    export const decrypt = ({ token, key }: { token: string; key: string }) => {
+    export const decrypt = ({
+        token,
+        key,
+    }: {
+        token: string;
+        key: string;
+    }): Result<
+        string,
+        ExternalFailure<"Crypto.decrypt"> | InternalFailure<"INVALID_TOKEN">
+    > => {
         try {
-            if (key.length !== 32)
-                return Result.Error.map("key Invalid" as const);
-
             const [iv, tag, encrypted] = token.split(".");
             if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Result.Error.map("Token Invalid" as const);
+                return Result.Error.map(new InternalFailure("INVALID_TOKEN"));
 
             const decipher = crypto
                 .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
@@ -62,8 +76,10 @@ export namespace Crypto {
                 decipher.update(encrypted, "base64", "utf8") +
                     decipher.final("utf8"),
             );
-        } catch {
-            return Result.Error.map("Unexpected Error" as const);
+        } catch (error) {
+            return Result.Error.map(
+                ExternalFailure.get("Crypto.decrypt", error),
+            );
         }
     };
 }

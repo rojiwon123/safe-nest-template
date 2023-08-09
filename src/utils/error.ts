@@ -9,7 +9,6 @@ export class InternalFailure<T extends string = string> extends Error {
      */
     override readonly name: "InternalError";
     override readonly stack: string;
-    override readonly cause: undefined;
 
     constructor(override readonly message: T) {
         super(message);
@@ -52,7 +51,7 @@ export namespace ExternalFailure {
     ): ExternalFailure<T> => ({ name: "ExternalError", at, error });
 }
 
-export class HttpFailure<E extends InternalFailure | ExternalFailure<string>> {
+export class HttpFailure<T extends string = string> {
     readonly name: "HttpError";
 
     constructor(
@@ -63,7 +62,7 @@ export class HttpFailure<E extends InternalFailure | ExternalFailure<string>> {
          *
          * 로깅이 필요한 경우 추가한다.
          */
-        readonly orignal?: E,
+        readonly orignal?: InternalFailure<T>,
     ) {
         this.name = "HttpError";
     }

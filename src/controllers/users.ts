@@ -1,27 +1,27 @@
 import { TypedParam, TypedRoute } from "@nestia/core";
-import { Controller } from "@nestjs/common";
+import { Controller, NotFoundException } from "@nestjs/common";
 
-import { IUser } from "@APP/api/structures/user/user";
-import { User } from "@APP/providers/user";
-import { BIZUser } from "@APP/providers/user/biz_user";
+import { INormal } from "@APP/api/structures/user/INornal";
+import { NormalService } from "@APP/providers/user/normal";
+import { Result } from "@APP/utils";
 
-@Controller("users")
-export class UsersController {
+@Controller("users/normals")
+export class UsersNormalsController {
     /**
-     * this is sample api
-     * @summary user find by user id
-     * @tag users
-     * @param user_id user id
-     * @return user info
-     * @throw 404 Not Found
+     * 일반 사용자 공개 프로필 정보 요청 API
+     *
+     * @summary 일반 사용자 공개 프로필 정보 요청
+     * @tag normals
+     * @param normal_id 사용자 id
+     * @return 일반 사용자 공개 정보
      */
-    @TypedRoute.Get(":user_id")
-    getOne(@TypedParam("user_id") user_id: string): Promise<IUser> {
-        return User.Service.getOne(user_id);
-    }
-
-    @TypedRoute.Get()
-    async test(): Promise<boolean> {
-        return BIZUser.Service.getFalse();
+    @TypedRoute.Get(":normal_id")
+    async getOne(
+        @TypedParam("normal_id") normal_id: string,
+    ): Promise<INormal.IPublicProfile> {
+        const result = await NormalService.getPublicProfile()(normal_id);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        throw new NotFoundException(error.message);
     }
 }

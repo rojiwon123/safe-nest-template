@@ -1,9 +1,5 @@
-import typia from "typia";
+import { IConnection } from "@nestia/fetcher";
 
-import { IAuthentication } from "@APP/api/structures/authentication";
-import { Authentication } from "@APP/providers/authentication";
-
-export const test_api = async () => {
-    const input = typia.random<IAuthentication.ISignIn>();
-    await Authentication.Service.signIn(input);
+export const test_example = async (connection: IConnection) => {
+    console.log(connection);
 };

@@ -1,8 +1,8 @@
-import { mock } from "./mock";
+import { mock_function } from "./mock";
 import { run } from "./runner";
 
 (async () => {
-    await mock();
+    mock_function();
     await run();
 })().catch((err) => {
     console.log(err);

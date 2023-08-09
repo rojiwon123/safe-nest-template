@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import typia from "typia";
 
 const init = () => {
-    switch (process.env.NODE_ENV) {
+    switch (process.env["NODE_ENV"]) {
         case "development":
             dotenv.config({ path: ".env" });
             break;
@@ -17,20 +17,22 @@ const init = () => {
             );
     }
 
-    return process.env.NODE_ENV === "test"
-        ? ({ ...process.env, PORT: 4000 } as unknown as IEnv)
-        : typia.assert<IEnv>({ ...process.env, PORT: 4000 });
+    return process.env["NODE_ENV"] === "test"
+        ? ({ PORT: 4000, ...process.env } as unknown as IEnv)
+        : typia.assert<IEnv>({ PORT: 4000, ...process.env });
 };
 export const Configuration: IEnv = init();
 
 interface IEnv {
     readonly NODE_ENV: "development" | "production" | "test";
-    readonly PORT: 4000;
+    readonly PORT: number;
     readonly DATABASE_URL: string;
 
     readonly KAKAO_CLIENT_ID: string;
     readonly KAKAO_CLIENT_SECRET: string;
     readonly KAKAO_REDIRECT_URI: string;
 
+    readonly ACCOUNT_TOKEN_KEY: string;
     readonly ACCESS_TOKEN_KEY: string;
+    readonly REFRESH_TOKEN_KEY: string;
 }

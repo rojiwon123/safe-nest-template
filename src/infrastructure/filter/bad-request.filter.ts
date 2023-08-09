@@ -1,25 +1,24 @@
 import {
     ArgumentsHost,
+    BadRequestException,
     Catch,
     ExceptionFilter,
-    HttpStatus,
 } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 
-import { Logger } from "../logger";
+import { ErrorCode } from "@APP/api";
 
-@Catch()
-export class UnExpectedErrorFilter implements ExceptionFilter {
+@Catch(BadRequestException)
+export class BadRequestFilter implements ExceptionFilter {
     constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-    catch(exception: unknown, host: ArgumentsHost) {
+    catch(exception: BadRequestException, host: ArgumentsHost) {
         const { httpAdapter } = this.httpAdapterHost;
         const ctx = host.switchToHttp();
-        Logger.error((exception as Error).stack ?? exception);
         httpAdapter.reply(
             ctx.getResponse(),
-            "INTERNAL_SERVER_ERROR",
-            HttpStatus.INTERNAL_SERVER_ERROR,
+            "INVALID_INPUT" satisfies ErrorCode.InvalidInput,
+            exception.getStatus(),
         );
     }
 }
