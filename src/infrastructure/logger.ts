@@ -1,6 +1,6 @@
 import winston from "winston";
 
-import { pick } from "@APP/utils";
+import { pick } from "@APP/utils/map";
 
 import { Configuration } from "./config";
 

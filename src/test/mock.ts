@@ -1,7 +1,7 @@
 import { mock } from "node:test";
 
 import { Oauth } from "@APP/externals/oauth";
-import { Result } from "@APP/utils";
+import { Result } from "@APP/utils/result";
 
 export const mock_function = () => {
     mock.method(Oauth.kakao, "authorize").mock.mockImplementation((async (

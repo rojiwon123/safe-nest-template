@@ -4,7 +4,7 @@ import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
-import { DateMapper } from "@APP/utils";
+import { DateMapper } from "@APP/utils/date";
 
 import { prisma } from "./infrastructure/DB";
 import { Configuration } from "./infrastructure/config";

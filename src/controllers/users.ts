@@ -1,9 +1,8 @@
 import { TypedParam, TypedRoute } from "@nestia/core";
 import { Controller, NotFoundException } from "@nestjs/common";
 
-import { INormal } from "@APP/api/structures/user/INornal";
-import { NormalService } from "@APP/providers/user/normal";
-import { Result } from "@APP/utils";
+import { INormal, Normal } from "@APP/app/user/normal";
+import { Result } from "@APP/utils/result";
 
 @Controller("users/normals")
 export class UsersNormalsController {
@@ -19,7 +18,7 @@ export class UsersNormalsController {
     async getOne(
         @TypedParam("normal_id") normal_id: string,
     ): Promise<INormal.IPublicProfile> {
-        const result = await NormalService.getPublicProfile()(normal_id);
+        const result = await Normal.Service.getPublicProfile()(normal_id);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
         const error = Result.Error.flatten(result);
         throw new NotFoundException(error.message);

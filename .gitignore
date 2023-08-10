@@ -6,6 +6,7 @@ build
 tbuild
 packages/sdk/lib
 db
+migrated
 
 # log
 

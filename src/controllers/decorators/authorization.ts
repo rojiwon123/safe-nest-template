@@ -6,8 +6,8 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 
-import { IToken } from "@APP/api/structures/IToken";
-import { ErrorCode } from "@APP/api/types/ErrorCode";
+import { IToken } from "@APP/app/token";
+import { ErrorCode } from "@APP/types/ErrorCode";
 
 const extract_authorization_header = (ctx: ExecutionContext) =>
     ctx.switchToHttp().getRequest<Request>().headers["authorization"];

@@ -1,6 +1,6 @@
 import { IConnection } from "@nestia/fetcher";
 
-import { IToken } from "@APP/api/structures/IToken";
+import { IToken } from "@APP/app/token";
 
 export const addHeaders =
     (headers: Record<string, string>) =>

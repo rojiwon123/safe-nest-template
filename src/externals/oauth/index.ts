@@ -1,5 +1,6 @@
-import { IAuthentication } from "@APP/api/structures/IAuthentication";
-import { ExternalFailure, Result } from "@APP/utils";
+import { IAuthentication } from "@APP/app/authentication";
+import { ExternalFailure } from "@APP/utils/error";
+import { Result } from "@APP/utils/result";
 
 import { Github } from "./github";
 import { Kakao } from "./kakao";
