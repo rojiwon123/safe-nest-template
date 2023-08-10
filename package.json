@@ -5,7 +5,7 @@
     "main": "build/main",
     "scripts": {
         "check": "ts-patch check",
-        "prepare": "ts-patch install",
+        "prepare": "husky install && ts-patch install",
         "---------------------------------------------": "",
         "eslint": "eslint src",
         "eslint:fix": "eslint src --fix",
@@ -64,6 +64,7 @@
         "@typescript-eslint/eslint-plugin": "^6.3.0",
         "@typescript-eslint/parser": "^6.3.0",
         "eslint-plugin-deprecation": "^1.5.0",
+        "husky": "^8.0.3",
         "nestia": "^4.4.0",
         "prettier": "^3.0.1",
         "prisma": "^5.1.1",
