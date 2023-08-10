@@ -15,7 +15,9 @@ export class UnExpectedErrorFilter implements ExceptionFilter {
     catch(exception: unknown, host: ArgumentsHost) {
         const { httpAdapter } = this.httpAdapterHost;
         const ctx = host.switchToHttp();
-        Logger.error((exception as Error).stack ?? exception);
+        Logger.error(
+            exception instanceof Error ? exception.stack : "Unknown Error",
+        );
         httpAdapter.reply(
             ctx.getResponse(),
             "INTERNAL_SERVER_ERROR",

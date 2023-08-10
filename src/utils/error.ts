@@ -1,3 +1,5 @@
+import { isString } from "@fxts/core";
+
 /**
  * 내부 처리에서 사용되는 에러 클래스
  *
@@ -51,19 +53,23 @@ export namespace ExternalFailure {
     ): ExternalFailure<T> => ({ name: "ExternalError", at, error });
 }
 
-export class HttpFailure<T extends string = string> {
-    readonly name: "HttpError";
+export class HttpFailure extends Error {
+    override readonly name: "HttpError";
+    override readonly stack?: string;
 
     constructor(
-        readonly message: string,
+        override readonly message: string,
         readonly status: number,
         /**
-         * 원본 에러 객체
-         *
-         * 로깅이 필요한 경우 추가한다.
+         * Error.stack 로깅하고 싶다면 추가한다.
          */
-        readonly orignal?: InternalFailure<T>,
+        _stack?: string,
     ) {
+        super(message);
         this.name = "HttpError";
+        if (isString(_stack)) {
+            super.stack = _stack;
+            this.stack = _stack;
+        }
     }
 }

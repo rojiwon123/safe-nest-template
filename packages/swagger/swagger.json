@@ -36,7 +36,7 @@
         },
         "summary": "카카오 인증 페이지 주소 요청",
         "description": "카카오 인증 로그인 페이지 주소 요청",
-        "x-nestia-namespace": "auth.oauth.kakao.getKakaoLoginUrl",
+        "x-nestia-namespace": "auth.oauth.kakao.kakao",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
@@ -90,7 +90,7 @@
         },
         "summary": "깃허브 인증 페이지 주소 요청",
         "description": "깃허브 인증 로그인 페이지 주소 요청",
-        "x-nestia-namespace": "auth.oauth.github.getGithubLoginUrl",
+        "x-nestia-namespace": "auth.oauth.github.github",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
@@ -120,6 +120,31 @@
             ]
           }
         ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/users/normals": {
+      "get": {
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          }
+        },
+        "x-nestia-namespace": "users.normals.get",
+        "x-nestia-jsDocTags": [],
         "x-nestia-method": "GET"
       }
     },
@@ -154,7 +179,7 @@
         },
         "summary": "일반 사용자 공개 프로필 정보 요청",
         "description": "일반 사용자 공개 프로필 정보 요청 API",
-        "x-nestia-namespace": "users.normals.getOne",
+        "x-nestia-namespace": "users.normals.geByNormalId",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",

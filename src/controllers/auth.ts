@@ -13,7 +13,7 @@ export class AuthController {
      * @return 카카오 인증 페이지 주소
      */
     @TypedRoute.Get("oauth/kakao")
-    getKakaoLoginUrl(): Promise<string> {
+    kakao(): Promise<string> {
         return Authentication.Service.getLoginUrl("kakao");
     }
 
@@ -25,7 +25,7 @@ export class AuthController {
      * @return 깃허브 인증 페이지 주소
      */
     @TypedRoute.Get("oauth/github")
-    getGithubLoginUrl(): Promise<string> {
+    github(): Promise<string> {
         return Authentication.Service.getLoginUrl("github");
     }
 }
