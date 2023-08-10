@@ -81,7 +81,7 @@ npm i @PROJECT/sdk
 | style    | :truck:               | 🚚    | 리소스 이동, 이름 변경      |
 | refactor | :recycle:             | ♻️    | 프로덕션 코드 리팩토링      |
 | test     | :white_check_mark:    | ✅    | 테스트 추가/수정            |
-| chore    | :arrow_up:            | ⬆     | dependencies 업데이트       |
+| chore    | :arrow_up:            | ⬆    | dependencies 업데이트       |
 | chore    | :construction_worker: | 👷    | CI 빌드 시스템 추가/수정    |
 | chore    | :wrench:              | 🔧    | 설정 파일 추가/수정         |
 | chore    | :heavy_plus_sign:     | ➕    | dependency 추가             |

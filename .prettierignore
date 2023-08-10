@@ -5,6 +5,6 @@ tbuild
 db
 packages
 
-src/api/functional
+test/sdk
 
-!src/infrastructure/DB
+!src/**/*
