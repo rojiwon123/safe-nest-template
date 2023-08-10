@@ -4,7 +4,6 @@
     "extends": ["plugin:@typescript-eslint/recommended"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": { "project": ["tsconfig.json"] },
-    "ignorePatterns": [".eslintrc.js", "*.config.js"],
     "rules": {
         // typescript rules
         "@typescript-eslint/interface-name-prefix": "off",
