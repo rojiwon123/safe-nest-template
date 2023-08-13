@@ -37,7 +37,11 @@ export namespace Crypto {
             );
         } catch (error) {
             return Result.Error.map(
-                ExternalFailure.get("Crypto.encrypt", error),
+                ExternalFailure.create({
+                    at: "Crypto.encrypt",
+                    error,
+                    input: JSON.stringify({ plain, key }),
+                }),
             );
         }
     };
@@ -78,7 +82,11 @@ export namespace Crypto {
             );
         } catch (error) {
             return Result.Error.map(
-                ExternalFailure.get("Crypto.decrypt", error),
+                ExternalFailure.create({
+                    at: "Crypto.decrypt",
+                    error,
+                    input: { token, key },
+                }),
             );
         }
     };

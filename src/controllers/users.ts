@@ -27,6 +27,7 @@ export class UsersNormalsController {
         const result = await Normal.Service.getPublicProfile()(normal_id);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
         const error = Result.Error.flatten(result);
+
         throw new HttpFailure(error.message, HttpStatus.NOT_FOUND);
     }
 }

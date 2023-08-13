@@ -1,4 +1,6 @@
-import { isString } from "@fxts/core";
+import { isString, isUndefined } from "@fxts/core";
+
+import { DateMapper } from "./date";
 
 /**
  * 내부 처리에서 사용되는 에러 클래스
@@ -9,12 +11,12 @@ export class InternalFailure<T extends string = string> extends Error {
     /**
      * 애플리케이션 내부 에러임을 나타내기 위한 에러 이름
      */
-    override readonly name: "InternalError";
+    override readonly name: "InternalFailure";
     override readonly stack: string;
 
     constructor(override readonly message: T) {
         super(message);
-        this.name = "InternalError";
+        this.name = "InternalFailure";
         this.stack = super.stack ?? `InternalError: ${message}`;
     }
 
@@ -32,44 +34,54 @@ export class InternalFailure<T extends string = string> extends Error {
  * nodejs 내장 모듈 혹은 외부 시스템으로부터 발생된 에러 객체를 담은 객체
  */
 export interface ExternalFailure<T extends string> {
-    /**
-     * InternalError와 구분하는 용도로써 사용
-     */
-    readonly name: "ExternalError";
-    /**
-     * error가 발생된 애플리케이션의 위치
-     */
+    /** InternalFailure와 구분하는 용도로써 사용 */
+    readonly name: "ExternalFailure";
+    /** 에러 발생 함수 */
     readonly at: T;
-    /**
-     * 외부 시스템으로부터 발생한 에러 객체
-     */
-    readonly error: unknown;
+    /** 에러 메시지 */
+    readonly message: string;
 }
 
 export namespace ExternalFailure {
-    export const get = <T extends string>(
-        at: T,
-        error: unknown,
-    ): ExternalFailure<T> => ({ name: "ExternalError", at, error });
+    interface Input<T extends string> {
+        at: T;
+        input?: unknown;
+        error: unknown;
+    }
+    const getMessage = <T extends string>({
+        at,
+        input,
+        error,
+    }: Input<T>): string => {
+        const exception =
+            error instanceof Error
+                ? `${error.name}: ${error.message}`
+                : JSON.stringify(error);
+        const fn = isUndefined(input)
+            ? `${at}()`
+            : `${at}(${JSON.stringify(input)})`;
+        return exception + "\n" + fn + "\n" + DateMapper.toISO();
+    };
+    export const create = <T extends string>(
+        input: Input<T>,
+    ): ExternalFailure<T> => ({
+        name: "ExternalFailure",
+        at: input.at,
+        message: getMessage(input),
+    });
 }
 
 export class HttpFailure extends Error {
-    override readonly name: "HttpError";
+    override readonly name: "HttpFailure";
     override readonly stack?: string;
 
     constructor(
         override readonly message: string,
         readonly status: number,
-        /**
-         * Error.stack 로깅하고 싶다면 추가한다.
-         */
         _stack?: string,
     ) {
         super(message);
-        this.name = "HttpError";
-        if (isString(_stack)) {
-            super.stack = _stack;
-            this.stack = _stack;
-        }
+        this.name = "HttpFailure";
+        if (isString(_stack)) this.stack = _stack;
     }
 }

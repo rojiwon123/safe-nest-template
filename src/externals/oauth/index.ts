@@ -11,7 +11,7 @@ type Authorize = (code: string) => Promise<
             oauth_sub: string;
             name: string | null;
         },
-        ExternalFailure<"OAUTH_FAIL">
+        ExternalFailure<`Oauth[${IAuthentication.OuathType}].authorize`>
     >
 >;
 
@@ -39,7 +39,11 @@ export const Oauth: {
                 return Result.Ok.map({ oauth_sub, name });
             } catch (error) {
                 return Result.Error.map(
-                    ExternalFailure.get("OAUTH_FAIL", error),
+                    ExternalFailure.create({
+                        at: "Oauth[kakao].authorize",
+                        error,
+                        input: { code },
+                    }),
                 );
             }
         },
@@ -56,7 +60,11 @@ export const Oauth: {
                 return Result.Ok.map({ oauth_sub, name });
             } catch (error) {
                 return Result.Error.map(
-                    ExternalFailure.get("OAUTH_FAIL", error),
+                    ExternalFailure.create({
+                        at: "Oauth[github].authorize",
+                        error,
+                        input: { code },
+                    }),
                 );
             }
         },
