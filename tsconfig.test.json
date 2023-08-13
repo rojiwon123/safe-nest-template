@@ -3,6 +3,6 @@
     "compilerOptions": {
         "outDir": "./tbuild" /* Specify an output folder for all emitted files. */
     },
-    "include": ["./src", "./test"],
+    "include": ["./src"],
     "exclude": []
 }
