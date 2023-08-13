@@ -22,12 +22,6 @@ const Logger = createWriteStream(path.join(__dirname, "./../../test_log.txt"), {
     flags: "w",
 });
 
-const write = process.stdout.write.bind(process.stdout);
-process.stdout.write = (str: string) => {
-    Logger.write(stripAnsi(str));
-    return write(str);
-};
-
 const test = async (connection: IConnection): Promise<0 | -1> => {
     const report = await DynamicExecutor.validate({
         prefix: "test",
@@ -93,6 +87,12 @@ export const run = async () => {
     const app = await Backend.start({ logger: false });
     const connection: IConnection = {
         host: `http://localhost:${Configuration.PORT}`,
+    };
+
+    const write = process.stdout.write.bind(process.stdout);
+    process.stdout.write = (str: string) => {
+        Logger.write(stripAnsi(str));
+        return write(str);
     };
 
     console.log("# Test Report");
