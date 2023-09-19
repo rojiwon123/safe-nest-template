@@ -7,13 +7,15 @@ import {
 import { Controller } from "@nestjs/common";
 
 import { IAuthentication } from "@APP/app/authentication";
+import { IToken } from "@APP/app/token";
 import { INormal } from "@APP/app/user/normal";
 
 @Controller("users/normals")
 export class UsersNormalsController {
     @TypedRoute.Get()
-    async get(): Promise<number[]> {
-        return [1, 2, 3];
+    async get(@TypedQuery() query: IToken): Promise<IToken.IAccess> {
+        query;
+        throw Error();
     }
     /**
      * 일반 사용자 공개 프로필 정보 요청 API
