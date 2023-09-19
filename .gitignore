@@ -7,6 +7,8 @@ tbuild
 packages/sdk/lib
 db
 migrated
+sdk
+!packages/sdk
 
 # log
 

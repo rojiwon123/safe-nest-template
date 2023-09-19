@@ -2,17 +2,19 @@ import type nestia from "@nestia/sdk";
 
 const NESTIA_CONFIG: nestia.INestiaConfig = {
     input: "src/controllers",
-    output: "./src/test/sdk",
-    json: false,
-    primitive: false,
+    output: "./sdk",
     simulate: true,
+    propagate: true,
+    clone: true,
+    primitive: true,
+    json: false,
     swagger: {
         decompose: true,
-        output: "packages/swagger/swagger.json",
+        output: "packages/sdk/doc/swagger.json",
         info: {
-            version: "0.0.1",
             title: "Server Title",
             description: "Service Description",
+            version: "0.0.1",
         },
         servers: [
             { url: "https://localhost:4000", description: "Local Server" },

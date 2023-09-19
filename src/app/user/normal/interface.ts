@@ -4,8 +4,6 @@ import { ErrorCode } from "@APP/types/ErrorCode";
 import { InternalFailure } from "@APP/utils/error";
 import { Result } from "@APP/utils/result";
 
-import { IUser } from "../interface";
-
 export interface INormalService {
     readonly get: (
         tx?: Prisma.TransactionClient,
@@ -20,7 +18,13 @@ export interface INormalService {
     >;
 }
 
-export interface INormal extends IUser.IBase<"normal"> {}
+export interface INormal {
+    type: "normal";
+    id: string;
+    name: string;
+    created_at: string;
+    other_attr: boolean;
+}
 
 export namespace INormal {
     export type IPublicProfile = Pick<INormal, "type" | "id" | "name">;

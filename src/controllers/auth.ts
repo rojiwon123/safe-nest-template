@@ -1,7 +1,7 @@
 import { TypedRoute } from "@nestia/core";
 import { Controller } from "@nestjs/common";
 
-import { Authentication } from "@APP/app/authentication";
+import { AuthenticationService } from "@APP/app/authentication";
 
 @Controller("auth")
 export class AuthController {
@@ -14,7 +14,7 @@ export class AuthController {
      */
     @TypedRoute.Get("oauth/kakao")
     kakao(): Promise<string> {
-        return Authentication.Service.getLoginUrl("kakao");
+        return AuthenticationService.getLoginUrl("kakao");
     }
 
     /**
@@ -26,6 +26,6 @@ export class AuthController {
      */
     @TypedRoute.Get("oauth/github")
     github(): Promise<string> {
-        return Authentication.Service.getLoginUrl("github");
+        return AuthenticationService.getLoginUrl("github");
     }
 }

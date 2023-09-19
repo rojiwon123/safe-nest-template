@@ -1,0 +1,8 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./packages/sdk/lib" /* Specify an output folder for all emitted files. */
+    },
+    "include": ["./sdk"],
+    "exclude": ["./src"]
+}

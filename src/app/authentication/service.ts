@@ -1,11 +1,14 @@
 import { Oauth } from "@APP/externals/oauth";
+import { typedModule } from "@APP/utils/fx";
 
 import { IAuthenticationService } from "./interface";
 
-export namespace Service {
+typedModule<IAuthenticationService>(AuthenticationService);
+
+export namespace AuthenticationService {
     export const getLoginUrl: IAuthenticationService["getLoginUrl"] = async (
         oauth_type,
-    ): Promise<string> => {
+    ) => {
         return Oauth[oauth_type].loginUri;
     };
 }

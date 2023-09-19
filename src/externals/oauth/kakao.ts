@@ -1,4 +1,4 @@
-import { Fetcher } from "@nestia/fetcher";
+import { PlainFetcher } from "@nestia/fetcher/lib/PlainFetcher";
 
 import { Configuration } from "@APP/infrastructure/config";
 
@@ -35,7 +35,7 @@ export namespace Kakao {
     export const getTokens = (
         ({ client_id, client_secret, redirect_uri }: IOauth2Options) =>
         (code: string): Promise<ITokens> =>
-            Fetcher.fetch<string, ITokens>(
+            PlainFetcher.fetch<string, ITokens>(
                 {
                     host: API_URL,
                     headers: {
@@ -45,11 +45,18 @@ export namespace Kakao {
                     },
                 },
                 {
+                    method: "POST",
+                    path: "/oauth/token",
+                    request: {
+                        type: "application/json",
+                        encrypted: false,
+                    },
+                    response: {
+                        type: "application/json",
+                        encrypted: false,
+                    },
                     status: 200,
-                    response: false,
                 },
-                "POST",
-                "/oauth/token",
                 new URLSearchParams({
                     grant_type: "authorization_code",
                     client_id,
@@ -61,7 +68,7 @@ export namespace Kakao {
     )(options);
 
     export const getMe = (access_token: string): Promise<IMeResponse> =>
-        Fetcher.fetch<IMeResponse>(
+        PlainFetcher.fetch<IMeResponse>(
             {
                 host: API_URL,
                 headers: {
@@ -69,9 +76,16 @@ export namespace Kakao {
                     Authorization: `Bearer ${access_token}`,
                 },
             },
-            { response: false, status: 200 },
-            "GET",
-            "/v2/user/me",
+            {
+                method: "GET",
+                path: "/v2/user/me",
+                request: null,
+                response: {
+                    type: "application/json",
+                    encrypted: false,
+                },
+                status: 200,
+            },
         );
 
     export interface IOauth2Options {

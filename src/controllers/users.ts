@@ -1,10 +1,13 @@
-import { TypedParam, TypedRoute } from "@nestia/core";
+import {
+    TypedException,
+    TypedParam,
+    TypedQuery,
+    TypedRoute,
+} from "@nestia/core";
 import { Controller } from "@nestjs/common";
-import { HttpStatus } from "@nestjs/common/enums";
 
-import { INormal, Normal } from "@APP/app/user/normal";
-import { HttpFailure } from "@APP/utils/error";
-import { Result } from "@APP/utils/result";
+import { IAuthentication } from "@APP/app/authentication";
+import { INormal } from "@APP/app/user/normal";
 
 @Controller("users/normals")
 export class UsersNormalsController {
@@ -20,14 +23,13 @@ export class UsersNormalsController {
      * @param normal_id 사용자 id
      * @return 일반 사용자 공개 정보
      */
+    @TypedException<IAuthentication.OuathType>(404)
     @TypedRoute.Get(":normalId")
     async geByNormalId(
         @TypedParam("normalId") normal_id: string,
+        @TypedQuery() query: INormal,
     ): Promise<INormal.IPublicProfile> {
-        const result = await Normal.Service.getPublicProfile()(normal_id);
-        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
-        const error = Result.Error.flatten(result);
-
-        throw new HttpFailure(error.message, HttpStatus.NOT_FOUND);
+        query;
+        throw Error();
     }
 }

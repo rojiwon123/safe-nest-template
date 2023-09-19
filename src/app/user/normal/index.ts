@@ -1,2 +1,2 @@
-export * from "./module";
 export type * from "./interface";
+export * from "./service";

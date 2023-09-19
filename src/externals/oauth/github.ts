@@ -1,4 +1,4 @@
-import { Fetcher } from "@nestia/fetcher";
+import { PlainFetcher } from "@nestia/fetcher/lib/PlainFetcher";
 
 export namespace Github {
     const AUTH_URL = "https://github.com/login/oauth";
@@ -36,7 +36,7 @@ export namespace Github {
     export const getTokens = (
         ({ client_id, client_secret }: IOauth2Options) =>
         (code: string): Promise<ITokens> =>
-            Fetcher.fetch(
+            PlainFetcher.fetch(
                 {
                     host: AUTH_URL,
                     headers: {
@@ -46,11 +46,18 @@ export namespace Github {
                     },
                 },
                 {
-                    response: false,
+                    method: "POST",
+                    path: "/access_token",
+                    request: {
+                        type: "application/json",
+                        encrypted: false,
+                    },
+                    response: {
+                        type: "application/json",
+                        encrypted: false,
+                    },
                     status: 200,
                 },
-                "POST",
-                "/access_token",
                 {
                     client_id,
                     client_secret,
@@ -62,7 +69,7 @@ export namespace Github {
     const get =
         <T>(path: string) =>
         (access_token: string) =>
-            Fetcher.fetch<T>(
+            PlainFetcher.fetch<T>(
                 {
                     host: API_URL,
                     headers: {
@@ -74,11 +81,15 @@ export namespace Github {
                     simulate: true,
                 },
                 {
-                    response: false,
+                    method: "GET",
+                    path,
+                    request: null,
+                    response: {
+                        type: "application/json",
+                        encrypted: false,
+                    },
                     status: 200,
                 },
-                "GET",
-                path,
             );
 
     export const getUser = get<IUser>("/user");

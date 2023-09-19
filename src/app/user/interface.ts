@@ -1,5 +1,3 @@
-export interface IUserService {}
-
 export namespace IUser {
     export type Type = "normal" | "admin";
 
