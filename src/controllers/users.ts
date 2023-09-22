@@ -32,6 +32,7 @@ export class UsersNormalsController {
         @TypedQuery() query: INormal,
     ): Promise<INormal.IPublicProfile> {
         query;
+        normal_id;
         throw Error();
     }
 }

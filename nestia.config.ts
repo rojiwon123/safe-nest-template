@@ -10,7 +10,7 @@ const NESTIA_CONFIG: nestia.INestiaConfig = {
     json: false,
     swagger: {
         decompose: true,
-        output: "packages/sdk/doc/swagger.json",
+        output: "packages/api/swagger/swagger.json",
         info: {
             title: "Server Title",
             description: "Service Description",

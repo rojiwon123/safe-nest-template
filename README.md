@@ -46,18 +46,17 @@ Nestia와 prisma를 미리 적용한 템플릿 프로젝트
 
 nestia를 통해 swagger, sdk 자동빌드 기능을 지원한다.
 
--   @nestia/migrate를 사용하면 swagger.json만으로도 fake server 및 sdk 빌드가 가능하다.
-
 ### Swagger
 
 ```bash
-npx @PROJECT/swagger swagger
+npm i @PROJECT/api
+npm run start
 ```
 
 ### SDK
 
 ```bash
-npm i @PROJECT/sdk
+npm i @PROJECT/api
 ```
 
 ## 깃 컨벤션

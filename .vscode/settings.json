@@ -2,7 +2,6 @@
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.preferences.autoImportFileExcludePatterns": [
         "./build/**",
-        "./tbuild/**",
-        "./packages/**"
+        "./tbuild/**"
     ]
 }

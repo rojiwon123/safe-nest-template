@@ -1,8 +1,10 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "./packages/sdk/lib" /* Specify an output folder for all emitted files. */
+        "outDir": "./packages/api/lib",
+        "sourceMap": false,
+        "target": "ES2015",
+        "moduleDetection": "auto"
     },
-    "include": ["./sdk"],
-    "exclude": ["./src"]
+    "include": ["./sdk"]
 }
