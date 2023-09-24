@@ -14,7 +14,7 @@
   <ol>
     <li><a href="#소개">소개</a></li>
     <li><a href="#api-문서화">API 문서화 방식</a></li>
-    <li><a href="#erd">erd 문서</a></li>
+    <li><a href="./ERD.md">erd 문서</a></li>
     <li><a href="#커밋-컨벤션">커밋 컨벤션</a></li>
   </ol>
 </details>
@@ -53,10 +53,6 @@ npm run build:nestia
 ```bash
 npm run swagger
 ```
-
-## ERD
-
--   [View ERD](./ERD.md)
 
 ## 커밋 컨벤션
 
