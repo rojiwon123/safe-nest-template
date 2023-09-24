@@ -16,5 +16,8 @@ export namespace ErrorCode {
         export type Invalid = "INVALID_TOKEN";
     }
 
-    export type UserNotFound = "NOT_FOUND_USER";
+    export namespace User {
+        export type NotFound = "NOT_FOUND_USER";
+        export type AlreadyExist = "ALREADY_EXIST_USER";
+    }
 }

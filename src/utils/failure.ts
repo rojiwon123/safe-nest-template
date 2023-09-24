@@ -74,7 +74,10 @@ export namespace Failure {
         ) {
             super(message);
             this.name = "HttpFailure";
-            if (stack) this.log = stack;
+            if (stack) {
+                this.log = stack;
+                this.stack = stack;
+            }
         }
     }
 }

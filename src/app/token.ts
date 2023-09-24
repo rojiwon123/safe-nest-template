@@ -10,8 +10,6 @@ import { Failure } from "@APP/utils/failure";
 import { assertModule } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
 
-assertModule<Token>(Token);
-
 export interface Token {
     readonly verifyAccess: (
         token: string,
@@ -45,16 +43,16 @@ export namespace Token {
     const day = hour * 24;
 
     const durationOfAccess = hour * 8;
-    const durationOfRefresh = day;
+    const durationOfRefresh = day * 7;
 
-    export type verify<T extends IToken> = (
+    type verify<T extends IToken> = (
         token: string,
     ) => Result<
         T,
         Failure.External<"Crypto.decrypt"> | Failure.Internal<ErrorCode.Token>
     >;
 
-    export type generate<T extends IToken, P> = (
+    type generate<T extends IToken, P> = (
         input: P,
     ) => Result<
         IToken.IResponse<T["type"]>,
@@ -94,7 +92,7 @@ export namespace Token {
                 ),
             );
 
-    export const generate =
+    const generate =
         <T extends IToken, P>(options: {
             key: string;
             inputor: (input: P) => T;
@@ -165,3 +163,5 @@ export namespace Token {
         }),
     });
 }
+
+assertModule<Token>(Token);

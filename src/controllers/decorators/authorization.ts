@@ -6,9 +6,9 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 
-import { IToken } from "@APP/app/token";
 import { ErrorCode } from "@APP/types/dto/ErrorCode";
-import { HttpFailure } from "@APP/utils/failure";
+import { IToken } from "@APP/types/dto/IToken";
+import { Failure } from "@APP/utils/failure";
 
 const extract_authorization_header = (ctx: ExecutionContext) =>
     ctx.switchToHttp().getRequest<Request>().headers["authorization"];
@@ -20,7 +20,7 @@ const extract_token = (token_type: string) => (header: string) =>
         ?.split(/\s+/)[1];
 
 const Unauthorized = (message: ErrorCode.Authorization) => () => {
-    throw new HttpFailure(message, HttpStatus.UNAUTHORIZED);
+    throw new Failure.Http(message, HttpStatus.UNAUTHORIZED);
 };
 
 export const Authorization = (token_type: IToken.Type) =>

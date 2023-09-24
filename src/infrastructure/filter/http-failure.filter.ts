@@ -2,18 +2,18 @@ import { isString } from "@fxts/core";
 import { ArgumentsHost, Catch, ExceptionFilter } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 
-import { HttpFailure } from "@APP/utils/failure";
+import { Failure } from "@APP/utils/failure";
 
 import { Logger } from "../logger";
 
-@Catch(HttpFailure)
+@Catch(Failure.Http)
 export class HttpFailureFilter implements ExceptionFilter {
     constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-    catch(exception: HttpFailure, host: ArgumentsHost) {
+    catch(exception: Failure.Http, host: ArgumentsHost) {
         const { httpAdapter } = this.httpAdapterHost;
         const ctx = host.switchToHttp();
-        if (isString(exception.stack)) Logger.error(exception.stack);
+        if (isString(exception.log)) Logger.error(exception.log);
         httpAdapter.reply(
             ctx.getResponse(),
             exception.message,

@@ -1,5 +1,4 @@
-import { Format } from "typia/lib/tags";
-
+import { IOauth } from "@APP/types/dto/IOauth";
 import { Failure } from "@APP/utils/failure";
 import { assertModule } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
@@ -7,38 +6,23 @@ import { Result } from "@APP/utils/result";
 import { GithubSDK } from "./github";
 import { KakaoSDK } from "./kakao";
 
-assertModule<Oauth>(Oauth.Kakao);
-assertModule<Oauth>(Oauth.Github);
-
 export interface Oauth {
     readonly getUrlForLogin: () => string;
     readonly getProfile: (
         code: string,
     ) => Promise<
         Result<
-            { oauth_sub: string; profile: Oauth.IProfile },
+            { oauth_sub: string; profile: IOauth.IProfile },
             Failure.Internal<`Fail To Get ${string}`>
         >
     >;
 }
 
 export namespace Oauth {
-    /**
-     * 외부 서비스로부터 얻은 사용자 프로필 정보
-     *
-     * 해당 정보를 기반으로 사용자 프로필을 생성한다.
-     */
-    export interface IProfile {
-        /** 사용자명 */
-        name: string;
-        /** 인증된 이메일 */
-        email: (string & Format<"email">) | null;
-        /** 프로필 이미지 */
-        image_url: (string & Format<"url">) | null;
-    }
-
     export namespace Kakao {
-        const get_profile = (user: KakaoSDK.IGetUserResponse): IProfile => {
+        const get_profile = (
+            user: KakaoSDK.IGetUserResponse,
+        ): IOauth.IProfile => {
             user;
             throw Error("Function is not Implemented.");
         };
@@ -68,7 +52,7 @@ export namespace Oauth {
     }
 
     export namespace Github {
-        const get_profile = (user: GithubSDK.IUser): IProfile => {
+        const get_profile = (user: GithubSDK.IUser): IOauth.IProfile => {
             user;
             throw Error("Function is not Implemented.");
         };
@@ -90,3 +74,6 @@ export namespace Oauth {
         };
     }
 }
+
+assertModule<Oauth>(Oauth.Kakao);
+assertModule<Oauth>(Oauth.Github);

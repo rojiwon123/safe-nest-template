@@ -1,6 +1,6 @@
 import { IConnection } from "@nestia/fetcher";
 
-import { IToken } from "@APP/app/token";
+import { IToken } from "@APP/types/dto/IToken";
 
 export const addHeaders =
     (headers: Record<string, string>) =>
@@ -12,11 +12,8 @@ export const addHeaders =
         },
     });
 
-const addAuthorization = ({ token, type }: { type: string; token: string }) =>
+export const addToken = (type: IToken.Type) => (token: string) =>
     addHeaders({ Authorization: `${type} ${token}` });
-
-export const Token = (type: IToken.Type) => (token: string) =>
-    addAuthorization({ token, type });
 
 declare const a: IConnection<{
     Authorization: `${"bearer" | "basic"} ${string}`;
