@@ -1,3 +1,5 @@
+import { Minimum, Type } from "typia/lib/tags";
+
 /**
  * 주소 데이터 형식
  */
@@ -22,18 +24,10 @@ export interface IAddress {
 
 export interface IPaginatedResponse<T> {
     readonly data: T[];
-    /**
-     * @type uint
-     * @minimum 1
-     */
-    readonly page: number;
+    readonly page: number & Type<"uint64"> & Minimum<1>;
 }
 
 export interface IPage {
-    /**
-     * @default 1
-     * @type uint
-     * @minimum 1
-     */
-    page?: number;
+    /** @default 1 */
+    page?: number & Type<"uint64"> & Minimum<1>;
 }

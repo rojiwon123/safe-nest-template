@@ -2,7 +2,7 @@ import { isString } from "@fxts/core";
 import { ArgumentsHost, Catch, ExceptionFilter } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 
-import { HttpFailure } from "@APP/utils/error";
+import { HttpFailure } from "@APP/utils/failure";
 
 import { Logger } from "../logger";
 

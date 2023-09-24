@@ -9,6 +9,7 @@ export const mock_function = () => {
     ) => {
         return Result.Ok.map({ oauth_sub: code, name: "" });
     }) satisfies (typeof Oauth)["kakao"]["authorize"]);
+
     mock.method(Oauth.github, "authorize").mock.mockImplementation((async (
         code,
     ) => {

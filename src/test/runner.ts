@@ -10,7 +10,6 @@ import {
     toArray,
 } from "@fxts/core";
 import { DynamicExecutor } from "@nestia/e2e";
-import { IConnection } from "@nestia/fetcher";
 import { createWriteStream } from "fs";
 import path from "path";
 import stripAnsi from "strip-ansi";
@@ -18,11 +17,13 @@ import stripAnsi from "strip-ansi";
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 
+import { ITarget } from "./internal/target";
+
 const Logger = createWriteStream(path.join(__dirname, "./../../test_log.txt"), {
     flags: "w",
 });
 
-const test = async (connection: IConnection): Promise<0 | -1> => {
+const test = async (connection: ITarget): Promise<0 | -1> => {
     const report = await DynamicExecutor.validate({
         prefix: "test",
         parameters: () => [connection],
@@ -85,7 +86,7 @@ const test = async (connection: IConnection): Promise<0 | -1> => {
 
 export const run = async () => {
     const app = await Backend.start({ logger: false });
-    const connection: IConnection = {
+    const connection: ITarget = {
         host: `http://localhost:${Configuration.PORT}`,
     };
 

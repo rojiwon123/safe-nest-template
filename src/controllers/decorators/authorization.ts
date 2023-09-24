@@ -1,13 +1,14 @@
 import { isUndefined, negate, pipe, unless } from "@fxts/core";
 import {
     ExecutionContext,
-    UnauthorizedException,
+    HttpStatus,
     createParamDecorator,
 } from "@nestjs/common";
 import { Request } from "express";
 
 import { IToken } from "@APP/app/token";
-import { ErrorCode } from "@APP/types/ErrorCode";
+import { ErrorCode } from "@APP/types/dto/ErrorCode";
+import { HttpFailure } from "@APP/utils/failure";
 
 const extract_authorization_header = (ctx: ExecutionContext) =>
     ctx.switchToHttp().getRequest<Request>().headers["authorization"];
@@ -19,7 +20,7 @@ const extract_token = (token_type: string) => (header: string) =>
         ?.split(/\s+/)[1];
 
 const Unauthorized = (message: ErrorCode.Authorization) => () => {
-    throw new UnauthorizedException(message);
+    throw new HttpFailure(message, HttpStatus.UNAUTHORIZED);
 };
 
 export const Authorization = (token_type: IToken.Type) =>
@@ -33,6 +34,6 @@ export const Authorization = (token_type: IToken.Type) =>
 
             extract_token(type),
 
-            unless(negate(isUndefined), Unauthorized("INVALID_HEADER_VALUE")),
+            unless(negate(isUndefined), Unauthorized("UNAUTHORIZED_REQUEST")),
         ),
     )(token_type);

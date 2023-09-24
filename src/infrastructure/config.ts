@@ -25,6 +25,7 @@ export const Configuration: IEnv = init();
 
 interface IEnv {
     readonly NODE_ENV: "development" | "production" | "test";
+    /** @default 4000 */
     readonly PORT: number;
     readonly DATABASE_URL: string;
 
@@ -32,7 +33,6 @@ interface IEnv {
     readonly KAKAO_CLIENT_SECRET: string;
     readonly KAKAO_REDIRECT_URI: string;
 
-    readonly ACCOUNT_TOKEN_KEY: string;
     readonly ACCESS_TOKEN_KEY: string;
     readonly REFRESH_TOKEN_KEY: string;
 }

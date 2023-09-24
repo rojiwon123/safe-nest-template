@@ -8,7 +8,7 @@ const transports: winston.transport =
     Configuration.NODE_ENV === "production"
         ? new winston.transports.Stream({
               level: "warn",
-              stream: process.stdout,
+              stream: process.stdout, // 외부 스트림으로 변경할 것
               format: winston.format.printf(
                   (info) => `--- LOG LEVEL: ${info.level} ---\n` + info.message,
               ),

@@ -1,4 +1,4 @@
-import { mock_function } from "./mock";
+import { mock_function } from "./internal/mock";
 import { run } from "./runner";
 
 (async () => {

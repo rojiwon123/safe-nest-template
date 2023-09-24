@@ -1,92 +1,11 @@
-import { PlainFetcher } from "@nestia/fetcher/lib/PlainFetcher";
-
 import { Configuration } from "@APP/infrastructure/config";
+import { Failure } from "@APP/utils/failure";
+import { fetch } from "@APP/utils/fetch";
+import { Result } from "@APP/utils/result";
 
-export namespace Kakao {
+export namespace KakaoSDK {
     const AUTH_URL = "https://kauth.kakao.com";
     const API_URL = "https://kapi.kakao.com";
-
-    const options: IOauth2Options = {
-        client_id: Configuration.KAKAO_CLIENT_ID,
-        client_secret: Configuration.KAKAO_CLIENT_SECRET,
-        redirect_uri: Configuration.KAKAO_REDIRECT_URI,
-        service_terms: [],
-        prompt: "login",
-    };
-
-    export const LoginUri = ((options: IOauth2Options): string => {
-        const { client_id, redirect_uri, prompt, service_terms, state, nonce } =
-            options;
-        const path = "/oauth/authorize";
-        const search_params = new URLSearchParams({
-            client_id,
-            redirect_uri,
-            ...(prompt ? { prompt } : {}),
-            ...(service_terms.length > 0
-                ? { service_terms: service_terms.join(",") }
-                : {}),
-            ...(state ? { state } : {}),
-            ...(nonce ? { nonce } : {}),
-            response_type: "code",
-        }).toString();
-        return AUTH_URL + path + "?" + search_params;
-    })(options);
-
-    export const getTokens = (
-        ({ client_id, client_secret, redirect_uri }: IOauth2Options) =>
-        (code: string): Promise<ITokens> =>
-            PlainFetcher.fetch<string, ITokens>(
-                {
-                    host: API_URL,
-                    headers: {
-                        "User-Agent": "request",
-                        "Content-Type":
-                            "application/x-www-form-urlencoded;charset=utf-8",
-                    },
-                },
-                {
-                    method: "POST",
-                    path: "/oauth/token",
-                    request: {
-                        type: "application/json",
-                        encrypted: false,
-                    },
-                    response: {
-                        type: "application/json",
-                        encrypted: false,
-                    },
-                    status: 200,
-                },
-                new URLSearchParams({
-                    grant_type: "authorization_code",
-                    client_id,
-                    redirect_uri,
-                    code,
-                    ...(client_secret ? { client_secret } : {}),
-                }).toString(),
-            )
-    )(options);
-
-    export const getMe = (access_token: string): Promise<IMeResponse> =>
-        PlainFetcher.fetch<IMeResponse>(
-            {
-                host: API_URL,
-                headers: {
-                    "User-Agent": "request",
-                    Authorization: `Bearer ${access_token}`,
-                },
-            },
-            {
-                method: "GET",
-                path: "/v2/user/me",
-                request: null,
-                response: {
-                    type: "application/json",
-                    encrypted: false,
-                },
-                status: 200,
-            },
-        );
 
     export interface IOauth2Options {
         /**
@@ -145,16 +64,29 @@ export namespace Kakao {
         readonly nonce?: string;
     }
 
-    export interface IMeRequestParameter {
-        /**
-         * 이미지 URL 값 HTTPS 여부, true 설정 시 HTTPS 사용, 기본 값 false
-         */
-        readonly secure_resource?: boolean;
-        /**
-         * Property 키 목록, JSON Array를 ["kakao_account.email"]과 같은 형식으로 사용
-         */
-        readonly property_keys: PropertyKey[];
-    }
+    const options: IOauth2Options = {
+        client_id: Configuration.KAKAO_CLIENT_ID,
+        client_secret: Configuration.KAKAO_CLIENT_SECRET,
+        redirect_uri: Configuration.KAKAO_REDIRECT_URI,
+        service_terms: [],
+        prompt: "login",
+    };
+
+    /**
+     * Get Url for {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-code 인가 코드 받기}
+     */
+    export const getUrlForAuthorize = (): string =>
+        `${AUTH_URL}/oauth/authorize?${new URLSearchParams({
+            client_id: options.client_id,
+            redirect_uri: options.redirect_uri,
+            ...(options.prompt ? { prompt: options.prompt } : {}),
+            ...(options.service_terms.length > 0
+                ? { service_terms: options.service_terms.join(",") }
+                : {}),
+            ...(options.state ? { state: options.state } : {}),
+            ...(options.nonce ? { nonce: options.nonce } : {}),
+            response_type: "code",
+        }).toString()}`;
 
     export interface ITokens {
         /**
@@ -196,8 +128,116 @@ export namespace Kakao {
          *
          * 참고: OpenID Connect가 활성화된 앱의 토큰 발급 요청인 경우, ID 토큰이 함께 발급되며 scope 값에 openid 포함
          */
-        readonly scope: string;
+        readonly scope?: string;
     }
+
+    /**
+     * {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-token 토큰 받기}
+     */
+    export const getToken = async (
+        code: string,
+    ): Promise<
+        Result<ITokens, Failure.Internal<"Fail To Get AccessToken">>
+    > => {
+        try {
+            return Result.Ok.map(
+                await fetch<string, ITokens>(
+                    {
+                        host: AUTH_URL,
+                        headers: {
+                            "User-Agent": "request",
+                            "Content-Type":
+                                "application/x-www-form-urlencoded;charset=utf-8",
+                        },
+                    },
+                    {
+                        method: "POST",
+                        path: "/oauth/token",
+                        status: 200,
+                        request: {
+                            type: "text/plain",
+                            encrypted: false,
+                        },
+                        response: {
+                            type: "application/json",
+                            encrypted: false,
+                        },
+                    },
+                    new URLSearchParams({
+                        grant_type: "authorization_code",
+                        client_id: options.client_id,
+                        redirect_uri: options.redirect_uri,
+                        code,
+                        ...(options.client_secret
+                            ? { client_secret: options.client_secret }
+                            : {}),
+                    }).toString(),
+                ),
+            );
+        } catch {
+            return Result.Error.map(
+                new Failure.Internal("Fail To Get AccessToken"),
+            );
+        }
+    };
+
+    export interface IMeRequestParameter {
+        /**
+         * 이미지 URL 값 HTTPS 여부, true 설정 시 HTTPS 사용, 기본 값 false
+         */
+        readonly secure_resource?: boolean;
+        /**
+         * Property 키 목록, JSON Array를 ["kakao_account.email"]과 같은 형식으로 사용
+         */
+        readonly property_keys: PropertyKey[];
+    }
+
+    /**
+     * {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#req-user-info 사용자 기본 정보 가져오기}
+     */
+    export const getUser =
+        (parameter: IMeRequestParameter) =>
+        async (
+            access_token: string,
+        ): Promise<
+            Result<IGetUserResponse, Failure.Internal<"Fail To Get UserData">>
+        > => {
+            try {
+                return Result.Ok.map(
+                    await fetch<IGetUserResponse>(
+                        {
+                            host: API_URL,
+                            headers: {
+                                "User-Agent": "request",
+                                Authorization: `Bearer ${access_token}`,
+                                "Content-type":
+                                    "application/x-www-form-urlencoded;charset=utf-8",
+                            },
+                        },
+                        {
+                            method: "GET",
+                            path: `/v2/user/me?${new URLSearchParams({
+                                secure_resource:
+                                    (parameter.secure_resource ?? true) + "",
+                                property_keys: JSON.stringify(
+                                    parameter.property_keys,
+                                ),
+                            })}`,
+                            request: null,
+                            response: {
+                                type: "application/json",
+                                encrypted: false,
+                            },
+                            status: 200,
+                        },
+                    ),
+                );
+            } catch {
+                return Result.Error.map(
+                    new Failure.Internal("Fail To Get UserData"),
+                );
+            }
+        };
 
     export interface IIdTokenPayload {
         /**
@@ -275,7 +315,7 @@ export namespace Kakao {
         | "kakao_account.birthday"
         | "kakao_account.gender";
 
-    export interface IMeResponse {
+    export interface IGetUserResponse {
         /**
          * 회원번호
          */

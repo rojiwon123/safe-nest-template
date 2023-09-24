@@ -1,7 +1,9 @@
 import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
 
-import { ExternalFailure, InternalFailure } from "./error";
+import { ErrorCode } from "@APP/types/dto/ErrorCode";
+
+import { Failure } from "./failure";
 import { Result } from "./result";
 
 export namespace Crypto {
@@ -21,7 +23,7 @@ export namespace Crypto {
     }: {
         plain: string;
         key: string;
-    }): Result<string, ExternalFailure<"Crypto.encrypt">> => {
+    }): Result<string, Failure.External<"Crypto.encrypt">> => {
         try {
             const iv = crypto.randomBytes(IV_LEN);
             const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
@@ -36,13 +38,7 @@ export namespace Crypto {
                 )}.${encrypted}`,
             );
         } catch (error) {
-            return Result.Error.map(
-                ExternalFailure.create({
-                    at: "Crypto.encrypt",
-                    error,
-                    input: JSON.stringify({ plain, key }),
-                }),
-            );
+            return Failure.External.getResult("Crypto.encrypt")(error);
         }
     };
 
@@ -65,12 +61,13 @@ export namespace Crypto {
         key: string;
     }): Result<
         string,
-        ExternalFailure<"Crypto.decrypt"> | InternalFailure<"INVALID_TOKEN">
+        | Failure.External<"Crypto.decrypt">
+        | Failure.Internal<ErrorCode.Token.Invalid>
     > => {
         try {
             const [iv, tag, encrypted] = token.split(".");
             if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Result.Error.map(new InternalFailure("INVALID_TOKEN"));
+                return Result.Error.map(new Failure.Internal("INVALID_TOKEN"));
 
             const decipher = crypto
                 .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
@@ -81,13 +78,7 @@ export namespace Crypto {
                     decipher.final("utf8"),
             );
         } catch (error) {
-            return Result.Error.map(
-                ExternalFailure.create({
-                    at: "Crypto.decrypt",
-                    error,
-                    input: { token, key },
-                }),
-            );
+            return Failure.External.getResult("Crypto.decrypt")(error);
         }
     };
 }

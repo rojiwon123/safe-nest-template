@@ -1,7 +1,7 @@
 import { Prisma } from "@PRISMA";
 
-import { ErrorCode } from "@APP/types/ErrorCode";
-import { InternalFailure } from "@APP/utils/error";
+import { ErrorCode } from "@APP/types/dto/ErrorCode";
+import { InternalFailure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
 export interface INormalService {

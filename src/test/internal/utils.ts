@@ -17,3 +17,9 @@ const addAuthorization = ({ token, type }: { type: string; token: string }) =>
 
 export const Token = (type: IToken.Type) => (token: string) =>
     addAuthorization({ token, type });
+
+declare const a: IConnection<{
+    Authorization: `${"bearer" | "basic"} ${string}`;
+}>;
+
+a.headers?.Authorization;

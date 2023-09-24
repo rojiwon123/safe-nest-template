@@ -1,53 +1,98 @@
-import { PlainFetcher } from "@nestia/fetcher/lib/PlainFetcher";
+import { IPropagation, Primitive } from "@nestia/fetcher";
+import typia from "typia";
 
-export namespace Github {
-    const AUTH_URL = "https://github.com/login/oauth";
+import { Failure } from "@APP/utils/failure";
+import { fetch, propagate } from "@APP/utils/fetch";
+import { Result } from "@APP/utils/result";
+
+export namespace GithubSDK {
+    const AUTH_URL = "https://github.com";
     const API_URL = "https://api.github.com";
+
+    export interface IOauth2Options {
+        /** The client ID you received from GitHub for your OAuth app. */
+        readonly client_id: string;
+        /** The client secret you received from GitHub for your OAuth app. */
+        readonly client_secret: string;
+        /** The URL in your application where users will be sent after authorization. See details below about redirect urls. */
+        readonly redirect_uri: string;
+        /**
+         * A space-delimited list of scopes.
+         * If not provided, scope defaults to an empty list for users that have not authorized any scopes for the application.
+         * For users who have authorized scopes for the application, the user won't be shown the OAuth authorization page with the list of scopes.
+         * Instead, this step of the flow will automatically complete with the set of scopes the user has authorized for the application.
+         *
+         *  For example, if a user has already performed the web flow twice and has authorized one token with user scope and another token with repo scope, a third web flow that does not provide a scope will receive a token with user and repo scope.
+         */
+        readonly scope: Scope[];
+        /**
+         * Whether or not unauthenticated users will be offered an option to sign up for GitHub during the OAuth flow.
+         * The default is true. Use false when a policy prohibits signups.
+         */
+        readonly allow_signup: boolean;
+        readonly state?: string;
+    }
 
     const options: IOauth2Options = {
         client_id: "",
         client_secret: "",
         redirect_uri: "",
-        scope: [],
+        scope: ["read:user"],
+        allow_signup: true,
     };
 
-    export const LoginUri = ((options: IOauth2Options): string => {
-        const {
-            client_id,
-            client_secret,
-            redirect_uri,
-            scope,
-            allow_signup = true,
-        } = options;
-        return (
-            AUTH_URL +
-            "/authorize" +
-            "?" +
-            new URLSearchParams([
-                ["client_id", client_id],
-                ["client_secret", client_secret],
-                ["redirect_uri", redirect_uri],
-                ["allow_signup", allow_signup + ""],
-                ["scope", scope.join(" ")],
-            ]).toString()
-        );
-    })(options);
+    /**
+     * Get Url for {@link https://docs.github.com/ko/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#1-request-a-users-github-identity Request a user's Github identity}
+     */
+    export const getUrlForAuthorize = (): string =>
+        AUTH_URL +
+        "/authorize" +
+        "?" +
+        new URLSearchParams([
+            ["client_id", options.client_id],
+            ["redirect_uri", options.redirect_uri],
+            ["allow_signup", options.allow_signup + ""],
+            ["scope", options.scope.join(" ")],
+        ]).toString();
 
-    export const getTokens = (
-        ({ client_id, client_secret }: IOauth2Options) =>
-        (code: string): Promise<ITokens> =>
-            PlainFetcher.fetch(
+    interface IGetAccessToken {
+        access_token: string;
+        scope: string;
+        token_type: "bearer";
+    }
+    export interface IErrorBody {
+        error: string;
+        error_description: string;
+        error_uri: string;
+    }
+    /**
+     * 성공시 access_token을, 실패시 실패 메시지를 반환합니다.
+     *
+     * {@link https://docs.github.com/ko/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github Users are redirected back to your site by GitHub}
+     */
+    export const getAccessToken = async (
+        code: string,
+    ): Promise<Result<string, Failure.Internal<"Fail To Get AccessToken">>> => {
+        try {
+            const response = await fetch<
+                {
+                    client_id: string;
+                    client_secret: string;
+                    code: string;
+                    redirect_uri?: string;
+                },
+                IGetAccessToken | IErrorBody
+            >(
                 {
                     host: AUTH_URL,
                     headers: {
-                        "User-Agent": "request",
                         Accept: "application/json",
-                        "Content-Type": "application/json",
                     },
                 },
                 {
                     method: "POST",
-                    path: "/access_token",
+                    path: "/login/oauth/access_token",
+                    status: 200,
                     request: {
                         type: "application/json",
                         encrypted: false,
@@ -56,29 +101,42 @@ export namespace Github {
                         type: "application/json",
                         encrypted: false,
                     },
-                    status: 200,
                 },
                 {
-                    client_id,
-                    client_secret,
+                    client_id: options.client_id,
+                    client_secret: options.client_secret,
                     code,
+                    redirect_uri: options.redirect_uri,
                 },
-            )
-    )(options);
+            );
+
+            return typia.is<IGetAccessToken>(response)
+                ? Result.Ok.map(response.access_token)
+                : Result.Error.map(
+                      new Failure.Internal("Fail To Get AccessToken"),
+                  );
+        } catch {
+            return Result.Error.map(
+                new Failure.Internal("Fail To Get AccessToken"),
+            );
+        }
+    };
 
     const get =
-        <T>(path: string) =>
-        (access_token: string) =>
-            PlainFetcher.fetch<T>(
+        <T extends object>(path: string) =>
+        async (
+            access_token: string,
+        ): Promise<
+            Result<Primitive<T>, Failure.Internal<"Fail To Get UserData">>
+        > => {
+            const response = (await propagate(
                 {
                     host: API_URL,
                     headers: {
-                        "User-Agent": "request",
                         Authorization: "Bearer " + access_token,
                         Accept: "application/vnd.github+json",
                         "X-Github-Api-Version": "2022-11-28",
                     },
-                    simulate: true,
                 },
                 {
                     method: "GET",
@@ -90,19 +148,18 @@ export namespace Github {
                     },
                     status: 200,
                 },
-            );
+            )) as
+                | IPropagation.IBranch<true, 200, T>
+                | IPropagation.IBranch<false, string, { message: string }>;
+            return response.success
+                ? Result.Ok.map(response.data)
+                : Result.Error.map(
+                      new Failure.Internal("Fail To Get UserData"),
+                  );
+        };
 
     export const getUser = get<IUser>("/user");
-
     export const getEmails = get<IEmail[]>("/user/emails");
-
-    export interface IOauth2Options {
-        readonly client_id: string;
-        readonly client_secret: string;
-        readonly redirect_uri: string;
-        readonly scope: Scope[];
-        readonly allow_signup?: boolean;
-    }
 
     export type Scope =
         | "repo"
@@ -215,20 +272,5 @@ export namespace Github {
         verified: boolean;
         visibility: "public" | "private" | null;
         [k: string]: unknown;
-    }
-
-    export interface ITokens {
-        access_token: string;
-        token_type: string;
-        scope: string;
-        expires_in?: string;
-        refresh_token?: string;
-        refresh_token_expires_in?: string;
-    }
-
-    export interface IErrorBody {
-        error: string;
-        error_description: string;
-        error_uri: string;
     }
 }

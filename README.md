@@ -14,7 +14,8 @@
   <ol>
     <li><a href="#소개">소개</a></li>
     <li><a href="#api-문서화">API 문서화 방식</a></li>
-    <li><a href="#깃-컨벤션">깃 컨벤션</a></li>
+    <li><a href="#erd">erd 문서</a></li>
+    <li><a href="#커밋-컨벤션">커밋 컨벤션</a></li>
   </ol>
 </details>
 
@@ -24,19 +25,16 @@ Nestia와 prisma를 미리 적용한 템플릿 프로젝트
 
 ### 특징
 
--   ts 타입 시스템을 최대한 활용
+-   ts 타입기반의 검증 방식 사용
 
-    -   typia를 통한 ts 타입시스템 기반의 타입 검증
-    -   nestia를 통한 interface 형식의 DTO 적용
-    -   strict 모드!!
+    -   nestia, typia 라이브러리를 활용
 
 -   문서 자동화
 
-    -   nestia기반의 swagger & sdk 자동 빌드
+    -   swagger api 문서, sdk 라이브러리 자동빌드
+    -   prisma model과 연동된 erd 자동빌드
 
--   e2e test 환경 세팅
-
-    -   nestia/e2e & node:test 기반의 e2e(API) test 환경 세팅완료
+-   e2e test 환경 세팅 적용
 
 -   안전한 merge
 
@@ -44,22 +42,23 @@ Nestia와 prisma를 미리 적용한 템플릿 프로젝트
 
 ## API 문서화
 
-nestia를 통해 swagger, sdk 자동빌드 기능을 지원한다.
-
-### Swagger
+-   swagger, sdk 빌드 명령어
 
 ```bash
-npm i @PROJECT/api
-npm run start
+npm run build:nestia
 ```
 
-### SDK
+-   swagger-ui 서버 실행
 
 ```bash
-npm i @PROJECT/api
+npm run swagger
 ```
 
-## 깃 컨벤션
+## ERD
+
+-   [View ERD](./ERD.md)
+
+## 커밋 컨벤션
 
 1. 유다시티 컨벤션을 기반으로 깃모지를 활용한 깃 컨벤션을 적용한다.
 

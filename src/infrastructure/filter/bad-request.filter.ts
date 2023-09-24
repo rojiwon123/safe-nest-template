@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 
-import { ErrorCode } from "@APP/types/ErrorCode";
+import { ErrorCode } from "@APP/types/dto/ErrorCode";
 
 @Catch(BadRequestException)
 export class BadRequestFilter implements ExceptionFilter {

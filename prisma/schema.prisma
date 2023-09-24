@@ -3,19 +3,47 @@ datasource database {
   url      = env("DATABASE_URL")
 }
 
-generator client {
+generator db {
   provider = "prisma-client-js"
   output   = "../db"
 }
 
+generator markdown {
+  provider = "prisma-markdown"
+  output   = "../ERD.md"
+  title    = "template"
+}
+
+enum OauthType {
+  kakao
+  github
+}
+
+/// 사용자 기본정보
+///             
+///             서비스에 가입시 생성되는 사용자 기본 정보
+/// 
+/// @namespace Users
+/// @author industriously
 model UserModel {
+  // @format uuid
   id         String    @id
+  /// 데이터 생성일자
+  /// @format date-time
   created_at DateTime  @database.Timestamptz
+  /// 최근 수정일자
+  /// @format date-time
   updated_at DateTime  @database.Timestamptz
-  is_deleted Boolean
+  /// 데이터 삭제일자
+  /// 
+  /// 데이터가 null이 아닌 경우, 삭제된 데이터를 의미한다.
+  /// @format date-time
   deleted_at DateTime? @database.Timestamptz
+  /// 서비스에 표시되는 사용자명
   name       String
-  email      String
+  /// 인증된 이메일 주소
+  /// @format email
+  email      String?
 
   @@map("users")
 }
