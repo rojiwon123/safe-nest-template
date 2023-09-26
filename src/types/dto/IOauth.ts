@@ -15,4 +15,8 @@ export namespace IOauth {
         /** 프로필 이미지 */
         image_url: (string & tags.Format<"url">) | null;
     }
+
+    export interface IGetLoginUrl {
+        oauth: Type;
+    }
 }

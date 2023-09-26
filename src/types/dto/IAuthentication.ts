@@ -1,4 +1,4 @@
-import { IOauth } from "@APP/types/dto/IOauth";
+import { IOauth } from "./IOauth";
 
 export namespace IAuthentication {
     export interface IGetLoginUrl {
