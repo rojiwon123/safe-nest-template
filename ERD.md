@@ -14,6 +14,7 @@ users {
     DateTime updated_at
     DateTime deleted_at "nullable"
     String name
+    String image_url "nullable"
     String email "nullable"
 }
 ```
@@ -34,4 +35,5 @@ users {
     >
     > 데이터가 null이 아닌 경우, 삭제된 데이터를 의미한다.
 -   `name`: 서비스에 표시되는 사용자명
+-   `image_url`: 사용자 프로필 이미지 url
 -   `email`: 인증된 이메일 주소

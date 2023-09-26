@@ -20,8 +20,8 @@ enum OauthType {
 }
 
 /// 사용자 기본정보
-///             
-///             서비스에 가입시 생성되는 사용자 기본 정보
+/// 
+/// 서비스에 가입시 생성되는 사용자 기본 정보
 /// 
 /// @namespace Users
 /// @author industriously
@@ -41,7 +41,12 @@ model UserModel {
   deleted_at DateTime? @database.Timestamptz
   /// 서비스에 표시되는 사용자명
   name       String
+  /// 사용자 프로필 이미지 url
+  /// 
+  /// @format url
+  image_url  String?
   /// 인증된 이메일 주소
+  /// 
   /// @format email
   email      String?
 

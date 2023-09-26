@@ -1,4 +1,4 @@
-interface ICommentTag {
+interface ITag {
     /** Both ERD and markdown content */
     namespace?: string;
     /** Only ERD */
@@ -10,18 +10,16 @@ interface ICommentTag {
     /** erd writer */
     author?: string;
 }
-export const Comment =
-    (tags: ICommentTag) =>
-    (comment: string): `/// ${string}`[] => {
-        const tagline: `/// ${string}`[] = ["/// "];
-        if (tags.namespace) tagline.push(`/// @namespace ${tags.namespace}`);
-        if (tags.erd) tagline.push(`/// @erd ${tags.erd}`);
-        if (tags.describe) tagline.push(`/// @describe ${tags.describe}`);
-        if (tags.hidden) tagline.push(`/// @hidden ${tags.hidden}`);
-        if (tags.author) tagline.push(`/// @author ${tags.author}`);
 
-        return comment
-            .split("\n")
-            .map<`/// ${string}`>((line) => `/// ${line}`)
-            .concat(tagline);
-    };
+export const Comment = (...comments: string[]): `/// ${string}`[] =>
+    comments.map<`/// ${string}`>((line) => `/// ${line}`);
+
+export const ErdTag = (tags: ITag): `/// ${string}`[] => {
+    const lines: `/// ${string}`[] = ["/// "];
+    if (tags.namespace) lines.push(`/// @namespace ${tags.namespace}`);
+    if (tags.erd) lines.push(`/// @erd ${tags.erd}`);
+    if (tags.describe) lines.push(`/// @describe ${tags.describe}`);
+    if (tags.hidden) lines.push(`/// @hidden ${tags.hidden}`);
+    if (tags.author) lines.push(`/// @author ${tags.author}`);
+    return lines;
+};
