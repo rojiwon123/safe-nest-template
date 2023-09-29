@@ -3,9 +3,9 @@ import * as nest from "@nestjs/common";
 import typia from "typia";
 
 import { Authentication } from "@APP/app/authentication";
-import { ErrorCode } from "@APP/types/dto/ErrorCode";
-import { IAuthentication } from "@APP/types/dto/IAuthentication";
-import { IUser } from "@APP/types/dto/IUser";
+import { ErrorCode } from "@APP/types/ErrorCode";
+import { IAuthentication } from "@APP/types/IAuthentication";
+import { IUser } from "@APP/types/IUser";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 

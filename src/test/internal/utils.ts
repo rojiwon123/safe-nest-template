@@ -2,7 +2,7 @@ import { IConnection, IPropagation } from "@nestia/fetcher";
 import fs from "fs";
 import stripAnsi from "strip-ansi";
 
-import { IToken } from "@APP/types/dto/IToken";
+import { IToken } from "@APP/types/IToken";
 
 export namespace Util {
     export namespace md {
@@ -12,28 +12,33 @@ export namespace Util {
                 console.log("#".repeat(level), title);
 
         let toggleOpend: boolean = false;
-        export const ToggleStart = (title: string) => {
+        export const toggleOpen = (summary: string) => {
             if (toggleOpend) {
-                console.log("\n</details>");
-                console.log("\n<details>");
-                console.log(`<summary>${title}</summary>\n`);
-                toggleOpend = true;
+                console.log("</details>");
+                console.log("<details>");
+                console.log(`<summary>${summary}</summary>`);
             } else {
-                console.log("\n<details>");
-                console.log(`<summary>${title}</summary>\n`);
-                toggleOpend = true;
+                console.log("<details>");
+                console.log(`<summary>${summary}</summary>`);
             }
+            toggleOpend = true;
         };
 
-        export const ToggleEnd = () => {
-            if (toggleOpend) console.log("\n</details>");
+        export const toggleClose = () => {
+            if (toggleOpend) console.log("</details>");
             toggleOpend = false;
         };
 
         export const bash = (text: string) => {
-            console.log(`\`\`\`bash\n${text}\n\`\`\``);
+            console.log("```bash\n" + text + "\n```");
         };
+
+        export const title = (filename: string) =>
+            toggleOpen(
+                `\x1b[33m${filename.split("/").at(-1)!.slice(0, -3)}\x1b[0m`,
+            );
     }
+
     export const log =
         (run: () => Promise<boolean>) =>
         async (dirname: string): Promise<boolean> => {
@@ -51,21 +56,39 @@ export namespace Util {
             } finally {
                 process.stdout.write = write;
                 const stream = fs.createWriteStream(dirname, { flags: "w" });
-                queue.forEach((str) => {
-                    if (!str.endsWith("\n")) str.concat("\n");
-                    stream.write(stripAnsi(str));
-                    if (str.includes("</details>")) return;
-                    else if (str.includes("<details>"))
-                        process.stdout.write("\n");
-                    else
-                        process.stdout.write(
-                            str
-                                .replace("<summary>", "")
-                                .replace("</summary>", "")
-                                .replace("```bash\n", "")
-                                .replace("\n```", ""),
-                        );
-                });
+                const md = queue
+                    .map((line) => line.trimStart())
+                    .map((line) =>
+                        line.includes("</summary>") || line.startsWith("#")
+                            ? line + "\n"
+                            : line.includes("</details>") ||
+                              line.includes("```bash") ||
+                              line.includes("Test Count")
+                            ? "\n" + line + "\n"
+                            : line.includes("❌")
+                            ? line + "\n"
+                            : line.startsWith("-")
+                            ? "  " + line
+                            : line,
+                    )
+                    .join("")
+                    .replaceAll("\n\n\n", "\n\n")
+                    .replaceAll(
+                        "</details>\n\n<details>",
+                        "</details>\n<details>",
+                    );
+
+                stream.write(stripAnsi(md));
+                process.stdout.write(
+                    md
+                        .replaceAll("<details>\n", "")
+                        .replaceAll("</details>\n", "")
+                        .replaceAll("<summary>", "")
+                        .replaceAll("</summary>", "")
+                        .replaceAll("```bash\n", "")
+                        .replaceAll("```\n", "")
+                        .replaceAll("\n\n\n", "\n\n"),
+                );
                 stream.end();
             }
         };

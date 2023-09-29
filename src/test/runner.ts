@@ -40,20 +40,16 @@ const test = async (connection: ITarget): Promise<boolean> => {
         toArray,
     );
 
-    Util.md.ToggleEnd();
+    Util.md.toggleClose();
 
     if (isEmpty(executions)) {
-        console.log();
         console.log("✅ \x1b[32mAll Tests Passed\x1b[0m");
-        console.log();
         console.log(`Test Count: \x1b[36m${report.executions.length}\x1b[0m`);
-        console.log();
         console.log(
             `Total Test Time: \x1b[33m${report.time.toLocaleString()}\x1b[0m ms`,
         );
         return true;
     } else {
-        console.log();
         console.log(`❌ \x1b[31m${executions.length} Tests have Failed\x1b[0m`);
 
         pipe(
@@ -66,19 +62,15 @@ const test = async (connection: ITarget): Promise<boolean> => {
             sort(([a], [b]) => a.localeCompare(b)),
 
             each(([location, exes]) => {
-                console.log(
-                    "\n\x1b[33mLocation:\x1b[0m " +
-                        location.split("/features")[1],
-                );
+                Util.md.title(location);
                 each(({ name, error }) => {
-                    console.log();
                     console.log("- " + name);
-                    console.log();
                     Util.md.bash(`${error.name}: ${error.message}`);
                 }, exes);
             }),
         );
 
+        Util.md.toggleClose();
         return false;
     }
 };

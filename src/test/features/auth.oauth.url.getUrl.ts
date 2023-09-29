@@ -4,7 +4,7 @@ import { ArrayUtil } from "@nestia/e2e";
 import { ITestFn } from "@APP/test/internal/type";
 import { Util } from "@APP/test/internal/utils";
 
-Util.md.ToggleStart("auth.oauth.url.getUrl");
+Util.md.title(__filename);
 
 export const test_success: ITestFn = async (connection) => {
     const results = await ArrayUtil.asyncMap(["github", "kakao"] as const)(

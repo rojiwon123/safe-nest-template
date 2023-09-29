@@ -1,7 +1,7 @@
 import typia from "typia";
 
-import { IOauth } from "@APP/types/dto/IOauth";
-import { IUser } from "@APP/types/dto/IUser";
+import { IOauth } from "@APP/types/IOauth";
+import { IUser } from "@APP/types/IUser";
 
 export interface User {
     readonly create: (input: IOauth.IProfile) => Promise<IUser>;

@@ -2,9 +2,9 @@ import { isNull, pipe, unless } from "@fxts/core";
 import typia from "typia";
 
 import { Configuration } from "@APP/infrastructure/config";
-import { ErrorCode } from "@APP/types/dto/ErrorCode";
-import { IAuthentication } from "@APP/types/dto/IAuthentication";
-import { IToken } from "@APP/types/dto/IToken";
+import { ErrorCode } from "@APP/types/ErrorCode";
+import { IAuthentication } from "@APP/types/IAuthentication";
+import { IToken } from "@APP/types/IToken";
 import { Crypto } from "@APP/utils/crypto";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";

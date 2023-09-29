@@ -1,7 +1,7 @@
 import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
 
-import { ErrorCode } from "@APP/types/dto/ErrorCode";
+import { ErrorCode } from "@APP/types/ErrorCode";
 
 import { Failure } from "./failure";
 import { Result } from "./result";

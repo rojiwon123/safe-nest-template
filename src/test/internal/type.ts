@@ -1,6 +1,6 @@
 import { IConnection } from "@nestia/fetcher";
 
-import { IToken } from "@APP/types/dto/IToken";
+import { IToken } from "@APP/types/IToken";
 
 export type ITarget = IConnection<{
     Authorization: `${IToken.Type} ${string}`;

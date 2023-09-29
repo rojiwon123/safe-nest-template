@@ -5,10 +5,10 @@ import typia from "typia";
 
 import { ITestFn } from "@APP/test/internal/type";
 import { Util } from "@APP/test/internal/utils";
-import { ErrorCode } from "@APP/types/dto/ErrorCode";
-import { IAuthentication } from "@APP/types/dto/IAuthentication";
+import { ErrorCode } from "@APP/types/ErrorCode";
+import { IAuthentication } from "@APP/types/IAuthentication";
 
-Util.md.ToggleStart("auth.oauth.sign-in.oauthSignIn");
+Util.md.title(__filename);
 
 const oauths = ["github", "kakao"] as const;
 const oauthSignIn = api.functional.auth.oauth.sign_in.oauthSignIn;
@@ -45,6 +45,7 @@ export const test_user_not_found: ITestFn = async (connection) => {
         oauth_type: "github",
         code: "",
     });
+    response;
     Util.assertResposne({
         status: HttpStatus.FORBIDDEN,
         success: false,

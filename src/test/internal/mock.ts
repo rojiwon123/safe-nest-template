@@ -2,7 +2,7 @@
 import typia from "typia";
 
 import { Oauth } from "@APP/externals/oauth";
-import { IOauth } from "@APP/types/dto/IOauth";
+import { IOauth } from "@APP/types/IOauth";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 

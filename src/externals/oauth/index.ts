@@ -1,4 +1,4 @@
-import { IOauth } from "@APP/types/dto/IOauth";
+import { IOauth } from "@APP/types/IOauth";
 import { Failure } from "@APP/utils/failure";
 import { assertModule } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";

@@ -6,8 +6,8 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 
-import { ErrorCode } from "@APP/types/dto/ErrorCode";
-import { IToken } from "@APP/types/dto/IToken";
+import { ErrorCode } from "@APP/types/ErrorCode";
+import { IToken } from "@APP/types/IToken";
 import { Failure } from "@APP/utils/failure";
 
 const extract_authorization_header = (ctx: ExecutionContext) =>
