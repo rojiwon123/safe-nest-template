@@ -5,8 +5,7 @@ export type IToken = IToken.IAccess | IToken.IRefresh;
 
 export namespace IToken {
     export type Type = "access" | "refresh";
-
-    export interface IBase<T extends Type = Type> {
+    interface IBase<T extends Type = Type> {
         /** 토큰 유형 */
         type: T;
         user_id: string;
@@ -14,9 +13,6 @@ export namespace IToken {
         expired_at: string & tags.Format<"date-time">;
     }
     export interface IAccess extends IBase<"access"> {}
-    export namespace IAccess {
-        export type ICreate = Pick<IAccess, "user_id">;
-    }
     export interface IRefresh extends IBase<"refresh"> {
         /**
          * 토큰 식별 코드
@@ -26,14 +22,5 @@ export namespace IToken {
         id: string;
         /** 토큰 생성 일자 */
         created_at: string & tags.Format<"date-time">;
-    }
-    export namespace IRefresh {
-        export type ICreate = Pick<IRefresh, "user_id" | "id">;
-    }
-
-    export interface IResponse<T extends Type = Type> {
-        token: string;
-        token_type: T;
-        expired_at: string & tags.Format<"date-time">;
     }
 }

@@ -1,4 +1,4 @@
-import { tags } from "typia";
+import typia from "typia";
 
 export namespace IOauth {
     export type Type = "kakao" | "github";
@@ -11,12 +11,8 @@ export namespace IOauth {
         /** 사용자명 */
         name: string;
         /** 인증된 이메일 */
-        email: (string & tags.Format<"email">) | null;
+        email: (string & typia.tags.Format<"email">) | null;
         /** 프로필 이미지 */
-        image_url: (string & tags.Format<"url">) | null;
-    }
-
-    export interface IGetLoginUrl {
-        oauth: Type;
+        image_url: (string & typia.tags.Format<"url">) | null;
     }
 }

@@ -3,6 +3,7 @@ import typia from "typia";
 
 import { Configuration } from "@APP/infrastructure/config";
 import { ErrorCode } from "@APP/types/dto/ErrorCode";
+import { IAuthentication } from "@APP/types/dto/IAuthentication";
 import { IToken } from "@APP/types/dto/IToken";
 import { Crypto } from "@APP/utils/crypto";
 import { DateMapper } from "@APP/utils/date";
@@ -18,8 +19,11 @@ export interface Token {
         Failure.External<"Crypto.decrypt"> | Failure.Internal<ErrorCode.Token>
     >;
     readonly generateAccess: (
-        input: IToken.IAccess.ICreate,
-    ) => Result<IToken.IResponse<"access">, Failure.External<"Crypto.encrypt">>;
+        input: Pick<IToken.IAccess, "user_id">,
+    ) => Result<
+        IAuthentication.ITokenResponse,
+        Failure.External<"Crypto.encrypt">
+    >;
 
     readonly verifyRefresh: (
         token: string,
@@ -28,9 +32,9 @@ export interface Token {
         Failure.External<"Crypto.decrypt"> | Failure.Internal<ErrorCode.Token>
     >;
     readonly generateRefresh: (
-        input: IToken.IRefresh.ICreate,
+        input: Pick<IToken.IRefresh, "user_id" | "id">,
     ) => Result<
-        IToken.IResponse<"refresh">,
+        IAuthentication.ITokenResponse,
         Failure.External<"Crypto.encrypt">
     >;
 }
@@ -44,20 +48,6 @@ export namespace Token {
 
     const durationOfAccess = hour * 8;
     const durationOfRefresh = day * 7;
-
-    type verify<T extends IToken> = (
-        token: string,
-    ) => Result<
-        T,
-        Failure.External<"Crypto.decrypt"> | Failure.Internal<ErrorCode.Token>
-    >;
-
-    type generate<T extends IToken, P> = (
-        input: P,
-    ) => Result<
-        IToken.IResponse<T["type"]>,
-        Failure.External<"Crypto.encrypt">
-    >;
 
     const verify =
         <T extends IToken>(options: {
@@ -108,29 +98,27 @@ export namespace Token {
 
                 unless(
                     Result.Error.is,
-                    Result.Ok.lift((token) => ({
-                        token,
-                        expired_at: payload.expired_at,
-                        token_type: payload.type as T["type"],
-                    })),
+                    Result.Ok.lift(
+                        (token): IAuthentication.ITokenResponse => ({
+                            token,
+                            expired_at: payload.expired_at,
+                        }),
+                    ),
                 ),
             );
         };
 
     /// Access
 
-    export const verifyAccess: verify<IToken.IAccess> = verify({
+    export const verifyAccess: Token["verifyAccess"] = verify({
         key: Configuration.ACCESS_TOKEN_KEY,
         parser: typia.json.createIsParse<IToken.IAccess>(),
     });
 
-    export const generateAccess: generate<
-        IToken.IAccess,
-        IToken.IAccess.ICreate
-    > = generate({
+    export const generateAccess: Token["generateAccess"] = generate({
         key: Configuration.ACCESS_TOKEN_KEY,
         stringify: typia.json.createStringify<IToken.IAccess>(),
-        inputor: (input: IToken.IAccess.ICreate) => ({
+        inputor: (input) => ({
             type: "access",
             user_id: input.user_id,
             expired_at: DateMapper.toISO(
@@ -141,18 +129,15 @@ export namespace Token {
 
     /// Refresh
 
-    export const verifyRefresh: verify<IToken.IRefresh> = verify({
+    export const verifyRefresh: Token["verifyRefresh"] = verify({
         key: Configuration.REFRESH_TOKEN_KEY,
         parser: typia.json.createIsParse<IToken.IRefresh>(),
     });
 
-    export const generateRefresh: generate<
-        IToken.IRefresh,
-        IToken.IRefresh.ICreate
-    > = generate({
+    export const generateRefresh: Token["generateRefresh"] = generate({
         key: Configuration.REFRESH_TOKEN_KEY,
         stringify: typia.json.createStringify<IToken.IRefresh>(),
-        inputor: (input: IToken.IRefresh.ICreate) => ({
+        inputor: (input) => ({
             type: "refresh",
             user_id: input.user_id,
             id: input.id,

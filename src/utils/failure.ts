@@ -55,7 +55,7 @@ export namespace Failure {
             };
         export const getStack = <T extends string>(external: External<T>) =>
             (external.error.stack ??
-                `${external.error.name} ${external.error.message}`) +
+                `${external.error.name}: ${external.error.message}`) +
             `\n in ${external.origin}`;
 
         export const getResult =
@@ -78,6 +78,18 @@ export namespace Failure {
                 this.log = stack;
                 this.stack = stack;
             }
+        }
+
+        static fromInternal(internal: Internal, status: HttpStatus) {
+            return new Http(internal.message, status);
+        }
+
+        static fromExternal(external: External<string>) {
+            return new Http(
+                external.error.message,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                External.getStack(external),
+            );
         }
     }
 }

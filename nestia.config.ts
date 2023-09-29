@@ -20,11 +20,6 @@ const NESTIA_CONFIG: nestia.INestiaConfig = {
             { url: "https://localhost:4000", description: "Local Server" },
         ],
         security: {
-            account: {
-                type: "apiKey",
-                name: "Authorization",
-                in: "header",
-            },
             access: {
                 type: "apiKey",
                 name: "Authorization",

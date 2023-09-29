@@ -7,6 +7,11 @@ export namespace ErrorCode {
      * 인증 헤더가 누락되거나 올바르지 않은 경우
      */
     export type Authorization = "UNAUTHORIZED_REQUEST";
+    /**
+     * 인증 실패
+     * oauth 인증이 실패하거나 하는 경우
+     */
+    export type Authentication = "AUTHENTICATION_FAIL";
 
     export type Token = Token.Expired | Token.Invalid;
     export namespace Token {

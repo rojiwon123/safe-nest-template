@@ -1,3 +1,4 @@
+import api from "@PROJECT/api";
 import {
     each,
     filter,
@@ -10,20 +11,16 @@ import {
     toArray,
 } from "@fxts/core";
 import { DynamicExecutor } from "@nestia/e2e";
-import { createWriteStream } from "fs";
-import path from "path";
-import stripAnsi from "strip-ansi";
 
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 
-import { ITarget } from "./internal/target";
+import { ITarget } from "./internal/type";
+import { Util } from "./internal/utils";
 
-const Logger = createWriteStream(path.join(__dirname, "./../../test_log.txt"), {
-    flags: "w",
-});
+const test = async (connection: ITarget): Promise<boolean> => {
+    Util.md.header()("Test Report");
 
-const test = async (connection: ITarget): Promise<0 | -1> => {
     const report = await DynamicExecutor.validate({
         prefix: "test",
         parameters: () => [connection],
@@ -43,10 +40,10 @@ const test = async (connection: ITarget): Promise<0 | -1> => {
         toArray,
     );
 
-    Logger.write("\n</details>\n");
-    console.log();
+    Util.md.ToggleEnd();
 
     if (isEmpty(executions)) {
+        console.log();
         console.log("✅ \x1b[32mAll Tests Passed\x1b[0m");
         console.log();
         console.log(`Test Count: \x1b[36m${report.executions.length}\x1b[0m`);
@@ -54,8 +51,9 @@ const test = async (connection: ITarget): Promise<0 | -1> => {
         console.log(
             `Total Test Time: \x1b[33m${report.time.toLocaleString()}\x1b[0m ms`,
         );
-        return 0;
+        return true;
     } else {
+        console.log();
         console.log(`❌ \x1b[31m${executions.length} Tests have Failed\x1b[0m`);
 
         pipe(
@@ -73,14 +71,15 @@ const test = async (connection: ITarget): Promise<0 | -1> => {
                         location.split("/features")[1],
                 );
                 each(({ name, error }) => {
-                    console.log("\n- \x1b[34mFunction:\x1b[0m " + name);
-                    console.error();
-                    console.error(error);
+                    console.log();
+                    console.log("- " + name);
+                    console.log();
+                    Util.md.bash(`${error.name}: ${error.message}`);
                 }, exes);
             }),
         );
 
-        return -1;
+        return false;
     }
 };
 
@@ -90,23 +89,17 @@ export const run = async () => {
         host: `http://localhost:${Configuration.PORT}`,
     };
 
-    const write = process.stdout.write.bind(process.stdout);
-    process.stdout.write = (str: string) => {
-        Logger.write(stripAnsi(str));
-        return write(str);
-    };
+    const response = await api.functional.health.get(connection);
 
-    console.log("# Test Report");
-    Logger.write("\n<details>\n<summary>detail test case</summary>\n\n");
-
-    const code = await test(connection).catch((err) => {
-        console.log(err);
-        return -1 as const;
-    });
-
-    Logger.end();
-
-    await Backend.end(app);
-
-    process.exit(code);
+    if (!response.success) {
+        await Backend.end(app);
+        console.log("Server can't active");
+        process.exit(-1);
+    } else {
+        const state = await Util.log(() => test(connection))(
+            __dirname + "/../../test_log.md",
+        );
+        await Backend.end(app);
+        process.exit(state ? 0 : -1);
+    }
 };

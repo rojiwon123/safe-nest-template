@@ -2,8 +2,8 @@ import { isNull, negate, pipe, unless } from "@fxts/core";
 
 import { Oauth } from "@APP/externals/oauth";
 import { ErrorCode } from "@APP/types/dto/ErrorCode";
+import { IAuthentication } from "@APP/types/dto/IAuthentication";
 import { IOauth } from "@APP/types/dto/IOauth";
-import { IToken } from "@APP/types/dto/IToken";
 import { Failure } from "@APP/utils/failure";
 import { assertModule } from "@APP/utils/fx";
 import { Random } from "@APP/utils/random";
@@ -13,78 +13,58 @@ import { Token } from "./token";
 import { User } from "./user";
 
 export interface Authentication {
-    readonly getLoginUrl: (oauth_type: IOauth.Type) => Promise<string>;
+    readonly getOauthLoginUrl: (
+        oauth_type: IOauth.Type,
+    ) => Promise<IAuthentication.IUrl>;
 
-    readonly signIn: (
-        input: Authentication.IOauthInput,
+    readonly oauthSignIn: (
+        input: IAuthentication.IOauthRequest,
     ) => Promise<
         Result<
-            Authentication.IAuthenticationOutput,
+            IAuthentication.ISignInResponse,
             | Failure.External<"Crypto.encrypt">
             | Failure.Internal<
-                  `Fail To Get ${string}` | ErrorCode.User.NotFound
+                  ErrorCode.Authentication | ErrorCode.User.NotFound
               >
         >
     >;
 
-    readonly signUp: (
-        input: Authentication.IOauthInput,
+    readonly oauthSignUp: (
+        input: IAuthentication.IOauthRequest,
     ) => Promise<
         Result<
-            Authentication.IAuthenticationOutput,
+            IAuthentication.ISignInResponse,
             | Failure.External<"Crypto.encrypt">
             | Failure.Internal<
-                  `Fail To Get ${string}` | ErrorCode.User.AlreadyExist
+                  ErrorCode.Authentication | ErrorCode.User.AlreadyExist
               >
         >
     >;
 
-    readonly refreshAccessToken: (
-        input: Authentication.IRefreshAccessTokenInput,
+    readonly refreshToken: (
+        input: IAuthentication.IRefreshRequest,
     ) => Promise<
         Result<
-            Authentication.IRefreshAccessTokenOutput,
+            IAuthentication.IRefreshResponse,
             | Failure.External<"Crypto.encrypt">
-            | Failure.Internal<ErrorCode.Token.Expired>
+            | Failure.Internal<ErrorCode.Token>
         >
     >;
 }
 
 export namespace Authentication {
-    export interface IOauthInput {
-        oauth_type: IOauth.Type;
-        code: string;
-    }
-
-    export interface IAuthenticationOutput {
-        access_token: IToken.IResponse<"access">;
-        refresh_token: IToken.IResponse<"refresh">;
-    }
-
-    export interface IRefreshAccessTokenInput {
-        refresh_token: string;
-    }
-    export interface IRefreshAccessTokenOutput {
-        /** 새로 발급된 액세스 토큰 */
-        access_token: IToken.IResponse<"access">;
-        /**
-         * 만약 리프레시 토큰의 만료일이 얼마 안남은 경우, 리프레스 토큰가 응답 데이터에 추가된다.
-         */
-        refresh_token?: IToken.IResponse<"refresh">;
-    }
-
-    export const getLoginUrl: Authentication["getLoginUrl"] = async (
+    export const getOauthLoginUrl: Authentication["getOauthLoginUrl"] = async (
         oauth_type,
-    ) => {
+    ): Promise<IAuthentication.IUrl> => {
         switch (oauth_type) {
             case "kakao":
-                return Oauth.Kakao.getUrlForLogin();
+                return { url: Oauth.Kakao.getUrlForLogin() };
             case "github":
-                return Oauth.Github.getUrlForLogin();
+                return { url: Oauth.Github.getUrlForLogin() };
         }
     };
 
-    const getProfile = (input: IOauthInput) => {
+    const getProfile = async (input: IAuthentication.IOauthRequest) => {
         switch (input.oauth_type) {
             case "kakao":
                 return Oauth.Kakao.getProfile(input.code);
@@ -102,17 +82,27 @@ export namespace Authentication {
     /**
      * 로그인 요청
      */
-    export const signIn: Authentication["signIn"] = (input) =>
+    export const oauthSignIn: Authentication["oauthSignIn"] = (input) =>
         pipe(
             input,
 
             getProfile,
 
+            unless(
+                Result.Ok.is,
+                Result.Error.lift(
+                    () =>
+                        new Failure.Internal<ErrorCode.Authentication>(
+                            "AUTHENTICATION_FAIL",
+                        ),
+                ),
+            ),
+
             unless(Result.Error.is, async (ok) => {
-                const {} = Result.Ok.flatten(ok);
+                const { oauth_sub } = Result.Ok.flatten(ok);
 
                 // oauth_sub 기반으로 사용자 인증 정보 검색
-                const user_id: string | null = {} as any;
+                const user_id: string | null = oauth_sub;
                 if (isNull(user_id))
                     return Result.Error.map(
                         new Failure.Internal<ErrorCode.User.NotFound>(
@@ -135,17 +125,27 @@ export namespace Authentication {
             }),
         );
 
-    export const signUp: Authentication["signUp"] = (input) =>
+    export const oauthSignUp: Authentication["oauthSignUp"] = (input) =>
         pipe(
             input,
 
             getProfile,
 
+            unless(
+                Result.Ok.is,
+                Result.Error.lift(
+                    () =>
+                        new Failure.Internal<ErrorCode.Authentication>(
+                            "AUTHENTICATION_FAIL",
+                        ),
+                ),
+            ),
+
             unless(Result.Error.is, async (ok) => {
-                const { profile } = Result.Ok.flatten(ok);
+                const { oauth_sub, profile } = Result.Ok.flatten(ok);
 
                 // oauth_sub 기반으로 사용자 인증 정보 검색
-                const user_id: string | null = {} as any;
+                const user_id: string | null = oauth_sub;
                 if (negate(isNull)(user_id))
                     return Result.Error.map(
                         new Failure.Internal<ErrorCode.User.AlreadyExist>(
@@ -171,9 +171,7 @@ export namespace Authentication {
             }),
         );
 
-    export const refreshAccessToken: Authentication["refreshAccessToken"] = (
-        input,
-    ) => {
+    export const refreshToken: Authentication["refreshToken"] = (input) => {
         input;
         throw Error("");
     };

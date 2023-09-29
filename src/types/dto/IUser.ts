@@ -1,7 +1,7 @@
 import { tags } from "typia";
 
 /**
- * 사용자 엔티티
+ * 사용자 애그리거트
  */
 export interface IUser {
     /** 사용자 id */
@@ -18,4 +18,9 @@ export interface IUser {
     updated_at: string & tags.Format<"date-time">;
     /** 사용자 데이터 삭제일자 */
     deleted_at: (string & tags.Format<"date-time">) | null;
+}
+
+export namespace IUser {
+    export interface IResponse
+        extends Partial<Pick<IUser, "id" | "email" | "name">> {}
 }

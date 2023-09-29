@@ -34,8 +34,7 @@
         "paths": {
             "@PRISMA": ["./db"],
             "@APP/*": ["./src/*"],
-            "@TEST/*": ["./src/test/*"],
-            "@PROJECT/api": ["./packages/api/lib"]
+            "@TEST/*": ["./src/test/*"]
         },
         "resolveJsonModule": true,
         // "resolvePackageJsonExports": false,

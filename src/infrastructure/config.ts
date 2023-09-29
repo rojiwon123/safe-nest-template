@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import dotenv from "dotenv";
 import typia from "typia";
 
@@ -18,7 +19,12 @@ const init = () => {
     }
 
     return process.env["NODE_ENV"] === "test"
-        ? ({ PORT: 4000, ...process.env } as unknown as IEnv)
+        ? ({
+              PORT: 4000,
+              ...process.env,
+              ACCESS_TOKEN_KEY: randomBytes(32),
+              REFRESH_TOKEN_KEY: randomBytes(32),
+          } as unknown as IEnv)
         : typia.assert<IEnv>({ PORT: 4000, ...process.env });
 };
 export const Configuration: IEnv = init();
