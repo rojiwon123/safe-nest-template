@@ -1,32 +1,35 @@
 import { createMixin } from "schemix";
 
+import { Comment } from "../util/comment";
+
+export const Creatable = createMixin((mixin) => {
+    mixin.dateTime("created_at", {
+        raw: "@database.Timestamptz",
+        comments: Comment.lines("created time"),
+    });
+});
 export const Updatable = createMixin((mixin) => {
-    mixin
-        .dateTime("created_at", {
-            raw: "@database.Timestamptz",
-            comments: ["/// 데이터 생성일자", "/// @format date-time"],
-        })
-        .dateTime("updated_at", {
-            raw: "@database.Timestamptz",
-            comments: ["/// 최근 수정일자", "/// @format date-time"],
-        });
+    mixin.dateTime("updated_at", {
+        raw: "@database.Timestamptz",
+        comments: Comment.lines("updated time"),
+    });
 });
 
 export const Deletable = createMixin((mixin) => {
-    mixin.mixin(Updatable).dateTime("deleted_at", {
+    mixin.dateTime("deleted_at", {
         optional: true,
         raw: "@database.Timestamptz",
-        comments: [
-            "/// 데이터 삭제일자",
-            "/// ",
-            "/// 데이터가 null이 아닌 경우, 삭제된 데이터를 의미한다.",
-            "/// @format date-time",
-        ],
+        comments: Comment.lines(
+            "deleted time",
+            "",
+            "if null, a row is deleted data",
+        ),
     });
 });
 
 export const Entity = createMixin((mixin) => {
     mixin
-        .string("id", { id: true, comments: ["// @format uuid"] })
+        .string("id", { id: true, comments: Comment.lines("entity identity") })
+        .mixin(Creatable)
         .mixin(Deletable);
 });

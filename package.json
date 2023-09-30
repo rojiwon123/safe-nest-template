@@ -25,7 +25,7 @@
         "swagger": "npm run build:swagger && node ./packages/api/swagger/index.mjs",
         "-------------------------------------------------": "",
         "db:sch": "ts-node prisma",
-        "db:update": "rimraf db && npm run db:sch && prisma generate && find ./db/runtime -type f -exec sed -i '' 's/\\r$//' {} \\;",
+        "db:update": "rimraf ./db && npm run db:sch && prisma generate && find ./db/runtime -type f -exec sed -i '' 's/\\r$//' {} \\;",
         "db:sync": "npm run db:update && prisma migrate dev",
         "db:init": "prisma migrate reset --force",
         "db:deploy": "prisma migrate deploy"

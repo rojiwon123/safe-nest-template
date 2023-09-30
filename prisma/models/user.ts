@@ -1,31 +1,41 @@
 import { createModel } from "schemix";
 
-import { Entity } from "../mixins";
-import { Comment, ErdTag } from "../util/comment";
+import { Entity, Updatable } from "../mixins";
+import { Comment } from "../util/comment";
+import { OauthAccount } from "./account";
+import { Article, Board } from "./board";
+import { File } from "./file";
 
 export const User = createModel("UserModel", (model) => {
     model
         .mixin(Entity)
-        .string("name", { comments: Comment("서비스에 표시되는 사용자명") })
-        .string("image_url", {
+        .mixin(Updatable)
+        .string("name", {
+            comments: Comment.lines("displayed username in service"),
+        })
+        .string("profile_image_id", {
             optional: true,
-            comments: Comment("사용자 프로필 이미지 url", "", "@format url"),
+            comments: Comment.lines("referenced in file entity"),
         })
         .string("email", {
             optional: true,
-            comments: Comment("인증된 이메일 주소", "", "@format email"),
+            comments: Comment.lines("verified email address"),
         })
+        .relation("oauth_accounts", OauthAccount, { list: true })
+        .relation("profile_image", File, {
+            optional: true,
+            fields: ["profile_image_id"],
+            references: ["id"],
+        })
+        .relation("articles", Article, { list: true })
+        .relation("boards", Board, { list: true })
         .map("users")
         .comment(
-            ...Comment(
-                "사용자 기본정보",
-                "",
-                "서비스에 가입시 생성되는 사용자 기본 정보",
-            ).concat(
-                ErdTag({
-                    namespace: "Users",
-                    author: "industriously",
-                }),
-            ),
+            ...Comment.lines("user root entity", ""),
+            Comment.namespace("All"),
+            Comment.namespace("User"),
+            Comment.namespace("Board"),
+            Comment.namespace("Article"),
+            Comment.author(),
         );
 });
