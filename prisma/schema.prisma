@@ -8,203 +8,136 @@ generator db {
   output   = "../db"
 }
 
-generator markdown {
+generator erd {
   provider = "prisma-markdown"
   output   = "../ERD.md"
-  title    = "template"
+  title    = "BBS"
 }
 
-enum OauthType {
-  kakao
-  github
-}
-
-enum FileReference {
-  external
-  s3
-}
-
-/// external file entity
-/// 
-/// a entity can update only deleted_at
-/// 
-/// @namespace All
-/// @namespace Article
-/// @namespace User
-/// @author industriously
-model FileModel {
-  /// entity identity
-  id               String               @id
-  /// created time
-  created_at       DateTime             @database.Timestamptz
-  /// deleted time
-  /// 
-  /// if null, a row is deleted data
-  deleted_at       DateTime?            @database.Timestamptz
-  /// filename
-  name             String
-  /// file extension
-  /// 
-  /// e.g) html, md, txt, jpg...
-  extension        String
-  /// url of real file
-  url              String
-  /// if true, a file is public
-  is_public        Boolean
-  /// reference of file
-  reference        FileReference
-  users            UserModel[]
-  article_contents AricleContentModel[]
-
-  @@map("files")
-}
-
-/// board root entity
-/// 
-/// @namespace All
-/// @namespace Board
-/// @namespace Article
-/// @author industriously
-model BoardModel {
-  /// entity identity
-  id             String         @id
-  /// created time
-  created_at     DateTime       @database.Timestamptz
-  /// deleted time
-  /// 
-  /// if null, a row is deleted data
-  deleted_at     DateTime?      @database.Timestamptz
-  /// title of board
-  title          String
-  /// if true, board is public
-  is_public      Boolean
-  /// referenced in user root entity
-  /// this admin is super administrator
-  /// super administrator is only one
-  super_admin_id String
-  articles       ArticleModel[]
-  super_admin    UserModel      @relation(fields: [super_admin_id], references: [id])
-
-  @@map("boards")
-}
-
-/// article root entity
-/// 
-/// a entity can update only deleted_at
-/// 
-/// @namespace All
-/// @namespace Board
-/// @namespace Article
-/// @author industriously
-model ArticleModel {
-  /// entity identity
-  id         String               @id
-  /// created time
-  created_at DateTime             @database.Timestamptz
-  /// deleted time
-  /// 
-  /// if null, a row is deleted data
-  deleted_at DateTime?            @database.Timestamptz
-  /// referenced in board entity
-  /// if null, a article is personal article
-  board_id   String?
-  /// referenced in user entity
-  /// author id referenced in user root entity
-  author_id  String
-  author     UserModel            @relation(fields: [author_id], references: [id])
-  contents   AricleContentModel[]
-  board      BoardModel?          @relation(fields: [board_id], references: [id])
-
-  @@map("articles")
-}
-
-/// article content entity
-/// 
-/// @namespace All
-/// @namespace Article
-/// @author industriously
-model AricleContentModel {
-  /// entity identity
-  id         String       @id
-  /// created time
-  created_at DateTime     @database.Timestamptz
-  /// deleted time
-  /// 
-  /// if null, a row is deleted data
-  deleted_at DateTime?    @database.Timestamptz
-  /// referenced in article root entity
-  article_id String
-  /// referenced in file entity
-  file_id    String
-  /// sequence of content
-  sequence   Int
-  article    ArticleModel @relation(fields: [article_id], references: [id])
-  file       FileModel    @relation(fields: [file_id], references: [id])
-
-  @@map("article_contents")
-}
-
-/// user root entity
+/// User Root Entity
 /// 
 /// @namespace All
 /// @namespace User
-/// @namespace Board
-/// @namespace Article
 /// @author industriously
 model UserModel {
-  /// entity identity
-  id               String              @id
-  /// created time
-  created_at       DateTime            @database.Timestamptz
-  /// deleted time
+  /// entity uuid identity
+  id                String                @id @database.Uuid
+  /// creation time of record
+  created_at        DateTime              @database.Timestamptz
+  /// revision time of record
+  updated_at        DateTime              @database.Timestamptz
+  /// deletion time of record
   /// 
-  /// if null, a row is deleted data
-  deleted_at       DateTime?           @database.Timestamptz
-  /// updated time
-  updated_at       DateTime            @database.Timestamptz
-  /// displayed username in service
-  name             String
-  /// referenced in file entity
-  profile_image_id String?
+  /// if null, a row is soft-deleted data
+  deleted_at        DateTime?             @database.Timestamptz
+  /// deplayed username in service
+  name              String
+  /// url path for profile image
+  profile_image_url String?
   /// verified email address
-  email            String?
-  oauth_accounts   OauthAccountModel[]
-  profile_image    FileModel?          @relation(fields: [profile_image_id], references: [id])
-  articles         ArticleModel[]
-  boards           BoardModel[]
+  email             String?
+  articles          ArticleModel[]
+  article_comments  ArticleCommentModel[]
 
   @@map("users")
 }
 
-/// oauth authentication entity
-/// 
-/// generated when a user signs up through an OAuth service.
+/// Article Root Entity
 /// 
 /// @namespace All
-/// @namespace User
+/// @namespace BBS
 /// @author industriously
-model OauthAccountModel {
-  /// entity identity
-  id         String    @id
-  /// created time
-  created_at DateTime  @database.Timestamptz
-  /// deleted time
+model ArticleModel {
+  /// entity uuid identity
+  id         String                 @id @database.Uuid
+  /// creation time of record
+  created_at DateTime               @database.Timestamptz
+  /// deletion time of record
   /// 
-  /// if null, a row is deleted data
-  deleted_at DateTime? @database.Timestamptz
-  /// user identity referenced in oauth service
-  sub        String
-  /// oauth service type
-  type       OauthType
-  /// username in oauth service
-  name       String?
-  /// verified email in oauth service
-  email      String?
-  /// profile image url in oauth service
-  image_url  String?
+  /// if null, a row is soft-deleted data
+  deleted_at DateTime?              @database.Timestamptz
   /// referenced in user root entity
-  user_id    String
-  user       UserModel @relation(fields: [user_id], references: [id])
+  author_id  String
+  author     UserModel              @relation(fields: [author_id], references: [id])
+  snapshots  ArticleSnapshotModel[]
+  comments   ArticleCommentModel[]
 
-  @@map("oauth_accounts")
+  @@map("articles")
+}
+
+/// Snapshot of Article
+/// 
+/// a `article_snapshot` contains all content of the article.
+/// if article update body or title, a new article_snapshot is created.
+/// 
+/// @namespace All
+/// @namespace BBS
+/// @author industriously
+model ArticleSnapshotModel {
+  /// entity uuid identity
+  id         String       @id @database.Uuid
+  /// creation time of record
+  created_at DateTime     @database.Timestamptz
+  /// referenced in article root entity
+  article_id String
+  /// title of article
+  title      String
+  /// content of article
+  /// content is only text with 20,000 limit
+  content    String
+  article    ArticleModel @relation(fields: [article_id], references: [id])
+
+  @@map("article_snapshots")
+}
+
+/// Article Comment Root Entity
+/// 
+/// @namespace All
+/// @namespace BBS
+/// @author industriously
+model ArticleCommentModel {
+  /// entity uuid identity
+  id         String                   @id @database.Uuid
+  /// creation time of record
+  created_at DateTime                 @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a row is soft-deleted data
+  deleted_at DateTime?                @database.Timestamptz
+  /// referenced in article root entity
+  article_id String
+  article    ArticleModel             @relation(fields: [article_id], references: [id])
+  /// referenced in article comment root entity
+  /// if not null, a comment is reply of parent comment
+  parent_id  String?
+  parent     ArticleCommentModel?     @relation(name: "HierarchicalReply", fields: [parent_id], references: [id])
+  /// referenced in user root entity
+  author_id  String
+  author     UserModel                @relation(fields: [author_id], references: [id])
+  snapshots  ArticleCommentSnapshot[]
+  children   ArticleCommentModel[]    @relation(name: "HierarchicalReply")
+
+  @@map("article_comments")
+}
+
+/// Snapshot of Article Comment
+/// 
+/// a `article_comment_snapshot` contains all content of the comment.
+/// if comment update body or title, a new article_comment_snapshot is created.
+/// @namespace All
+/// @namespace BBS
+/// @author industriously
+model ArticleCommentSnapshot {
+  /// entity uuid identity
+  id         String              @id @database.Uuid
+  /// creation time of record
+  created_at DateTime            @database.Timestamptz
+  /// referenced in article comment root entity
+  comment_id String
+  comment    ArticleCommentModel @relation(fields: [comment_id], references: [id])
+  /// content of comment
+  /// content is only text with 1,000 limit
+  content    String
+
+  @@map("article_comment_snapshots")
 }

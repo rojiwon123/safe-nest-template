@@ -13,10 +13,10 @@ createSchema({
             output: "../db",
         },
         {
-            name: "markdown",
+            name: "erd",
             provider: "prisma-markdown",
             output: "../ERD.md",
-            title: "template",
+            title: "BBS",
         },
     ],
 }).export(__dirname, "schema");
