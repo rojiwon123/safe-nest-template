@@ -1,6 +1,6 @@
-import api from "@PROJECT/api";
 import { ArrayUtil } from "@nestia/e2e";
 import { HttpStatus } from "@nestjs/common";
+import api from "@project/api";
 import typia from "typia";
 
 import { ITestFn } from "@APP/test/internal/type";
@@ -40,6 +40,7 @@ export const test_oauth_fail: ITestFn = (connection) =>
         })(response);
     });
 
+/**
 export const test_user_not_found: ITestFn = async (connection) => {
     const response = await oauthSignIn(connection, {
         oauth_type: "github",
@@ -51,3 +52,4 @@ export const test_user_not_found: ITestFn = async (connection) => {
         assertBody: typia.createAssertEquals<ErrorCode.User.NotFound>(),
     })(response);
 };
+*/

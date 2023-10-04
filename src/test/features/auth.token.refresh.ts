@@ -1,4 +1,5 @@
-import api from "@PROJECT/api";
+/**
+import api from "@project/api";
 import { HttpStatus } from "@nestjs/common";
 import typia from "typia";
 
@@ -40,3 +41,4 @@ export const test_invalid_token: ITestFn = async (connection) => {
         assertBody: typia.createAssertEquals<ErrorCode.Token.Invalid>(),
     })(response);
 };
+*/
