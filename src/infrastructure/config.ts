@@ -1,6 +1,7 @@
-import { randomBytes } from "crypto";
 import dotenv from "dotenv";
 import typia from "typia";
+
+import { Random } from "@APP/utils/random";
 
 const init = () => {
     switch (process.env["NODE_ENV"]) {
@@ -22,8 +23,8 @@ const init = () => {
         ? ({
               PORT: 4000,
               ...process.env,
-              ACCESS_TOKEN_KEY: randomBytes(32),
-              REFRESH_TOKEN_KEY: randomBytes(32),
+              ACCESS_TOKEN_KEY: Random.string(32),
+              REFRESH_TOKEN_KEY: Random.string(32),
           } as unknown as IEnv)
         : typia.assert<IEnv>({ PORT: 4000, ...process.env });
 };
