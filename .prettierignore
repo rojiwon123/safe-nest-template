@@ -2,9 +2,8 @@ node_modules
 dist
 build
 tbuild
+
+lib
+
 db
-packages
-
-src/api/functional
-
 !src/infrastructure/DB

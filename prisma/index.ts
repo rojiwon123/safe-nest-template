@@ -6,8 +6,17 @@ createSchema({
         provider: "postgresql",
         url: { env: "DATABASE_URL" },
     },
-    generator: {
-        provider: "prisma-client-js",
-        output: "../db",
-    },
+    generator: [
+        {
+            name: "db",
+            provider: "prisma-client-js",
+            output: "../db",
+        },
+        {
+            name: "erd",
+            provider: "prisma-markdown",
+            output: "../ERD.md",
+            title: "BBS",
+        },
+    ],
 }).export(__dirname, "schema");

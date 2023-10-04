@@ -3,19 +3,141 @@ datasource database {
   url      = env("DATABASE_URL")
 }
 
-generator client {
+generator db {
   provider = "prisma-client-js"
   output   = "../db"
 }
 
+generator erd {
+  provider = "prisma-markdown"
+  output   = "../ERD.md"
+  title    = "BBS"
+}
+
+/// User Root Entity
+/// 
+/// @namespace All
+/// @namespace User
+/// @author industriously
 model UserModel {
-  id         String    @id
-  created_at DateTime  @database.Timestamptz
-  updated_at DateTime  @database.Timestamptz
-  is_deleted Boolean
-  deleted_at DateTime? @database.Timestamptz
-  name       String
-  email      String
+  /// entity uuid identity
+  id                String                @id @database.Uuid
+  /// creation time of record
+  created_at        DateTime              @database.Timestamptz
+  /// revision time of record
+  updated_at        DateTime              @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a row is soft-deleted data
+  deleted_at        DateTime?             @database.Timestamptz
+  /// deplayed username in service
+  name              String
+  /// url path for profile image
+  profile_image_url String?
+  /// verified email address
+  email             String?
+  articles          ArticleModel[]
+  article_comments  ArticleCommentModel[]
 
   @@map("users")
+}
+
+/// Article Root Entity
+/// 
+/// @namespace All
+/// @namespace BBS
+/// @author industriously
+model ArticleModel {
+  /// entity uuid identity
+  id         String                 @id @database.Uuid
+  /// creation time of record
+  created_at DateTime               @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a row is soft-deleted data
+  deleted_at DateTime?              @database.Timestamptz
+  /// referenced in user root entity
+  author_id  String
+  author     UserModel              @relation(fields: [author_id], references: [id])
+  snapshots  ArticleSnapshotModel[]
+  comments   ArticleCommentModel[]
+
+  @@map("articles")
+}
+
+/// Snapshot of Article
+/// 
+/// a `article_snapshot` contains all content of the article.
+/// if article update body or title, a new article_snapshot is created.
+/// 
+/// @namespace All
+/// @namespace BBS
+/// @author industriously
+model ArticleSnapshotModel {
+  /// entity uuid identity
+  id         String       @id @database.Uuid
+  /// creation time of record
+  created_at DateTime     @database.Timestamptz
+  /// referenced in article root entity
+  article_id String
+  /// title of article
+  title      String
+  /// content of article
+  /// content is only text with 20,000 limit
+  content    String
+  article    ArticleModel @relation(fields: [article_id], references: [id])
+
+  @@map("article_snapshots")
+}
+
+/// Article Comment Root Entity
+/// 
+/// @namespace All
+/// @namespace BBS
+/// @author industriously
+model ArticleCommentModel {
+  /// entity uuid identity
+  id         String                   @id @database.Uuid
+  /// creation time of record
+  created_at DateTime                 @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a row is soft-deleted data
+  deleted_at DateTime?                @database.Timestamptz
+  /// referenced in article root entity
+  article_id String
+  article    ArticleModel             @relation(fields: [article_id], references: [id])
+  /// referenced in article comment root entity
+  /// if not null, a comment is reply of parent comment
+  parent_id  String?
+  parent     ArticleCommentModel?     @relation(name: "HierarchicalReply", fields: [parent_id], references: [id])
+  /// referenced in user root entity
+  author_id  String
+  author     UserModel                @relation(fields: [author_id], references: [id])
+  snapshots  ArticleCommentSnapshot[]
+  children   ArticleCommentModel[]    @relation(name: "HierarchicalReply")
+
+  @@map("article_comments")
+}
+
+/// Snapshot of Article Comment
+/// 
+/// a `article_comment_snapshot` contains all content of the comment.
+/// if comment update body or title, a new article_comment_snapshot is created.
+/// @namespace All
+/// @namespace BBS
+/// @author industriously
+model ArticleCommentSnapshot {
+  /// entity uuid identity
+  id         String              @id @database.Uuid
+  /// creation time of record
+  created_at DateTime            @database.Timestamptz
+  /// referenced in article comment root entity
+  comment_id String
+  comment    ArticleCommentModel @relation(fields: [comment_id], references: [id])
+  /// content of comment
+  /// content is only text with 1,000 limit
+  content    String
+
+  @@map("article_comment_snapshots")
 }

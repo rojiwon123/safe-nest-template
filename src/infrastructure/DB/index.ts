@@ -1,5 +1,7 @@
 import { PrismaClient } from "@PRISMA";
+
 import { Configuration } from "../config";
+import { Logger } from "../logger";
 
 export const prisma = new PrismaClient({
     datasources: { database: { url: Configuration.DATABASE_URL } },
@@ -7,10 +9,10 @@ export const prisma = new PrismaClient({
         switch (mode) {
             case "development":
                 return [
-                    { emit: "event", level: "query" },
                     { emit: "stdout", level: "error" },
-                    { emit: "stdout", level: "info" },
                     { emit: "stdout", level: "warn" },
+                    { emit: "stdout", level: "info" },
+                    { emit: "event", level: "query" },
                 ];
             case "test":
                 return [
@@ -28,10 +30,10 @@ export const prisma = new PrismaClient({
 
 if (Configuration.NODE_ENV === "development") {
     prisma.$on("query", (e) => {
-        console.log("\n\x1b[33m--- Query ---\x1b[0m");
-        console.log(e.query);
-        console.log("\n\x1b[34m--- Params ---\x1b[0m");
-        console.log(e.params);
-        console.log(`\nDuration: \x1b[32m${e.duration}ms\x1b[0m`);
+        Logger.warn("\n--- Query ---");
+        Logger.info(e.query);
+        Logger.debug("\n--- Params ---");
+        Logger.info(e.params);
+        Logger.info(`\nDuration: \x1b[32m${e.duration}ms\x1b[0m`);
     });
 }

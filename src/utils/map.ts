@@ -1,8 +1,3 @@
-import { isNull } from "@fxts/core";
-
-export const nullToUndefined = <T>(input: T | null): T | undefined =>
-    isNull(input) ? undefined : input;
-
 export const pick =
     <T extends object, K extends keyof T>(key: K) =>
     (obj: T) =>
@@ -12,3 +7,6 @@ export const toFixed =
     (digit = 0) =>
     (num: number): number =>
         +num.toFixed(digit);
+
+type IsString<T> = [T] extends [string] ? true : false;
+export type True = IsString<never>;

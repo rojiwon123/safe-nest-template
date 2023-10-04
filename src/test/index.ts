@@ -1,10 +1,5 @@
-import { mock } from "./mock";
+import { Mock } from "./internal/mock";
 import { run } from "./runner";
 
-(async () => {
-    await mock();
-    await run();
-})().catch((err) => {
-    console.log(err);
-    process.exit(-1);
-});
+Mock.run();
+void run();

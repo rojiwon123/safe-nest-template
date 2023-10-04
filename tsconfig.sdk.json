@@ -1,12 +1,10 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "removeComments": false,
+        "outDir": "./packages/api/lib",
         "sourceMap": false,
-        "target": "ES6",
-        "declaration": true,
-        "outDir": "./packages/sdk/lib",
-        "lib": ["DOM", "ES2015"]
+        "target": "ES2015",
+        "moduleDetection": "auto"
     },
-    "include": ["./src/api"]
+    "include": ["./sdk"]
 }

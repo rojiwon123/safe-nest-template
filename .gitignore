@@ -4,11 +4,17 @@ node_modules
 
 build
 tbuild
-packages/sdk/lib
+packages/api/lib
+packages/api/swagger/swagger.json
+packages/api/package-lock.json
+db
+migrated
+sdk
 
 # log
 
 test_log.md
+test_log.txt
 
 # env
 

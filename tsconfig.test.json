@@ -1,8 +1,7 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "./tbuild" /* Specify an output folder for all emitted files. */
+        "outDir": "./tbuild"
     },
-    "include": ["./src"],
-    "exclude": []
+    "include": ["./src"]
 }

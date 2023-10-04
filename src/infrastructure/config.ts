@@ -1,8 +1,10 @@
 import dotenv from "dotenv";
 import typia from "typia";
 
+import { Random } from "@APP/utils/random";
+
 const init = () => {
-    switch (process.env.NODE_ENV) {
+    switch (process.env["NODE_ENV"]) {
         case "development":
             dotenv.config({ path: ".env" });
             break;
@@ -17,15 +19,21 @@ const init = () => {
             );
     }
 
-    return process.env.NODE_ENV === "test"
-        ? ({ ...process.env, PORT: 4000 } as unknown as IEnv)
-        : typia.assert<IEnv>({ ...process.env, PORT: 4000 });
+    return process.env["NODE_ENV"] === "test"
+        ? ({
+              PORT: 4000,
+              ...process.env,
+              ACCESS_TOKEN_KEY: Random.string(32),
+              REFRESH_TOKEN_KEY: Random.string(32),
+          } as unknown as IEnv)
+        : typia.assert<IEnv>({ PORT: 4000, ...process.env });
 };
 export const Configuration: IEnv = init();
 
 interface IEnv {
     readonly NODE_ENV: "development" | "production" | "test";
-    readonly PORT: 4000;
+    /** @default 4000 */
+    readonly PORT: number;
     readonly DATABASE_URL: string;
 
     readonly KAKAO_CLIENT_ID: string;
@@ -33,4 +41,5 @@ interface IEnv {
     readonly KAKAO_REDIRECT_URI: string;
 
     readonly ACCESS_TOKEN_KEY: string;
+    readonly REFRESH_TOKEN_KEY: string;
 }
