@@ -1,4 +1,3 @@
-import api from "@PROJECT/api";
 import {
     each,
     filter,
@@ -11,6 +10,7 @@ import {
     toArray,
 } from "@fxts/core";
 import { DynamicExecutor } from "@nestia/e2e";
+import api from "@project/api";
 
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";

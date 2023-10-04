@@ -1,6 +1,6 @@
-import api from "@PROJECT/api";
 import { ArrayUtil } from "@nestia/e2e";
 import { HttpStatus } from "@nestjs/common";
+import api from "@project/api";
 import typia from "typia";
 
 import { ITestFn } from "@APP/test/internal/type";

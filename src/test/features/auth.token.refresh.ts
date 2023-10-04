@@ -1,5 +1,5 @@
 /**
-import api from "@PROJECT/api";
+import api from "@project/api";
 import { HttpStatus } from "@nestjs/common";
 import typia from "typia";
 
