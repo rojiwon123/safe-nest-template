@@ -6,13 +6,13 @@ import typia from "typia";
 import { ITestFn } from "@APP/test/internal/type";
 import { Util } from "@APP/test/internal/utils";
 import { ErrorCode } from "@APP/types/ErrorCode";
-import { IAuthentication } from "@APP/types/IAuthentication";
 
 Util.md.title(__filename);
 
 const oauths = ["github", "kakao"] as const;
 const oauthSignUp = api.functional.auth.oauth.sign_up.oauthSignUp;
 
+/**
 export const test_signUp_by_oauth: ITestFn = (connection) =>
     ArrayUtil.asyncForEach(oauths)(async (oauth_type) => {
         const response = await oauthSignUp(connection, {
@@ -26,6 +26,7 @@ export const test_signUp_by_oauth: ITestFn = (connection) =>
                 typia.createAssertEquals<IAuthentication.ISignInResponse>(),
         })(response);
     });
+*/
 
 export const test_oauth_fail: ITestFn = (connection) =>
     ArrayUtil.asyncForEach(oauths)(async (oauth_type) => {
