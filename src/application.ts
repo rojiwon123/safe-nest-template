@@ -15,7 +15,7 @@ export namespace Backend {
     export const start = async (
         options: NestApplicationOptions = {},
     ): Promise<INestApplication> => {
-        //   await prisma.$connect();
+        // await prisma.$connect();
 
         const app = await NestFactory.create(
             await DynamicModule.mount(`${__dirname}/controllers`, {

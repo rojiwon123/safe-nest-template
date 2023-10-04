@@ -19,8 +19,3 @@ export interface IUser {
     /** 사용자 데이터 삭제일자 */
     deleted_at: (string & tags.Format<"date-time">) | null;
 }
-
-export namespace IUser {
-    export interface IResponse
-        extends Partial<Pick<IUser, "id" | "email" | "name">> {}
-}

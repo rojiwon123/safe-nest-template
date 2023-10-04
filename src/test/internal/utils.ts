@@ -61,12 +61,12 @@ export namespace Util {
                     .map((line) =>
                         line.includes("</summary>") || line.startsWith("#")
                             ? line + "\n"
-                            : line.includes("</details>") ||
-                              line.includes("```bash") ||
-                              line.includes("Test Count")
+                            : line.includes("```bash") ||
+                              line.includes("Test Count") ||
+                              line.includes("❌")
                             ? "\n" + line + "\n"
-                            : line.includes("❌")
-                            ? line + "\n"
+                            : line.includes("</details>") || line.includes("✅")
+                            ? "\n" + line
                             : line.startsWith("-")
                             ? "  " + line
                             : line,
@@ -113,13 +113,7 @@ export namespace Util {
             assertBody: (body: unknown) => T;
             assertHeader?: (header: unknown) => H;
         }) =>
-        (
-            response: IPropagation.IBranch<
-                boolean,
-                IPropagation.Status,
-                unknown
-            >,
-        ) => {
+        (response: IPropagation.IBranch<boolean, unknown, any>) => {
             if (
                 options.success !== response.success ||
                 options.status !== response.status

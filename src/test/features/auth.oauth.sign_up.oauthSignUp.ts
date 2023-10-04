@@ -11,16 +11,16 @@ import { IAuthentication } from "@APP/types/IAuthentication";
 Util.md.title(__filename);
 
 const oauths = ["github", "kakao"] as const;
-const oauthSignIn = api.functional.auth.oauth.sign_in.oauthSignIn;
+const oauthSignUp = api.functional.auth.oauth.sign_up.oauthSignUp;
 
-export const test_signIn_by_oauth: ITestFn = (connection) =>
+export const test_signUp_by_oauth: ITestFn = (connection) =>
     ArrayUtil.asyncForEach(oauths)(async (oauth_type) => {
-        const response = await oauthSignIn(connection, {
+        const response = await oauthSignUp(connection, {
             oauth_type,
             code: "test",
         });
         Util.assertResposne({
-            status: HttpStatus.OK,
+            status: HttpStatus.CREATED,
             success: true,
             assertBody:
                 typia.createAssertEquals<IAuthentication.ISignInResponse>(),
@@ -29,7 +29,7 @@ export const test_signIn_by_oauth: ITestFn = (connection) =>
 
 export const test_oauth_fail: ITestFn = (connection) =>
     ArrayUtil.asyncForEach(oauths)(async (oauth_type) => {
-        const response = await oauthSignIn(connection, {
+        const response = await oauthSignUp(connection, {
             oauth_type,
             code: "test_fail",
         });
@@ -40,14 +40,14 @@ export const test_oauth_fail: ITestFn = (connection) =>
         })(response);
     });
 
-export const test_user_not_found: ITestFn = async (connection) => {
-    const response = await oauthSignIn(connection, {
+export const test_user_already_exist: ITestFn = async (connection) => {
+    const response = await oauthSignUp(connection, {
         oauth_type: "github",
         code: "",
     });
     Util.assertResposne({
         status: HttpStatus.FORBIDDEN,
         success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.User.NotFound>(),
+        assertBody: typia.createAssertEquals<ErrorCode.User.AlreadyExist>(),
     })(response);
 };

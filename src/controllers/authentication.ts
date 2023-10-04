@@ -1,26 +1,14 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
-import typia from "typia";
 
 import { Authentication } from "@APP/app/authentication";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IAuthentication } from "@APP/types/IAuthentication";
-import { IUser } from "@APP/types/IUser";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
 @nest.Controller("auth")
 export class AuthenticationController {
-    @core.TypedRoute.Get("")
-    async test(): Promise<IUser.IResponse> {
-        return typia.random<IUser.IResponse>();
-    }
-
-    @core.TypedRoute.Get("user")
-    test2(): Promise<IUser> {
-        throw Error("");
-    }
-
     /**
      * oauth 로그인 페이지 리다이렉트 주소
      *
@@ -137,7 +125,14 @@ export class AuthenticationController {
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
         const error = Result.Error.flatten(result);
         if (error instanceof Failure.Internal)
-            throw new Failure.Http(error.message, nest.HttpStatus.FORBIDDEN);
+            switch (error.message) {
+                case "EXPIRED_TOKEN":
+                case "INVALID_TOKEN":
+                    throw new Failure.Http(
+                        error.message,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+            }
         throw Failure.Http.fromExternal(error);
     }
 }
