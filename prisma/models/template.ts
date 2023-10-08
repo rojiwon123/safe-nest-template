@@ -61,6 +61,7 @@ export const ArticleSnapshot = createModel("ArticleSnapshotModel", (model) => {
                 "Snapshot of Article",
                 "",
                 "a `article_snapshot` contains all content of the article.",
+                "",
                 "if article update body or title, a new article_snapshot is created.",
                 "",
             ),
@@ -74,6 +75,7 @@ export const ArticleSnapshot = createModel("ArticleSnapshotModel", (model) => {
         Model.String("content", {
             comments: Comment.lines(
                 "content of article",
+                "",
                 "content is only text with 20,000 limit",
             ),
         }),
@@ -123,6 +125,7 @@ export const ArticleCommentSnapshot = createModel(
                     "Snapshot of Article Comment",
                     "",
                     "a `article_comment_snapshot` contains all content of the comment.",
+                    "",
                     "if comment update body or title, a new article_comment_snapshot is created.",
                 ),
                 Comment.namespace(),

@@ -90,6 +90,7 @@ Article Root Entity
 Snapshot of Article
 
 a `article_snapshot` contains all content of the article.
+
 if article update body or title, a new article_snapshot is created.
 
 **Properties**
@@ -99,6 +100,7 @@ if article update body or title, a new article_snapshot is created.
 -   `title`: title of article
 -   `content`
     > content of article
+    >
     > content is only text with 20,000 limit
 -   `created_at`: creation time of record
 
@@ -126,6 +128,7 @@ Article Comment Root Entity
 Snapshot of Article Comment
 
 a `article_comment_snapshot` contains all content of the comment.
+
 if comment update body or title, a new article_comment_snapshot is created.
 
 **Properties**
@@ -226,6 +229,7 @@ Article Root Entity
 Snapshot of Article
 
 a `article_snapshot` contains all content of the article.
+
 if article update body or title, a new article_snapshot is created.
 
 **Properties**
@@ -235,6 +239,7 @@ if article update body or title, a new article_snapshot is created.
 -   `title`: title of article
 -   `content`
     > content of article
+    >
     > content is only text with 20,000 limit
 -   `created_at`: creation time of record
 
@@ -262,6 +267,7 @@ Article Comment Root Entity
 Snapshot of Article Comment
 
 a `article_comment_snapshot` contains all content of the comment.
+
 if comment update body or title, a new article_comment_snapshot is created.
 
 **Properties**
