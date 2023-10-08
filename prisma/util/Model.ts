@@ -83,9 +83,9 @@ export namespace Model {
     export const UuidRelation =
         (field: string, options: StringFieldOptions = {}) =>
         (
-            relationedModel: PrismaModel,
+            relationalModel: PrismaModel,
             tableName: string,
-            relationedOptions: RelationalFieldOptions = {},
+            relationalOptions: RelationalFieldOptions = {},
         ) =>
         (model: PrismaModel) => {
             if (isUndefined(options.comments))
@@ -98,14 +98,14 @@ export namespace Model {
                     ...options.comments,
                 ];
 
-            if (options.optional) relationedOptions.optional = options.optional;
+            if (options.optional) relationalOptions.optional = options.optional;
             Uuid(`${field}_id`, {
                 ...options,
             })(model);
-            return Relation(field, relationedModel, {
+            return Relation(field, relationalModel, {
                 fields: [`${field}_id`],
                 references: ["id"],
-                ...relationedOptions,
+                ...relationalOptions,
             })(model);
         };
 }
