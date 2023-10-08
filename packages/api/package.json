@@ -15,7 +15,7 @@
     "bugs": {
         "url": "https://github.com/industriously/nestia-template/issues"
     },
-    "homepage": "https://github.com/industriously/nestia-template/packages/swagger#readme",
+    "homepage": "https://github.com/industriously/nestia-template/packages/api#readme",
     "dependencies": {
         "@nestia/fetcher": "^2.0.4",
         "express": "^4.18.2",
