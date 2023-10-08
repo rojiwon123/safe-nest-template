@@ -20,24 +20,24 @@ generator erd {
 /// @namespace User
 /// @author industriously
 model UserModel {
-  /// entity uuid identity
-  id                String                @id @database.Uuid
+  /// record uuid identity
+  id               String                @id @database.Uuid
+  /// deplayed username in service
+  name             String
+  /// url path for profile image
+  image_url        String?
+  /// verified email address
+  email            String?
   /// creation time of record
-  created_at        DateTime              @database.Timestamptz
+  created_at       DateTime              @database.Timestamptz
   /// revision time of record
-  updated_at        DateTime              @database.Timestamptz
+  updated_at       DateTime              @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a row is soft-deleted data
-  deleted_at        DateTime?             @database.Timestamptz
-  /// deplayed username in service
-  name              String
-  /// url path for profile image
-  profile_image_url String?
-  /// verified email address
-  email             String?
-  articles          ArticleModel[]
-  article_comments  ArticleCommentModel[]
+  deleted_at       DateTime?             @database.Timestamptz
+  articles         ArticleModel[]
+  article_comments ArticleCommentModel[]
 
   @@map("users")
 }
@@ -48,17 +48,17 @@ model UserModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleModel {
-  /// entity uuid identity
+  /// record uuid identity
   id         String                 @id @database.Uuid
+  /// referenced in `users`
+  author_id  String                 @database.Uuid
+  author     UserModel              @relation(fields: [author_id], references: [id])
   /// creation time of record
   created_at DateTime               @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a row is soft-deleted data
   deleted_at DateTime?              @database.Timestamptz
-  /// referenced in user root entity
-  author_id  String
-  author     UserModel              @relation(fields: [author_id], references: [id])
   snapshots  ArticleSnapshotModel[]
   comments   ArticleCommentModel[]
 
@@ -74,18 +74,18 @@ model ArticleModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleSnapshotModel {
-  /// entity uuid identity
+  /// record uuid identity
   id         String       @id @database.Uuid
-  /// creation time of record
-  created_at DateTime     @database.Timestamptz
-  /// referenced in article root entity
-  article_id String
+  /// referenced in `articles`
+  article_id String       @database.Uuid
+  article    ArticleModel @relation(fields: [article_id], references: [id])
   /// title of article
   title      String
   /// content of article
   /// content is only text with 20,000 limit
   content    String
-  article    ArticleModel @relation(fields: [article_id], references: [id])
+  /// creation time of record
+  created_at DateTime     @database.Timestamptz
 
   @@map("article_snapshots")
 }
@@ -96,24 +96,25 @@ model ArticleSnapshotModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleCommentModel {
-  /// entity uuid identity
+  /// record uuid identity
   id         String                   @id @database.Uuid
+  /// referenced in `articles`
+  article_id String                   @database.Uuid
+  article    ArticleModel             @relation(fields: [article_id], references: [id])
+  /// referenced in `article_comments`
+  /// 
+  /// if not null, a comment is reply of parent comment
+  parent_id  String?                  @database.Uuid
+  parent     ArticleCommentModel?     @relation(fields: [parent_id], references: [id], name: "HierarchicalReply")
+  /// referenced in `users`
+  author_id  String                   @database.Uuid
+  author     UserModel                @relation(fields: [author_id], references: [id])
   /// creation time of record
   created_at DateTime                 @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a row is soft-deleted data
   deleted_at DateTime?                @database.Timestamptz
-  /// referenced in article root entity
-  article_id String
-  article    ArticleModel             @relation(fields: [article_id], references: [id])
-  /// referenced in article comment root entity
-  /// if not null, a comment is reply of parent comment
-  parent_id  String?
-  parent     ArticleCommentModel?     @relation(name: "HierarchicalReply", fields: [parent_id], references: [id])
-  /// referenced in user root entity
-  author_id  String
-  author     UserModel                @relation(fields: [author_id], references: [id])
   snapshots  ArticleCommentSnapshot[]
   children   ArticleCommentModel[]    @relation(name: "HierarchicalReply")
 
@@ -128,16 +129,17 @@ model ArticleCommentModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleCommentSnapshot {
-  /// entity uuid identity
+  /// record uuid identity
   id         String              @id @database.Uuid
-  /// creation time of record
-  created_at DateTime            @database.Timestamptz
-  /// referenced in article comment root entity
-  comment_id String
+  /// referenced in `article_comments`
+  comment_id String              @database.Uuid
   comment    ArticleCommentModel @relation(fields: [comment_id], references: [id])
   /// content of comment
+  /// 
   /// content is only text with 1,000 limit
   content    String
+  /// creation time of record
+  created_at DateTime            @database.Timestamptz
 
   @@map("article_comment_snapshots")
 }

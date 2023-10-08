@@ -12,39 +12,39 @@
 erDiagram
 users {
     String id PK
+    String name
+    String image_url "nullable"
+    String email "nullable"
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
-    String name
-    String profile_image_url "nullable"
-    String email "nullable"
 }
 articles {
     String id PK
+    String author_id FK
     DateTime created_at
     DateTime deleted_at "nullable"
-    String author_id FK
 }
 article_snapshots {
     String id PK
-    DateTime created_at
     String article_id FK
     String title
     String content
+    DateTime created_at
 }
 article_comments {
     String id PK
-    DateTime created_at
-    DateTime deleted_at "nullable"
     String article_id FK
     String parent_id FK "nullable"
     String author_id FK
+    DateTime created_at
+    DateTime deleted_at "nullable"
 }
 article_comment_snapshots {
     String id PK
-    DateTime created_at
     String comment_id FK
     String content
+    DateTime created_at
 }
 articles }|--|| users : author
 article_snapshots }|--|| articles : article
@@ -60,16 +60,16 @@ User Root Entity
 
 **Properties**
 
--   `id`: entity uuid identity
+-   `id`: record uuid identity
+-   `name`: deplayed username in service
+-   `image_url`: url path for profile image
+-   `email`: verified email address
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
     > deletion time of record
     >
     > if null, a row is soft-deleted data
--   `name`: deplayed username in service
--   `profile_image_url`: url path for profile image
--   `email`: verified email address
 
 ### `articles`
 
@@ -77,13 +77,13 @@ Article Root Entity
 
 **Properties**
 
--   `id`: entity uuid identity
+-   `id`: record uuid identity
+-   `author_id`: referenced in `users`
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
     >
     > if null, a row is soft-deleted data
--   `author_id`: referenced in user root entity
 
 ### `article_snapshots`
 
@@ -94,13 +94,13 @@ if article update body or title, a new article_snapshot is created.
 
 **Properties**
 
--   `id`: entity uuid identity
--   `created_at`: creation time of record
--   `article_id`: referenced in article root entity
+-   `id`: record uuid identity
+-   `article_id`: referenced in `articles`
 -   `title`: title of article
 -   `content`
     > content of article
     > content is only text with 20,000 limit
+-   `created_at`: creation time of record
 
 ### `article_comments`
 
@@ -108,17 +108,18 @@ Article Comment Root Entity
 
 **Properties**
 
--   `id`: entity uuid identity
+-   `id`: record uuid identity
+-   `article_id`: referenced in `articles`
+-   `parent_id`
+    > referenced in `article_comments`
+    >
+    > if not null, a comment is reply of parent comment
+-   `author_id`: referenced in `users`
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
     >
     > if null, a row is soft-deleted data
--   `article_id`: referenced in article root entity
--   `parent_id`
-    > referenced in article comment root entity
-    > if not null, a comment is reply of parent comment
--   `author_id`: referenced in user root entity
 
 ### `article_comment_snapshots`
 
@@ -129,12 +130,13 @@ if comment update body or title, a new article_comment_snapshot is created.
 
 **Properties**
 
--   `id`: entity uuid identity
--   `created_at`: creation time of record
--   `comment_id`: referenced in article comment root entity
+-   `id`: record uuid identity
+-   `comment_id`: referenced in `article_comments`
 -   `content`
     > content of comment
+    >
     > content is only text with 1,000 limit
+-   `created_at`: creation time of record
 
 ## User
 
@@ -142,12 +144,12 @@ if comment update body or title, a new article_comment_snapshot is created.
 erDiagram
 users {
     String id PK
+    String name
+    String image_url "nullable"
+    String email "nullable"
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
-    String name
-    String profile_image_url "nullable"
-    String email "nullable"
 }
 ```
 
@@ -157,16 +159,16 @@ User Root Entity
 
 **Properties**
 
--   `id`: entity uuid identity
+-   `id`: record uuid identity
+-   `name`: deplayed username in service
+-   `image_url`: url path for profile image
+-   `email`: verified email address
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
     > deletion time of record
     >
     > if null, a row is soft-deleted data
--   `name`: deplayed username in service
--   `profile_image_url`: url path for profile image
--   `email`: verified email address
 
 ## BBS
 
@@ -174,30 +176,30 @@ User Root Entity
 erDiagram
 articles {
     String id PK
+    String author_id FK
     DateTime created_at
     DateTime deleted_at "nullable"
-    String author_id FK
 }
 article_snapshots {
     String id PK
-    DateTime created_at
     String article_id FK
     String title
     String content
+    DateTime created_at
 }
 article_comments {
     String id PK
-    DateTime created_at
-    DateTime deleted_at "nullable"
     String article_id FK
     String parent_id FK "nullable"
     String author_id FK
+    DateTime created_at
+    DateTime deleted_at "nullable"
 }
 article_comment_snapshots {
     String id PK
-    DateTime created_at
     String comment_id FK
     String content
+    DateTime created_at
 }
 article_snapshots }|--|| articles : article
 article_comments }|--|| articles : article
@@ -211,13 +213,13 @@ Article Root Entity
 
 **Properties**
 
--   `id`: entity uuid identity
+-   `id`: record uuid identity
+-   `author_id`: referenced in `users`
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
     >
     > if null, a row is soft-deleted data
--   `author_id`: referenced in user root entity
 
 ### `article_snapshots`
 
@@ -228,13 +230,13 @@ if article update body or title, a new article_snapshot is created.
 
 **Properties**
 
--   `id`: entity uuid identity
--   `created_at`: creation time of record
--   `article_id`: referenced in article root entity
+-   `id`: record uuid identity
+-   `article_id`: referenced in `articles`
 -   `title`: title of article
 -   `content`
     > content of article
     > content is only text with 20,000 limit
+-   `created_at`: creation time of record
 
 ### `article_comments`
 
@@ -242,17 +244,18 @@ Article Comment Root Entity
 
 **Properties**
 
--   `id`: entity uuid identity
+-   `id`: record uuid identity
+-   `article_id`: referenced in `articles`
+-   `parent_id`
+    > referenced in `article_comments`
+    >
+    > if not null, a comment is reply of parent comment
+-   `author_id`: referenced in `users`
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
     >
     > if null, a row is soft-deleted data
--   `article_id`: referenced in article root entity
--   `parent_id`
-    > referenced in article comment root entity
-    > if not null, a comment is reply of parent comment
--   `author_id`: referenced in user root entity
 
 ### `article_comment_snapshots`
 
@@ -263,9 +266,10 @@ if comment update body or title, a new article_comment_snapshot is created.
 
 **Properties**
 
--   `id`: entity uuid identity
--   `created_at`: creation time of record
--   `comment_id`: referenced in article comment root entity
+-   `id`: record uuid identity
+-   `comment_id`: referenced in `article_comments`
 -   `content`
     > content of comment
+    >
     > content is only text with 1,000 limit
+-   `created_at`: creation time of record
