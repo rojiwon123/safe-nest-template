@@ -34,7 +34,7 @@ model UserModel {
   updated_at       DateTime              @database.Timestamptz
   /// deletion time of record
   /// 
-  /// if null, a row is soft-deleted data
+  /// if null, a record is soft-deleted
   deleted_at       DateTime?             @database.Timestamptz
   articles         ArticleModel[]
   article_comments ArticleCommentModel[]
@@ -57,7 +57,7 @@ model ArticleModel {
   created_at DateTime               @database.Timestamptz
   /// deletion time of record
   /// 
-  /// if null, a row is soft-deleted data
+  /// if null, a record is soft-deleted
   deleted_at DateTime?              @database.Timestamptz
   snapshots  ArticleSnapshotModel[]
   comments   ArticleCommentModel[]
@@ -115,7 +115,7 @@ model ArticleCommentModel {
   created_at DateTime                 @database.Timestamptz
   /// deletion time of record
   /// 
-  /// if null, a row is soft-deleted data
+  /// if null, a record is soft-deleted
   deleted_at DateTime?                @database.Timestamptz
   snapshots  ArticleCommentSnapshot[]
   children   ArticleCommentModel[]    @relation(name: "HierarchicalReply")

@@ -76,7 +76,7 @@ export namespace Model {
         comments: Comment.lines(
             "deletion time of record",
             "",
-            "if null, a row is soft-deleted data",
+            "if null, a record is soft-deleted",
         ),
     });
 

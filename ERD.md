@@ -69,7 +69,7 @@ User Root Entity
 -   `deleted_at`
     > deletion time of record
     >
-    > if null, a row is soft-deleted data
+    > if null, a record is soft-deleted
 
 ### `articles`
 
@@ -83,7 +83,7 @@ Article Root Entity
 -   `deleted_at`
     > deletion time of record
     >
-    > if null, a row is soft-deleted data
+    > if null, a record is soft-deleted
 
 ### `article_snapshots`
 
@@ -121,7 +121,7 @@ Article Comment Root Entity
 -   `deleted_at`
     > deletion time of record
     >
-    > if null, a row is soft-deleted data
+    > if null, a record is soft-deleted
 
 ### `article_comment_snapshots`
 
@@ -171,7 +171,7 @@ User Root Entity
 -   `deleted_at`
     > deletion time of record
     >
-    > if null, a row is soft-deleted data
+    > if null, a record is soft-deleted
 
 ## BBS
 
@@ -222,7 +222,7 @@ Article Root Entity
 -   `deleted_at`
     > deletion time of record
     >
-    > if null, a row is soft-deleted data
+    > if null, a record is soft-deleted
 
 ### `article_snapshots`
 
@@ -260,7 +260,7 @@ Article Comment Root Entity
 -   `deleted_at`
     > deletion time of record
     >
-    > if null, a row is soft-deleted data
+    > if null, a record is soft-deleted
 
 ### `article_comment_snapshots`
 

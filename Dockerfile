@@ -6,7 +6,7 @@ COPY  package*.json tsconfig*.json ./
 RUN npm i -g npm && npm ci
 
 COPY . .
-RUN npm run db:update
+RUN npm run build:prisma
 RUN npm run build && npm prune --omit=dev
 
 FROM node:18-alpine AS runner
