@@ -1,7 +1,7 @@
 import { createModel } from "schemix";
 
 import { Comment } from "../util/comment";
-import { Model } from "../util/model";
+import { Model } from "../util/temp";
 
 export const User = createModel("UserModel", (model) => {
     Model.define(
@@ -13,23 +13,25 @@ export const User = createModel("UserModel", (model) => {
             Comment.namespace("User"),
             Comment.author(),
         ),
-        Model.Id(true),
-        Model.String("name", {
-            comments: Comment.lines("deplayed username in service"),
+        Model.addId(),
+        Model.add("string")("name", {
+            comments: Comment.lines("displayed username in service"),
         }),
-        Model.String("image_url", {
+        Model.add("string")("image_url", {
             optional: true,
             comments: Comment.lines("url path for profile image"),
         }),
-        Model.String("email", {
+        Model.add("string")("email", {
             optional: true,
             comments: Comment.lines("verified email address"),
         }),
-        Model.Creatable,
-        Model.Updatable,
-        Model.Deletable,
-        Model.Relation("articles", Article, { list: true }),
-        Model.Relation("article_comments", ArticleComment, { list: true }),
+        Model.setCreatable,
+        Model.setUpdatable,
+        Model.setDeletable,
+        Model.add("relation")("articles", Article, { list: true }),
+        Model.add("relation")("article_comments", ArticleComment, {
+            list: true,
+        }),
     );
 });
 
@@ -43,12 +45,12 @@ export const Article = createModel("ArticleModel", (model) => {
             Comment.namespace("BBS"),
             Comment.author(),
         ),
-        Model.Id(true),
-        Model.UuidRelation("author")(User, "users"),
-        Model.Creatable,
-        Model.Deletable,
-        Model.Relation("snapshots", ArticleSnapshot, { list: true }),
-        Model.Relation("comments", ArticleComment, { list: true }),
+        Model.addId(),
+        Model.addRelationalString("author")(User, "users"),
+        Model.setCreatable,
+        Model.setDeletable,
+        Model.add("relation")("snapshots", ArticleSnapshot, { list: true }),
+        Model.add("relation")("comments", ArticleComment, { list: true }),
     );
 });
 
@@ -69,17 +71,19 @@ export const ArticleSnapshot = createModel("ArticleSnapshotModel", (model) => {
             Comment.namespace("BBS"),
             Comment.author(),
         ),
-        Model.Id(true),
-        Model.UuidRelation("article")(Article, "articles"),
-        Model.String("title", { comments: Comment.lines("title of article") }),
-        Model.String("content", {
+        Model.addId(),
+        Model.addRelationalString("article")(Article, "articles"),
+        Model.add("string")("title", {
+            comments: Comment.lines("title of article"),
+        }),
+        Model.add("string")("body", {
             comments: Comment.lines(
                 "content of article",
                 "",
                 "content is only text with 20,000 limit",
             ),
         }),
-        Model.Creatable,
+        Model.setCreatable,
     );
 });
 
@@ -93,9 +97,9 @@ export const ArticleComment = createModel("ArticleCommentModel", (model) => {
             Comment.namespace("BBS"),
             Comment.author(),
         ),
-        Model.Id(true),
-        Model.UuidRelation("article")(Article, "articles"),
-        Model.UuidRelation("parent", {
+        Model.addId(),
+        Model.addRelationalString("article")(Article, "articles"),
+        Model.addRelationalString("parent", {
             optional: true,
             comments: Comment.lines(
                 "if not null, a comment is reply of parent comment",
@@ -103,11 +107,13 @@ export const ArticleComment = createModel("ArticleCommentModel", (model) => {
         })(ArticleComment, "article_comments", {
             name: "HierarchicalReply",
         }),
-        Model.UuidRelation("author")(User, "users"),
-        Model.Creatable,
-        Model.Deletable,
-        Model.Relation("snapshots", ArticleCommentSnapshot, { list: true }),
-        Model.Relation("children", ArticleComment, {
+        Model.addRelationalString("author")(User, "users"),
+        Model.setCreatable,
+        Model.setDeletable,
+        Model.add("relation")("snapshots", ArticleCommentSnapshot, {
+            list: true,
+        }),
+        Model.add("relation")("children", ArticleComment, {
             list: true,
             name: "HierarchicalReply",
         }),
@@ -132,16 +138,19 @@ export const ArticleCommentSnapshot = createModel(
                 Comment.namespace("BBS"),
                 Comment.author(),
             ),
-            Model.Id(true),
-            Model.UuidRelation("comment")(ArticleComment, "article_comments"),
-            Model.String("content", {
+            Model.addId(),
+            Model.addRelationalString("comment")(
+                ArticleComment,
+                "article_comments",
+            ),
+            Model.add("string")("content", {
                 comments: Comment.lines(
                     "content of comment",
                     "",
                     "content is only text with 1,000 limit",
                 ),
             }),
-            Model.Creatable,
+            Model.setCreatable,
         );
     },
 );

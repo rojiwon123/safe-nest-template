@@ -20,9 +20,11 @@ generator erd {
 /// @namespace User
 /// @author industriously
 model UserModel {
-  /// record uuid identity
+  /// record identity
+  /// 
+  /// `uuid` type
   id               String                @id @database.Uuid
-  /// deplayed username in service
+  /// displayed username in service
   name             String
   /// url path for profile image
   image_url        String?
@@ -48,7 +50,9 @@ model UserModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleModel {
-  /// record uuid identity
+  /// record identity
+  /// 
+  /// `uuid` type
   id         String                 @id @database.Uuid
   /// referenced in `users`
   author_id  String                 @database.Uuid
@@ -75,7 +79,9 @@ model ArticleModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleSnapshotModel {
-  /// record uuid identity
+  /// record identity
+  /// 
+  /// `uuid` type
   id         String       @id @database.Uuid
   /// referenced in `articles`
   article_id String       @database.Uuid
@@ -85,7 +91,7 @@ model ArticleSnapshotModel {
   /// content of article
   /// 
   /// content is only text with 20,000 limit
-  content    String
+  body       String
   /// creation time of record
   created_at DateTime     @database.Timestamptz
 
@@ -98,7 +104,9 @@ model ArticleSnapshotModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleCommentModel {
-  /// record uuid identity
+  /// record identity
+  /// 
+  /// `uuid` type
   id         String                   @id @database.Uuid
   /// referenced in `articles`
   article_id String                   @database.Uuid
@@ -132,7 +140,9 @@ model ArticleCommentModel {
 /// @namespace BBS
 /// @author industriously
 model ArticleCommentSnapshot {
-  /// record uuid identity
+  /// record identity
+  /// 
+  /// `uuid` type
   id         String              @id @database.Uuid
   /// referenced in `article_comments`
   comment_id String              @database.Uuid

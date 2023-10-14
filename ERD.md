@@ -29,7 +29,7 @@ article_snapshots {
     String id PK
     String article_id FK
     String title
-    String content
+    String body
     DateTime created_at
 }
 article_comments {
@@ -60,8 +60,11 @@ User Root Entity
 
 **Properties**
 
--   `id`: record uuid identity
--   `name`: deplayed username in service
+-   `id`
+    > record identity
+    >
+    > `uuid` type
+-   `name`: displayed username in service
 -   `image_url`: url path for profile image
 -   `email`: verified email address
 -   `created_at`: creation time of record
@@ -77,7 +80,10 @@ Article Root Entity
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `author_id`: referenced in `users`
 -   `created_at`: creation time of record
 -   `deleted_at`
@@ -95,10 +101,13 @@ if article update body or title, a new article_snapshot is created.
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `article_id`: referenced in `articles`
 -   `title`: title of article
--   `content`
+-   `body`
     > content of article
     >
     > content is only text with 20,000 limit
@@ -110,7 +119,10 @@ Article Comment Root Entity
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `article_id`: referenced in `articles`
 -   `parent_id`
     > referenced in `article_comments`
@@ -133,7 +145,10 @@ if comment update body or title, a new article_comment_snapshot is created.
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `comment_id`: referenced in `article_comments`
 -   `content`
     > content of comment
@@ -162,8 +177,11 @@ User Root Entity
 
 **Properties**
 
--   `id`: record uuid identity
--   `name`: deplayed username in service
+-   `id`
+    > record identity
+    >
+    > `uuid` type
+-   `name`: displayed username in service
 -   `image_url`: url path for profile image
 -   `email`: verified email address
 -   `created_at`: creation time of record
@@ -187,7 +205,7 @@ article_snapshots {
     String id PK
     String article_id FK
     String title
-    String content
+    String body
     DateTime created_at
 }
 article_comments {
@@ -216,7 +234,10 @@ Article Root Entity
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `author_id`: referenced in `users`
 -   `created_at`: creation time of record
 -   `deleted_at`
@@ -234,10 +255,13 @@ if article update body or title, a new article_snapshot is created.
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `article_id`: referenced in `articles`
 -   `title`: title of article
--   `content`
+-   `body`
     > content of article
     >
     > content is only text with 20,000 limit
@@ -249,7 +273,10 @@ Article Comment Root Entity
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `article_id`: referenced in `articles`
 -   `parent_id`
     > referenced in `article_comments`
@@ -272,7 +299,10 @@ if comment update body or title, a new article_comment_snapshot is created.
 
 **Properties**
 
--   `id`: record uuid identity
+-   `id`
+    > record identity
+    >
+    > `uuid` type
 -   `comment_id`: referenced in `article_comments`
 -   `content`
     > content of comment
