@@ -1,7 +1,7 @@
 import { createModel } from "schemix";
 
 import { Comment } from "../util/comment";
-import { Model } from "../util/temp";
+import { Model } from "../util/model";
 
 export const User = createModel("UserModel", (model) => {
     Model.define(
