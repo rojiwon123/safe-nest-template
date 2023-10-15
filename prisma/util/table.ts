@@ -66,15 +66,14 @@ export namespace Table {
         options: Omit<DateTimeFieldOptions, "raw"> = {},
     ) => addColumn("dateTime")(fieldName, { ...options, raw: Raw.Timestamptz });
 
-    export const addId = (
-        options: Omit<
-            StringFieldOptions & {
-                id: true;
-                uuid?: boolean;
-            },
-            "id" | "comments" | "raw"
-        > = {},
-    ) => {
+    type IdOptions = Omit<
+        StringFieldOptions & {
+            id: true;
+            uuid?: boolean;
+        },
+        "id" | "comments" | "raw"
+    >;
+    export const addId = (options: IdOptions = {}) => {
         const { uuid = true, ...fieldOptions } = options;
         return addColumn("string")("id", {
             id: true,
@@ -82,7 +81,6 @@ export namespace Table {
             ...(uuid ? { raw: Raw.Uuid } : {}),
             comments: Description.lines(
                 "record identity",
-                "",
                 `\`${uuid ? "uuid" : "string"}\` type`,
             ),
         });
@@ -100,7 +98,6 @@ export namespace Table {
         optional: true,
         comments: Description.lines(
             "deletion time of record",
-            "",
             "if null, a record is soft-deleted",
         ),
     });
@@ -125,15 +122,10 @@ export namespace Table {
             addColumn("string")(`${fieldName}_id`, {
                 ...fieldOptions,
                 ...(uuid ? { raw: Raw.Uuid } : {}),
-                comments: comments
-                    ? [
-                          ...Description.lines(
-                              `referenced in \`${tableName}\``,
-                              "",
-                          ),
-                          ...comments,
-                      ]
-                    : Description.lines(`referenced in \`${tableName}\``),
+                comments: Description.lines(
+                    `referenced in \`${tableName}\``,
+                    `\`${uuid ? "uuid" : "string"}\` type`,
+                ).concat(...(comments ?? [])),
             })(model);
             return addRelation({
                 tableName,

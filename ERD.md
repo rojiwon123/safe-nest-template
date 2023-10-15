@@ -84,7 +84,10 @@ Article Root Entity
     > record identity
     >
     > `uuid` type
--   `author_id`: referenced in `users`
+-   `author_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -105,7 +108,10 @@ if article update body or title, a new article_snapshot is created.
     > record identity
     >
     > `uuid` type
--   `article_id`: referenced in `articles`
+-   `article_id`
+    > referenced in `articles`
+    >
+    > `uuid` type
 -   `title`: title of article
 -   `body`
     > content of article
@@ -123,12 +129,20 @@ Article Comment Root Entity
     > record identity
     >
     > `uuid` type
--   `article_id`: referenced in `articles`
+-   `article_id`
+    > referenced in `articles`
+    >
+    > `uuid` type
 -   `parent_id`
     > referenced in `article_comments`
     >
+    > `uuid` type
+    >
     > if not null, a comment is reply of parent comment
--   `author_id`: referenced in `users`
+-   `author_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -149,7 +163,10 @@ if comment update body or title, a new article_comment_snapshot is created.
     > record identity
     >
     > `uuid` type
--   `comment_id`: referenced in `article_comments`
+-   `comment_id`
+    > referenced in `article_comments`
+    >
+    > `uuid` type
 -   `content`
     > content of comment
     >
@@ -238,7 +255,10 @@ Article Root Entity
     > record identity
     >
     > `uuid` type
--   `author_id`: referenced in `users`
+-   `author_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -259,7 +279,10 @@ if article update body or title, a new article_snapshot is created.
     > record identity
     >
     > `uuid` type
--   `article_id`: referenced in `articles`
+-   `article_id`
+    > referenced in `articles`
+    >
+    > `uuid` type
 -   `title`: title of article
 -   `body`
     > content of article
@@ -277,12 +300,20 @@ Article Comment Root Entity
     > record identity
     >
     > `uuid` type
--   `article_id`: referenced in `articles`
+-   `article_id`
+    > referenced in `articles`
+    >
+    > `uuid` type
 -   `parent_id`
     > referenced in `article_comments`
     >
+    > `uuid` type
+    >
     > if not null, a comment is reply of parent comment
--   `author_id`: referenced in `users`
+-   `author_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -303,7 +334,10 @@ if comment update body or title, a new article_comment_snapshot is created.
     > record identity
     >
     > `uuid` type
--   `comment_id`: referenced in `article_comments`
+-   `comment_id`
+    > referenced in `article_comments`
+    >
+    > `uuid` type
 -   `content`
     > content of comment
     >

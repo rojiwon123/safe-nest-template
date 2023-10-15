@@ -17,26 +17,36 @@ generator erd {
 /// User Root Entity
 /// 
 /// @namespace All
+/// 
 /// @namespace User
+/// 
 /// @author industriously
+/// 
 model users {
   /// record identity
   /// 
   /// `uuid` type
+  /// 
   id               String             @id @database.Uuid
   /// displayed username in service
+  /// 
   name             String
   /// url path for profile image
+  /// 
   image_url        String?
   /// verified email address
+  /// 
   email            String?
   /// creation time of record
+  /// 
   created_at       DateTime           @database.Timestamptz
   /// revision time of record
+  /// 
   updated_at       DateTime           @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
+  /// 
   deleted_at       DateTime?          @database.Timestamptz
   articles         articles[]
   article_comments article_comments[]
@@ -45,21 +55,30 @@ model users {
 /// Article Root Entity
 /// 
 /// @namespace All
+/// 
 /// @namespace BBS
+/// 
 /// @author industriously
+/// 
 model articles {
   /// record identity
   /// 
   /// `uuid` type
+  /// 
   id         String              @id @database.Uuid
   /// referenced in `users`
+  /// 
+  /// `uuid` type
+  /// 
   author_id  String              @database.Uuid
   author     users               @relation(fields: [author_id], references: [id])
   /// creation time of record
+  /// 
   created_at DateTime            @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
+  /// 
   deleted_at DateTime?           @database.Timestamptz
   snapshots  article_snapshots[]
   comments   article_comments[]
@@ -72,52 +91,77 @@ model articles {
 /// if article update body or title, a new article_snapshot is created.
 /// 
 /// @namespace All
+/// 
 /// @namespace BBS
+/// 
 /// @author industriously
+/// 
 model article_snapshots {
   /// record identity
   /// 
   /// `uuid` type
+  /// 
   id         String   @id @database.Uuid
   /// referenced in `articles`
+  /// 
+  /// `uuid` type
+  /// 
   article_id String   @database.Uuid
   article    articles @relation(fields: [article_id], references: [id])
   /// title of article
+  /// 
   title      String
   /// content of article
   /// 
   /// content is only text with 20,000 limit
+  /// 
   body       String
   /// creation time of record
+  /// 
   created_at DateTime @database.Timestamptz
 }
 
 /// Article Comment Root Entity
 /// 
 /// @namespace All
+/// 
 /// @namespace BBS
+/// 
 /// @author industriously
+/// 
 model article_comments {
   /// record identity
   /// 
   /// `uuid` type
+  /// 
   id         String                      @id @database.Uuid
   /// referenced in `articles`
+  /// 
+  /// `uuid` type
+  /// 
   article_id String                      @database.Uuid
   article    articles                    @relation(fields: [article_id], references: [id])
   /// referenced in `article_comments`
   /// 
+  /// `uuid` type
+  /// 
   /// if not null, a comment is reply of parent comment
+  /// 
   parent_id  String?                     @database.Uuid
   parent     article_comments?           @relation(fields: [parent_id], references: [id], name: "HierarchicalReply")
   /// referenced in `users`
+  /// 
+  /// `uuid` type
+  /// 
   author_id  String                      @database.Uuid
   author     users                       @relation(fields: [author_id], references: [id])
   /// creation time of record
+  /// 
   created_at DateTime                    @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
+  /// 
   deleted_at DateTime?                   @database.Timestamptz
   snapshots  article_comment_snapshots[]
   children   article_comments[]          @relation(name: "HierarchicalReply")
@@ -128,21 +172,31 @@ model article_comments {
 /// a `article_comment_snapshot` contains all content of the comment.
 /// 
 /// if comment update body or title, a new article_comment_snapshot is created.
+/// 
 /// @namespace All
+/// 
 /// @namespace BBS
+/// 
 /// @author industriously
+/// 
 model article_comment_snapshots {
   /// record identity
   /// 
   /// `uuid` type
+  /// 
   id         String           @id @database.Uuid
   /// referenced in `article_comments`
+  /// 
+  /// `uuid` type
+  /// 
   comment_id String           @database.Uuid
   comment    article_comments @relation(fields: [comment_id], references: [id])
   /// content of comment
   /// 
   /// content is only text with 1,000 limit
+  /// 
   content    String
   /// creation time of record
+  /// 
   created_at DateTime         @database.Timestamptz
 }

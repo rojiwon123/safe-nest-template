@@ -5,7 +5,6 @@ Table.create({
     tableName: "users",
     comments: Description.lines(
         "User Root Entity",
-        "",
         Description.namespace(),
         Description.namespace("User"),
         Description.author(),
@@ -37,7 +36,6 @@ Table.create({
     tableName: "articles",
     comments: Description.lines(
         "Article Root Entity",
-        "",
         Description.namespace(),
         Description.namespace("BBS"),
         Description.author(),
@@ -63,11 +61,8 @@ Table.create({
     tableName: "article_snapshots",
     comments: Description.lines(
         "Snapshot of Article",
-        "",
         "a `article_snapshot` contains all content of the article.",
-        "",
         "if article update body or title, a new article_snapshot is created.",
-        "",
         Description.namespace(),
         Description.namespace("BBS"),
         Description.author(),
@@ -81,7 +76,6 @@ Table.create({
     Table.addColumn("string")("body", {
         comments: Description.lines(
             "content of article",
-            "",
             "content is only text with 20,000 limit",
         ),
     }),
@@ -92,7 +86,6 @@ Table.create({
     tableName: "article_comments",
     comments: Description.lines(
         "Article Comment Root Entity",
-        "",
         Description.namespace(),
         Description.namespace("BBS"),
         Description.author(),
@@ -128,9 +121,7 @@ Table.create({
     tableName: "article_comment_snapshots",
     comments: Description.lines(
         "Snapshot of Article Comment",
-        "",
         "a `article_comment_snapshot` contains all content of the comment.",
-        "",
         "if comment update body or title, a new article_comment_snapshot is created.",
         Description.namespace(),
         Description.namespace("BBS"),
@@ -142,7 +133,6 @@ Table.create({
     Table.addColumn("string")("content", {
         comments: Description.lines(
             "content of comment",
-            "",
             "content is only text with 1,000 limit",
         ),
     }),
