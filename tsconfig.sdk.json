@@ -4,7 +4,8 @@
         "outDir": "./packages/api/lib",
         "sourceMap": false,
         "target": "ES2015",
-        "moduleDetection": "auto"
+        "moduleDetection": "auto",
+        "noUnusedLocals": false
     },
     "include": ["./sdk"]
 }
