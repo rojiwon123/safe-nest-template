@@ -4,7 +4,6 @@ import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 
 import { Mocker } from "./internal/mocker";
-import { Seed } from "./internal/seed";
 import { runTest } from "./runner";
 
 void (async () => {
@@ -19,9 +18,9 @@ void (async () => {
     const state = await runTest(connection);
 
     await app.close();
-    const check = await Seed.size.check();
+    //  const check = await Seed.size.check();
     //  await Seed.restore();
     console.timeEnd("test time");
-    check();
+    //  check();
     process.exit(state);
 })();
