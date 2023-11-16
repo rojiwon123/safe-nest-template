@@ -5,7 +5,8 @@ export namespace Description {
     export const lines = (...texts: string[]): Line[] =>
         texts.flatMap((text) => [line(text), line("")]);
 
-    export const namespace = (text?: Namspace) => `@namespace ${text ?? "All"}`;
+    export const namespace = (text: Namspace | "ALL" = "ALL") =>
+        `@namespace ${text}`;
     export const erd = (text: string) => `@erd ${text}`;
     export const describe = (text: string) => `@describe ${text}`;
     export const hidden = (text: string) => `@hidden ${text}`;

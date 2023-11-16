@@ -1,24 +1,87 @@
 # https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 
-name: Docker Image Push 🔖
+name: Release 🔖
 
 on:
     push:
-        tags: v*
-
-env:
-    ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-    AWS_REGION: ${{ secrets.AWS_REGION }}
+        branches: [release]
 
 permissions:
     id-token: write
-    contents: read
+    contents: write
+    packages: write
+
+env:
+    DATABASE_URL: postgresql://test:test@localhost:5432/test
 
 jobs:
-    build_and_push:
-        name: Docker Image Build & Push
+    test:
         runs-on: ubuntu-latest
+        if: startsWith(github.event.head_commit.message, '🔖')
+        services:
+            postgres:
+                image: postgres:14
+                env:
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd="pg_isready"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
 
+            - name: Setup NodeJS
+              uses: actions/setup-node@main
+              with:
+                  node-version: 18
+
+            - name: Install
+              run: npm ci && npm run build:prisma && npm run build:sdk
+
+            - name: Setup DB
+              run: npm run db:deploy
+
+            - name: Test 🧪
+              run: npm run test
+
+    update_swagger:
+        runs-on: ubuntu-latest
+        needs: test
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@main
+              with:
+                  node-version: 18
+
+            - name: Install & Build
+              run: npm ci && npm run build:prisma && npm run build:swagger
+
+            - name: Copy swagger.json to gh-pages
+              run: |
+                  git config --global user.email "github-actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git fetch origin gh-pages:gh-pages
+                  git add .
+                  git commit -m "temp commit"
+                  git switch gh-pages
+                  mv ./packages/api/swagger/swagger.json ./swagger.json
+                  git add ./swagger.json
+                  git commit -m "Update swagger.json"
+                  git push --set-upstream origin gh-pages
+
+    build_and_push_image:
+        runs-on: ubuntu-latest
+        needs: test
+        if: false
         steps:
             - name: Checkout 🛎️
               uses: actions/checkout@main
@@ -33,7 +96,7 @@ jobs:
               id: login-ecr
               uses: aws-actions/amazon-ecr-login@v1
 
-            - name: Read package.json version 🔖
+            - name: Read Release Version 🔖
               id: read-version
               run: |
                   echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_OUTPUT
@@ -46,3 +109,28 @@ jobs:
               run: |
                   docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    release_tag:
+        runs-on: ubuntu-latest
+        needs: test
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Read Release Version 🔖
+              id: read-version
+              run: echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_OUTPUT
+
+            - name: Generate Release Note
+              run: git log -1 --pretty=format:"%b" > release_note.md
+
+            - name: create tag
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  git config --global user.email "github-actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  version="v${{ steps.read-version.outputs.VERSION }}"
+                  git tag -a "$version" -m "$version"
+                  git push origin "$version"
+                  gh release create "$version" -t "$version" --target "${{ github.sha }}" -F release_note.md

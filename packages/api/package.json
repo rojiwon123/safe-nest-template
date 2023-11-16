@@ -4,7 +4,7 @@
     "description": "Type-Safe SDK & Swagger를 제공하는 API Helper",
     "main": "./lib/index.js",
     "scripts": {
-        "start": "node swagger/index.mjs"
+        "start": "node swagger/index.cjs"
     },
     "repository": {
         "type": "git",

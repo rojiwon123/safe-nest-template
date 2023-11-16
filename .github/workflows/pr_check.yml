@@ -2,12 +2,13 @@ name: Test ✅
 
 on:
     pull_request:
-        branches: [main, develop]
+        branches: [main, release]
 
 env:
     DATABASE_URL: postgresql://test:test@localhost:5432/test
 
 permissions:
+    contents: read
     pull-requests: write
 
 jobs:
@@ -45,7 +46,7 @@ jobs:
               run: npm run db:deploy
 
             - name: Test 🧪
-              run: npm run test
+              run: npm run test -- --report
 
             - name: Create or Update PR Comment 💬
               if: matrix.node-version == '18.x'

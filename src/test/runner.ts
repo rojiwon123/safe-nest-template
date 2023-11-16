@@ -1,97 +1,44 @@
-import {
-    each,
-    filter,
-    groupBy,
-    isEmpty,
-    isNull,
-    negate,
-    pipe,
-    sort,
-    toArray,
-} from "@fxts/core";
 import { DynamicExecutor } from "@nestia/e2e";
-import api from "@project/api";
+import { IConnection } from "@nestia/fetcher";
 
-import { Backend } from "@APP/application";
-import { Configuration } from "@APP/infrastructure/config";
+import { Report } from "./internal/report";
 
-import { ITarget } from "./internal/type";
-import { Util } from "./internal/utils";
-
-const test = async (connection: ITarget): Promise<boolean> => {
-    Util.md.header()("Test Report");
-
+export const runTest = async (connection: IConnection): Promise<0 | -1> => {
+    const only_option = process.argv.find((exe) => exe.startsWith("--only="));
     const report = await DynamicExecutor.validate({
-        prefix: "test",
+        prefix: "test_",
         parameters: () => [connection],
+        wrapper: async (_, closure) => {
+            try {
+                await closure(connection);
+            } catch (error) {
+                delete (error as Error).stack;
+                console.log(error);
+                throw error;
+            }
+        },
+        ...(only_option
+            ? { filter: (name) => name.includes(only_option.slice(7)) }
+            : {}),
     })(__dirname + "/features");
-
-    const executions = pipe(
-        report.executions,
-
-        filter(
-            (
-                execution,
-            ): execution is DynamicExecutor.IReport.IExecution & {
-                error: Error;
-            } => negate(isNull)(execution.error),
-        ),
-
-        toArray,
-    );
-
-    Util.md.toggleClose();
-
-    if (isEmpty(executions)) {
-        console.log("✅ \x1b[32mAll Tests Passed\x1b[0m");
-        console.log(`Test Count: \x1b[36m${report.executions.length}\x1b[0m`);
+    console.log();
+    const result = Report.analyze(report);
+    if (result.result === 0) {
         console.log(
-            `Total Test Time: \x1b[33m${report.time.toLocaleString()}\x1b[0m ms`,
+            "✅",
+            Report.color("Cyan")(result.count),
+            Report.color("Green")("Tests Passed"),
         );
-        return true;
+        console.log("Total Elapsed time", result.time, "ms");
     } else {
-        console.log(`❌ \x1b[31m${executions.length} Tests have Failed\x1b[0m`);
-
-        pipe(
-            executions,
-
-            groupBy((exe) => exe.location),
-
-            (input) => Object.entries(input),
-
-            sort(([a], [b]) => a.localeCompare(b)),
-
-            each(([location, exes]) => {
-                Util.md.title(location);
-                each(({ name, error }) => {
-                    console.log("- " + name);
-                    Util.md.bash(`${error.name}: ${error.message}`);
-                }, exes);
-            }),
+        console.log(
+            "❌",
+            Report.color("LightRed")(result.failed_count),
+            Report.color("Red")("in"),
+            Report.color("Cyan")(result.total_count),
+            Report.color("Red")("Tests Failed"),
         );
-
-        Util.md.toggleClose();
-        return false;
     }
-};
-
-export const run = async () => {
-    const app = await Backend.start({ logger: false });
-    const connection: ITarget = {
-        host: `http://localhost:${Configuration.PORT}`,
-    };
-
-    const response = await api.functional.health.get(connection);
-
-    if (!response.success) {
-        await Backend.end(app);
-        console.log("Server can't active");
-        process.exit(-1);
-    } else {
-        const state = await Util.log(() => test(connection))(
-            __dirname + "/../../test_log.md",
-        );
-        await Backend.end(app);
-        process.exit(state ? 0 : -1);
-    }
+    if (process.argv.includes("--report")) Report.log(result);
+    return result.result;
 };

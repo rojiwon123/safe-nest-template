@@ -1,6 +1,7 @@
 import { IPropagation, Primitive } from "@nestia/fetcher";
 import typia from "typia";
 
+import { ErrorCode } from "@APP/types/ErrorCode";
 import { Failure } from "@APP/utils/failure";
 import { fetch, propagate } from "@APP/utils/fetch";
 import { Result } from "@APP/utils/result";
@@ -72,7 +73,7 @@ export namespace GithubSDK {
      */
     export const getAccessToken = async (
         code: string,
-    ): Promise<Result<string, Failure.Internal<"Fail To Get AccessToken">>> => {
+    ): Promise<Result<string, Failure.Internal<ErrorCode.Authentication>>> => {
         try {
             const response = await fetch<
                 {
@@ -112,12 +113,10 @@ export namespace GithubSDK {
 
             return typia.is<IGetAccessToken>(response)
                 ? Result.Ok.map(response.access_token)
-                : Result.Error.map(
-                      new Failure.Internal("Fail To Get AccessToken"),
-                  );
+                : Result.Error.map(new Failure.Internal("AUTHENTICATION_FAIL"));
         } catch {
             return Result.Error.map(
-                new Failure.Internal("Fail To Get AccessToken"),
+                new Failure.Internal("AUTHENTICATION_FAIL"),
             );
         }
     };
@@ -127,7 +126,7 @@ export namespace GithubSDK {
         async (
             access_token: string,
         ): Promise<
-            Result<Primitive<T>, Failure.Internal<"Fail To Get UserData">>
+            Result<Primitive<T>, Failure.Internal<ErrorCode.Authentication>>
         > => {
             const response = (await propagate(
                 {
@@ -153,9 +152,7 @@ export namespace GithubSDK {
                 | IPropagation.IBranch<false, string, { message: string }>;
             return response.success
                 ? Result.Ok.map(response.data)
-                : Result.Error.map(
-                      new Failure.Internal("Fail To Get UserData"),
-                  );
+                : Result.Error.map(new Failure.Internal("AUTHENTICATION_FAIL"));
         };
 
     export const getUser = get<IUser>("/user");

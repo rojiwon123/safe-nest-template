@@ -17,11 +17,9 @@ export namespace Failure {
      */
     export class Internal<T extends string = string> extends Error {
         override readonly name: "InternalFailure";
-        override readonly stack: string;
         constructor(override readonly message: T) {
             super(message);
             this.name = "InternalFailure";
-            this.stack = super.stack ?? `InternalError: ${message}`;
         }
         /**
          * function for type narrowing
@@ -66,18 +64,13 @@ export namespace Failure {
 
     export class Http extends Error {
         override readonly name: "HttpFailure";
-        readonly log?: string;
         constructor(
             override readonly message: string,
             readonly status: HttpStatus,
-            stack?: string,
+            readonly log?: string,
         ) {
             super(message);
             this.name = "HttpFailure";
-            if (stack) {
-                this.log = stack;
-                this.stack = stack;
-            }
         }
 
         static fromInternal(internal: Internal, status: HttpStatus) {
