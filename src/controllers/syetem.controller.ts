@@ -8,7 +8,10 @@ export class SystemController {
      *
      * @summary Health check API
      * @tag system
+     * @return hello world
      */
     @core.TypedRoute.Get()
-    get(): void {}
+    async check(): Promise<"hello world"> {
+        return "hello world";
+    }
 }

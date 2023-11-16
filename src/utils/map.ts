@@ -7,6 +7,3 @@ export const toFixed =
     (digit = 0) =>
     (num: number): number =>
         +num.toFixed(digit);
-
-type IsString<T> = [T] extends [string] ? true : false;
-export type True = IsString<never>;

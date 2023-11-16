@@ -1,8 +1,6 @@
 import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
 
-import { ErrorCode } from "@APP/types/ErrorCode";
-
 import { Failure } from "./failure";
 import { Result } from "./result";
 
@@ -23,23 +21,17 @@ export namespace Crypto {
     }: {
         plain: string;
         key: string;
-    }): Result<string, Failure.External<"Crypto.encrypt">> => {
-        try {
-            const iv = crypto.randomBytes(IV_LEN);
-            const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
-                authTagLength: TAG_LEN,
-            });
-            const encrypted =
-                cipher.update(plain, "utf8", "base64") + cipher.final("base64");
-            const tag = cipher.getAuthTag();
-            return Result.Ok.map(
-                `${iv.toString("base64")}.${tag.toString(
-                    "base64",
-                )}.${encrypted}`,
-            );
-        } catch (error) {
-            return Failure.External.getResult("Crypto.encrypt")(error);
-        }
+    }): Result.Ok<string> => {
+        const iv = crypto.randomBytes(IV_LEN);
+        const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
+            authTagLength: TAG_LEN,
+        });
+        const encrypted =
+            cipher.update(plain, "utf8", "base64") + cipher.final("base64");
+        const tag = cipher.getAuthTag();
+        return Result.Ok.map(
+            `${iv.toString("base64")}.${tag.toString("base64")}.${encrypted}`,
+        );
     };
 
     /**
@@ -59,26 +51,18 @@ export namespace Crypto {
     }: {
         token: string;
         key: string;
-    }): Result<
-        string,
-        | Failure.External<"Crypto.decrypt">
-        | Failure.Internal<ErrorCode.Token.Invalid>
-    > => {
-        try {
-            const [iv, tag, encrypted] = token.split(".");
-            if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Result.Error.map(new Failure.Internal("INVALID_TOKEN"));
+    }): Result<string, Failure.Internal<"INVALID">> => {
+        const [iv, tag, encrypted] = token.split(".");
+        if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
+            return Result.Error.map(new Failure.Internal("INVALID"));
 
-            const decipher = crypto
-                .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
-                .setAuthTag(Buffer.from(tag, "base64"));
+        const decipher = crypto
+            .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
+            .setAuthTag(Buffer.from(tag, "base64"));
 
-            return Result.Ok.map(
-                decipher.update(encrypted, "base64", "utf8") +
-                    decipher.final("utf8"),
-            );
-        } catch (error) {
-            return Failure.External.getResult("Crypto.decrypt")(error);
-        }
+        return Result.Ok.map(
+            decipher.update(encrypted, "base64", "utf8") +
+                decipher.final("utf8"),
+        );
     };
 }

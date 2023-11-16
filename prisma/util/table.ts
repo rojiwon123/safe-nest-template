@@ -7,7 +7,7 @@ import {
 } from "schemix/dist/typings/prisma-type-options";
 import { handleRelationalOptions } from "schemix/dist/util/options";
 
-import { Omit } from "@APP/types/Omit";
+import { Omit } from "@APP/types/global";
 
 import { Description } from "./description";
 import { Raw } from "./raw";
@@ -91,6 +91,7 @@ export namespace Table {
     });
 
     export const setUpdatable = addTimestamptz("updated_at", {
+        optional: true,
         comments: Description.lines("revision time of record"),
     });
 

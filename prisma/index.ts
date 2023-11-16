@@ -16,7 +16,7 @@ createSchema({
             name: "erd",
             provider: "prisma-markdown",
             output: "../ERD.md",
-            title: "BBS",
+            title: "Template",
         },
     ],
 }).export(__dirname, "schema");

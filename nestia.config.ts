@@ -14,7 +14,6 @@ const NESTIA_CONFIG: nestia.INestiaConfig = {
         info: {
             title: "Server Title",
             description: "Service Description",
-            version: "0.0.1",
         },
         servers: [
             { url: "https://localhost:4000", description: "Local Server" },

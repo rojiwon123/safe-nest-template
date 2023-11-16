@@ -1,4 +1,5 @@
 import { Configuration } from "@APP/infrastructure/config";
+import { ErrorCode } from "@APP/types/ErrorCode";
 import { Failure } from "@APP/utils/failure";
 import { fetch } from "@APP/utils/fetch";
 import { Result } from "@APP/utils/result";
@@ -136,9 +137,7 @@ export namespace KakaoSDK {
      */
     export const getToken = async (
         code: string,
-    ): Promise<
-        Result<ITokens, Failure.Internal<"Fail To Get AccessToken">>
-    > => {
+    ): Promise<Result<ITokens, Failure.Internal<ErrorCode.Authentication>>> => {
         try {
             return Result.Ok.map(
                 await fetch<string, ITokens>(
@@ -176,7 +175,7 @@ export namespace KakaoSDK {
             );
         } catch {
             return Result.Error.map(
-                new Failure.Internal("Fail To Get AccessToken"),
+                new Failure.Internal("AUTHENTICATION_FAIL"),
             );
         }
     };
@@ -200,7 +199,7 @@ export namespace KakaoSDK {
         async (
             access_token: string,
         ): Promise<
-            Result<IGetUserResponse, Failure.Internal<"Fail To Get UserData">>
+            Result<IGetUserResponse, Failure.Internal<ErrorCode.Authentication>>
         > => {
             try {
                 return Result.Ok.map(
@@ -234,7 +233,7 @@ export namespace KakaoSDK {
                 );
             } catch {
                 return Result.Error.map(
-                    new Failure.Internal("Fail To Get UserData"),
+                    new Failure.Internal("AUTHENTICATION_FAIL"),
                 );
             }
         };

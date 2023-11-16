@@ -1,24 +1,21 @@
+import { ErrorCode } from "@APP/types/ErrorCode";
 import { IOauth } from "@APP/types/IOauth";
 import { Failure } from "@APP/utils/failure";
-import { assertModule } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
 
 import { GithubSDK } from "./github";
 import { KakaoSDK } from "./kakao";
 
-export interface Oauth {
-    readonly getUrlForLogin: () => string;
-    readonly getProfile: (
+export namespace Oauth {
+    export type GetUrl = () => string;
+    export type GetProfile = (
         code: string,
     ) => Promise<
         Result<
             { oauth_sub: string; profile: IOauth.IProfile },
-            Failure.Internal<`Fail To Get ${string}`>
+            Failure.Internal<ErrorCode.Authentication>
         >
     >;
-}
-
-export namespace Oauth {
     export namespace Kakao {
         const get_profile = (
             user: KakaoSDK.IGetUserResponse,
@@ -27,10 +24,10 @@ export namespace Oauth {
             throw Error("Function is not Implemented.");
         };
 
-        export const getUrlForLogin: Oauth["getUrlForLogin"] = () =>
+        export const getUrlForLogin: GetUrl = () =>
             KakaoSDK.getUrlForAuthorize();
 
-        export const getProfile: Oauth["getProfile"] = async (code) => {
+        export const getProfile: GetProfile = async (code) => {
             const response = await KakaoSDK.getToken(code);
             if (Result.Error.is(response)) return response;
             const access_token = Result.Ok.flatten(response).access_token;
@@ -57,10 +54,10 @@ export namespace Oauth {
             throw Error("Function is not Implemented.");
         };
 
-        export const getUrlForLogin: Oauth["getUrlForLogin"] = () =>
+        export const getUrlForLogin: GetUrl = () =>
             GithubSDK.getUrlForAuthorize();
 
-        export const getProfile: Oauth["getProfile"] = async (code) => {
+        export const getProfile: GetProfile = async (code) => {
             const response = await GithubSDK.getAccessToken(code);
             if (Result.Error.is(response)) return response;
             const access_token = Result.Ok.flatten(response);
@@ -74,6 +71,3 @@ export namespace Oauth {
         };
     }
 }
-
-assertModule<Oauth>(Oauth.Kakao);
-assertModule<Oauth>(Oauth.Github);
