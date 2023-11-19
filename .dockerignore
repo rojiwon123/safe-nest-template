@@ -18,6 +18,8 @@ README.md
 .env
 .env.*
 
+.npmrc
+
 .DS_Store
 
 # config
