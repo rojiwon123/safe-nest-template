@@ -1,17 +1,19 @@
 import typia from "typia";
 
+import { Num } from "./global";
+
 export namespace IPage {
     export type SortType = "latest" | "oldest";
     export interface IPaginated<T> {
         data: T[];
-        page: number & typia.tags.Type<"uint64">;
-        size: number & typia.tags.Type<"uint64"> & typia.tags.Minimum<10>;
+        page: Num.UInt64;
+        size: Num.UInt64 & typia.tags.Minimum<10>;
     }
 
     export interface ISearch {
         /** @default 0 */
-        page?: number & typia.tags.Type<"uint64">;
+        page?: Num.UInt64;
         /** @default 10 */
-        size?: number & typia.tags.Type<"uint64"> & typia.tags.Minimum<10>;
+        size?: Num.UInt64 & typia.tags.Minimum<10>;
     }
 }

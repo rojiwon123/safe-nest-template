@@ -14,16 +14,10 @@ import { Raw } from "./raw";
 
 export namespace Table {
     export const create =
-        ({
-            tableName,
-            comments,
-        }: {
-            tableName: string;
-            comments: Description.Line[];
-        }) =>
+        (tableName: string, ...comments: string[]) =>
         (...fns: ((model: PrismaModel) => PrismaModel)[]) =>
             createModel(tableName, (model) => {
-                model.comment(...comments);
+                model.comment(...comments.map(Description.line));
                 fns.forEach((fn) => fn(model));
             });
 
