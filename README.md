@@ -5,7 +5,7 @@
 ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 
-[![Test Status](https://github.com/industriously/nestia-template/actions/workflows/pr_check.yml/badge.svg?branch=develop)](https://github.com/industriously/nestia-template/actions/workflows/pr_check.yml)
+[![Test Status](https://github.com/rojiwon123/nestia-template/actions/workflows/pr_check.yml/badge.svg?branch=develop)](https://github.com/rojiwon123/nestia-template/actions/workflows/pr_check.yml)
 
 </div>
 

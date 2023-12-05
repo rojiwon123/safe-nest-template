@@ -9,7 +9,7 @@ on:
 permissions:
     id-token: write
     contents: write
-    packages: write
+    packages: read
 
 env:
     DATABASE_URL: postgresql://test:test@localhost:5432/test
@@ -41,6 +41,11 @@ jobs:
               with:
                   node-version: 18
 
+            - name: Setup Registry
+              run: |
+                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+                  echo "@rojiwon123:registry=https://npm.pkg.github.com" >> ~/.npmrc
+
             - name: Install
               run: npm ci && npm run build:prisma && npm run build:sdk
 
@@ -61,6 +66,11 @@ jobs:
               uses: actions/setup-node@main
               with:
                   node-version: 18
+
+            - name: Setup Registry
+              run: |
+                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+                  echo "@rojiwon123:registry=https://npm.pkg.github.com" >> ~/.npmrc
 
             - name: Install & Build
               run: npm ci && npm run build:prisma && npm run build:swagger
@@ -107,7 +117,7 @@ jobs:
                   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
                   IMAGE_TAG: ${{ steps.read-version.outputs.VERSION }}
               run: |
-                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+                  docker build --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     release_tag:
