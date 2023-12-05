@@ -1,12 +1,13 @@
-import { createSchema } from "schemix";
+import type psg from "@rojiwon123/prisma-schema-generator";
 
-createSchema({
-    basePath: __dirname,
+const config: psg.IConfiguration = {
+    input: "prisma/example.ts",
+    output: "prisma/schema.prisma",
     datasource: {
         provider: "postgresql",
         url: { env: "DATABASE_URL" },
     },
-    generator: [
+    generators: [
         {
             name: "db",
             provider: "prisma-client-js",
@@ -19,4 +20,6 @@ createSchema({
             title: "Template",
         },
     ],
-}).export(__dirname, "schema");
+};
+
+export default config;

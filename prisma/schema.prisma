@@ -14,68 +14,57 @@ generator erd {
   title    = "Template"
 }
 
-enum OauthType {
-  github
-  kakao
-}
-
-/// Root Entity of User
-/// 
-/// @namespace ALL
-/// 
-/// @author industriously
-/// 
+///  Root Entity of User
+///
+///  @namespace All
+///
+///  @namespace User
+///
+///  @author rojiwon
+///
 model users {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
+  ///  `uuid` string
+  ///
   id         String     @id @database.Uuid
-  /// displayed name of user
-  /// 
-  name       String
-  /// url of user profile image
-  /// 
-  image_url  String?
-  /// creation time of record
-  /// 
+  ///  displayed name of user
+  ///
+  name       String    
+  ///  url of user profile image
+  ///
+  image_url  String?   
+  ///  creation time of record
+  ///
   created_at DateTime   @database.Timestamptz
-  /// revision time of record
-  /// 
+  ///  revision time of record
+  ///
   updated_at DateTime?  @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
+  ///  deletion time of record
+  ///
   deleted_at DateTime?  @database.Timestamptz
   articles   articles[]
 }
 
-/// Root Entity of Article
-/// 
-/// @namespace ALL
-/// 
-/// @author industriously
-/// 
+///  Root Entity of Article
+///
+///  @namespace All
+///
+///  @author rojiwon
+///
 model articles {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
+  ///  `uuid` string
+  ///
   id         String    @id @database.Uuid
-  /// referenced in `users`
-  /// 
-  /// `uuid` type
-  /// 
+  ///  referenced in `users`
+  ///
+  ///  `uuid` string
+  ///
   author_id  String    @database.Uuid
   author     users     @relation(fields: [author_id], references: [id])
-  body       String
-  /// creation time of record
-  /// 
+  body       String   
+  ///  creation time of record
+  ///
   created_at DateTime  @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
+  ///  deletion time of record
+  ///
   deleted_at DateTime? @database.Timestamptz
 }

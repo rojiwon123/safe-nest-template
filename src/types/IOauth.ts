@@ -1,4 +1,4 @@
-import typia from "typia";
+import { Regex } from "./global";
 
 export namespace IOauth {
     export type Type = "kakao" | "github";
@@ -11,8 +11,8 @@ export namespace IOauth {
         /** 사용자명 */
         name: string;
         /** 인증된 이메일 */
-        email: (string & typia.tags.Format<"email">) | null;
+        email: Regex.Email | null;
         /** 프로필 이미지 */
-        image_url: (string & typia.tags.Format<"url">) | null;
+        image_url: Regex.URL | null;
     }
 }
