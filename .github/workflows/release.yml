@@ -66,13 +66,13 @@ jobs:
             - name: Generate Release Tag 🔧
               id: tag-name
               run: |
-                  echo VERSION=$(node -p "require('./package.json').version")
+                  VERSION=$(node -p "require('./package.json').version")
                   if [ -n "${{ github.event.inputs.suffix }}" ]; then
-                    echo TAG_NAME=v$VERSION-${{ github.event.inputs.suffix }}
+                    tag_name="v${VERSION}-${{ github.event.inputs.suffix }}"
                   else
-                    echo TAG_NAME=v$VERSION
+                    tag_name="v${VERSION}"
                   fi
-                    echo TAG_NAME >> $GITHUB_OUTPUT
+                    echo "TAG_NAME=$tag_name" >> $GITHUB_OUTPUT
               shell: bash
 
             - name: Create Release Note 🔖
