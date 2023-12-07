@@ -5,7 +5,7 @@
 ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 
-[![Test Status](https://github.com/rojiwon123/nestia-template/actions/workflows/pr_check.yml/badge.svg?branch=develop)](https://github.com/rojiwon123/nestia-template/actions/workflows/pr_check.yml)
+[![Test Status](https://github.com/rojiwon123/nestia-template/actions/workflows/release.yml/badge.svg)](https://github.com/rojiwon123/nestia-template/actions/workflows/release.yml)
 
 </div>
 
@@ -15,6 +15,7 @@
     <li><a href="#소개">소개</a></li>
     <li><a href="#api-문서화">API 문서화 방식</a></li>
     <li><a href="./ERD.md">erd 문서</a></li>
+    <li><a href="https://rojiwon123.github.io/nestia-template/">Swagger UI</a></li>
     <li><a href="#커밋-컨벤션">커밋 컨벤션</a></li>
   </ol>
 </details>
