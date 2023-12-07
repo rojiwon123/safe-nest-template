@@ -103,7 +103,7 @@ jobs:
             - name: Install & Build
               run: npm ci && npm run build:prisma && npm run build:swagger
 
-            - name: Commit to gh-page
+            - name: Commit to gh-pages
               run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "Github Actions"
