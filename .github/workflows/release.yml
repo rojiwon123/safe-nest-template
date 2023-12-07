@@ -68,9 +68,9 @@ jobs:
               run: |
                   echo VERSION=$(node -p "require('./package.json').version")
                   if [ -n "${{ github.event.inputs.suffix }}" ]; then
-                    echo "TAG_NAME=v$VERSION-${{github.event.inputs.suffix }}"
+                    echo TAG_NAME=v$VERSION-${{ github.event.inputs.suffix }}
                   else
-                    echo "TAG_NAME=v$VERSION"
+                    echo TAG_NAME=v$VERSION
                   fi
                     echo TAG_NAME >> $GITHUB_OUTPUT
               shell: bash
