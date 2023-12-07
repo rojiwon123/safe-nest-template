@@ -7,8 +7,14 @@ on:
                 description: "Suffix to Append to Tag Names"
                 required: false
                 type: string
+            deploy:
+                description: "Option whether Deploy Docker Image"
+                required: true
+                default: false
+                type: boolean
 
 permissions:
+    id-token: write
     contents: write
     packages: read
 
@@ -59,6 +65,10 @@ jobs:
     create-release-note:
         runs-on: ubuntu-latest
         needs: test
+
+        outputs:
+            release: ${{ steps.tag-name.outputs.TAG_NAME }}
+
         steps:
             - name: Checkout 🛎️
               uses: actions/checkout@main
@@ -115,3 +125,30 @@ jobs:
                   git add ./swagger.json
                   git commit -m "Update swagger.json"
                   git push --set-upstream origin gh-pages
+
+    deploy_image:
+        runs-on: ubuntu-latest
+        needs: create-release-note
+        if: github.event.inputs.deploy
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Configure AWS credentials 🔒
+              uses: aws-actions/configure-aws-credentials@v2
+              with:
+                  role-to-assume: ${{ secrets.AWS_ECR_ROLE }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Login to Amazon ECR 🔒
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v1
+
+            - name: Image Build and Push to Amazon ECR ✨
+              id: build-image
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                  IMAGE_TAG: ${{ needs.create-release-note.outputs.release }}
+              run: |
+                  docker build --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
