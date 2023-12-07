@@ -2,7 +2,7 @@ name: Test ✅
 
 on:
     pull_request:
-        branches: [main, release]
+        branches: [main]
 
 env:
     DATABASE_URL: postgresql://test:test@localhost:5432/test
