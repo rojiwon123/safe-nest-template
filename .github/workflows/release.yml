@@ -81,7 +81,7 @@ jobs:
                   git config --global user.name "GitHub Actions"
                   git tag -a "${{ steps.tag-name.outputs.TAG_NAME }}" -m "${{ steps.tag-name.outputs.TAG_NAME }}"
                   git push origin "${{ steps.tag-name.outputs.TAG_NAME }}"
-                  gh release create "${{ steps.tag-name.outputs.TAG_NAME }}" -t "${{ steps.tag-name.outputs.TAG_NAME }}" -generate-notes
+                  gh release create "${{ steps.tag-name.outputs.TAG_NAME }}" -t "${{ steps.tag-name.outputs.TAG_NAME }}" --target "${{ github.sha }}" --generate-notes
 
     update-swagger:
         runs-on: ubuntu-latest
