@@ -8,7 +8,7 @@ on:
                 required: false
                 type: string
             deploy:
-                description: "Option whether Deploy Docker Image"
+                description: "Deploy Docker Image"
                 required: true
                 default: false
                 type: boolean
