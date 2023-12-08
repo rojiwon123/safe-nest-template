@@ -77,7 +77,9 @@ jobs:
               id: tag-name
               run: |
                   VERSION=$(node -p "require('./package.json').version")
-                  if [ -n "${{ github.event.inputs.suffix }}" ]; then
+                  if [ "${{ github.ref_type }}" == "tag" ]; then
+                    echo tag_name="${{ github.ref_name }}""
+                  elif [ -n "${{ github.event.inputs.suffix }}" ]; then
                     tag_name="v${VERSION}-${{ github.event.inputs.suffix }}"
                   else
                     tag_name="v${VERSION}"
@@ -86,6 +88,7 @@ jobs:
               shell: bash
 
             - name: Create Release Note 🔖
+              if: github.ref_type != 'tag'
               run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
