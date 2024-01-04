@@ -32,14 +32,8 @@ model users {
   ///  url of user profile image
   ///
   image_url  String?   
-  ///  creation time of record
-  ///
   created_at DateTime   @database.Timestamptz
-  ///  revision time of record
-  ///
   updated_at DateTime?  @database.Timestamptz
-  ///  deletion time of record
-  ///
   deleted_at DateTime?  @database.Timestamptz
   articles   articles[]
 }
@@ -61,10 +55,6 @@ model articles {
   author_id  String    @database.Uuid
   author     users     @relation(fields: [author_id], references: [id])
   body       String   
-  ///  creation time of record
-  ///
   created_at DateTime  @database.Timestamptz
-  ///  deletion time of record
-  ///
   deleted_at DateTime? @database.Timestamptz
 }
