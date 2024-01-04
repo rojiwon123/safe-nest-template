@@ -103,21 +103,20 @@ export namespace Relation {
 }
 
 export namespace DateTime {
-    export const createdAt = (): psg.IField =>
-        psg.Field.datetime("created_at", {
+    export const at = (
+        field: string,
+        nullable: boolean,
+        ...comments: string[]
+    ): psg.IField =>
+        psg.Field.datetime(field, {
+            constraint: nullable ? "nullable" : "required",
             raw: Raw.Timestamptz,
-            comments: ["creation time of record"],
+            comments,
         });
-    export const updatedAt = () =>
-        psg.Field.datetime("updated_at", {
-            constraint: "nullable",
-            raw: Raw.Timestamptz,
-            comments: ["revision time of record"],
-        });
-    export const deletedAt = () =>
-        psg.Field.datetime("deleted_at", {
-            constraint: "nullable",
-            raw: Raw.Timestamptz,
-            comments: ["deletion time of record"],
-        });
+    export const createdAt = (...comments: string[]) =>
+        at("created_at", false, ...comments);
+    export const updatedAt = (...comments: string[]) =>
+        at("updated_at", true, ...comments);
+    export const deletedAt = (...comments: string[]) =>
+        at("deleted_at", true, ...comments);
 }
