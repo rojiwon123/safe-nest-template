@@ -137,7 +137,7 @@ export namespace KakaoSDK {
      */
     export const getToken = async (
         code: string,
-    ): Promise<Result<ITokens, Failure.Internal<ErrorCode.Authentication>>> => {
+    ): Promise<Result<ITokens, Failure<ErrorCode.Oauth.Fail>>> => {
         try {
             return Result.Ok.map(
                 await fetch<string, ITokens>(
@@ -173,10 +173,9 @@ export namespace KakaoSDK {
                     }).toString(),
                 ),
             );
-        } catch {
-            return Result.Error.map(
-                new Failure.Internal("AUTHENTICATION_FAIL"),
-            );
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : undefined;
+            return Result.Error.map(new Failure("Oauth Fail", message));
         }
     };
 
@@ -198,9 +197,7 @@ export namespace KakaoSDK {
         (parameter: IMeRequestParameter) =>
         async (
             access_token: string,
-        ): Promise<
-            Result<IGetUserResponse, Failure.Internal<ErrorCode.Authentication>>
-        > => {
+        ): Promise<Result<IGetUserResponse, Failure<ErrorCode.Oauth.Fail>>> => {
             try {
                 return Result.Ok.map(
                     await fetch<IGetUserResponse>(
@@ -231,10 +228,10 @@ export namespace KakaoSDK {
                         },
                     ),
                 );
-            } catch {
-                return Result.Error.map(
-                    new Failure.Internal("AUTHENTICATION_FAIL"),
-                );
+            } catch (error: unknown) {
+                const message =
+                    error instanceof Error ? error.message : undefined;
+                return Result.Error.map(new Failure("Oauth Fail", message));
             }
         };
 

@@ -1,4 +1,4 @@
-import { Regex } from "./global";
+import { Regex } from "./common";
 
 export namespace IOauth {
     export type Type = "kakao" | "github";

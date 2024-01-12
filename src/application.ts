@@ -4,12 +4,16 @@ import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
-import { prisma } from "./infrastructure/DB";
 import { Configuration } from "./infrastructure/config";
+import { prisma } from "./infrastructure/db";
 import { InfraModule } from "./infrastructure/infra.module";
 import { Logger } from "./infrastructure/logger";
 
 export namespace Backend {
+    const friendlyDate = () =>
+        new Date().toLocaleString(undefined, {
+            timeZoneName: "longGeneric",
+        });
     export const start = async (
         options: NestApplicationOptions = {},
     ): Promise<INestApplication> => {
@@ -28,21 +32,13 @@ export namespace Backend {
             await end(app);
             process.exit(0);
         });
-        Logger.info(
-            `Server start ${new Date().toLocaleString(undefined, {
-                timeZoneName: "longGeneric",
-            })}`,
-        );
+        Logger.info(`Server start ${friendlyDate()}`);
         return app;
     };
 
     export const end = async (app: INestApplication) => {
         await app.close();
         await prisma.$disconnect();
-        Logger.info(
-            `Server end ${new Date().toLocaleString(undefined, {
-                timeZoneName: "longGeneric",
-            })}`,
-        );
+        Logger.info(`Server end ${friendlyDate()}`);
     };
 }

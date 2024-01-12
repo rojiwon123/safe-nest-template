@@ -1,6 +1,6 @@
 import { IPage } from "./IPage";
 import { IUser } from "./IUser";
-import { Regex } from "./global";
+import { Regex } from "./common";
 
 export interface IArticle {
     id: Regex.UUID;

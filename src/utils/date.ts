@@ -1,4 +1,4 @@
-export namespace DateMapper {
+export namespace DateUtil {
     /** ISO8601 */
     export const toISO = (date?: Date): string => {
         const time = date ?? new Date();

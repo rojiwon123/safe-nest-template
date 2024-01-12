@@ -2,7 +2,7 @@ import { isUndefined } from "@fxts/core";
 import assert from "assert";
 import typia from "typia";
 
-import { prisma } from "@APP/infrastructure/DB";
+import { prisma } from "@APP/infrastructure/db";
 
 import { Prisma } from "../../../db/edge";
 

@@ -1,4 +1,4 @@
-import { Regex } from "./global";
+import { Regex } from "./common";
 
 export interface IUser {
     id: Regex.UUID;

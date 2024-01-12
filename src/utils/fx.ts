@@ -15,3 +15,13 @@ export namespace Entity {
         input: T | null,
     ): input is T & { deleted_at: null } => !isNull(input) && isDeleted(input);
 }
+
+export const pick =
+    <T extends object, K extends keyof T>(key: K) =>
+    (obj: T) =>
+        obj[key];
+
+export const toFixed =
+    (digit = 0) =>
+    (num: number): number =>
+        +num.toFixed(digit);

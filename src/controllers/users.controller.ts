@@ -4,8 +4,7 @@ import * as nest from "@nestjs/common";
 import { UsersUsecase } from "@APP/application/users.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IUser } from "@APP/types/IUser";
-import { Regex } from "@APP/types/global";
-import { Failure } from "@APP/utils/failure";
+import { Regex } from "@APP/types/common";
 import { Result } from "@APP/utils/result";
 
 @nest.Controller("users")
@@ -24,6 +23,6 @@ export class UsersController {
         const result = await UsersUsecase.get(user_id);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
         const error = Result.Error.flatten(result);
-        throw Failure.Http.fromInternal(error, nest.HttpStatus.NOT_FOUND);
+        throw error.toHttp(nest.HttpStatus.NOT_FOUND);
     }
 }

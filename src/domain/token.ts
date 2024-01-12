@@ -4,9 +4,9 @@ import typia from "typia";
 import { Configuration } from "@APP/infrastructure/config";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IToken } from "@APP/types/IToken";
-import { Regex } from "@APP/types/global";
+import { Regex } from "@APP/types/common";
 import { Crypto } from "@APP/utils/crypto";
-import { DateMapper } from "@APP/utils/date";
+import { DateUtil } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
@@ -23,16 +23,14 @@ export namespace Token {
         >(injection: {
             mapper: (input: ICreate) => Payload;
             stringify: (input: Payload) => string;
-            encrypt: (plain: string) => Result.Ok<string>;
+            encrypt: (plain: string) => string;
         }) =>
-        (input: ICreate): Result.Ok<IToken.IOutput> => {
+        (input: ICreate): IToken.IOutput => {
             const payload = injection.mapper(input);
             const expired_at = payload.expired_at;
             const plain = injection.stringify(payload);
             const encrypted = injection.encrypt(plain);
-            return Result.Ok.lift(
-                (token: string): IToken.IOutput => ({ token, expired_at }),
-            )(encrypted);
+            return { token: encrypted, expired_at };
         };
 
     const _verify =
@@ -40,38 +38,27 @@ export namespace Token {
             parser: (input: string) => Payload | null;
             decrypt: (
                 encrypted: string,
-            ) => Result<string, Failure.Internal<"INVALID">>;
+            ) => Result<string, Failure<ErrorCode.Authentication.Invalid>>;
         }) =>
         (
             token: string,
         ): Result<
             Payload,
-            Failure.Internal<
-                ErrorCode.Permission.Invalid | ErrorCode.Permission.Expired
+            Failure<
+                | ErrorCode.Authentication.Expired
+                | ErrorCode.Authentication.Invalid
             >
         > => {
             const now = new Date();
             const decrypted = injection.decrypt(token);
             if (Result.Error.is(decrypted))
-                return Result.Error.map(
-                    new Failure.Internal<ErrorCode.Permission.Invalid>(
-                        "INVALID_PERMISSION",
-                    ),
-                );
+                return Result.Error.map(new Failure("Authentication Invalid"));
             const plain = Result.Ok.flatten(decrypted);
             const payload = injection.parser(plain);
             if (isNull(payload))
-                return Result.Error.map(
-                    new Failure.Internal<ErrorCode.Permission.Invalid>(
-                        "INVALID_PERMISSION",
-                    ),
-                );
+                return Result.Error.map(new Failure("Authentication Invalid"));
             if (now > new Date(payload.expired_at))
-                return Result.Error.map(
-                    new Failure.Internal<ErrorCode.Permission.Expired>(
-                        "EXPIRED_PERMISSION",
-                    ),
-                );
+                return Result.Error.map(new Failure("Authentication Expired"));
             return Result.Ok.map(payload);
         };
 
@@ -79,7 +66,7 @@ export namespace Token {
         mapper: ({ user_id }: IToken.ICreate): IToken.IPayload => ({
             type: "access",
             user_id,
-            expired_at: DateMapper.toISO(new Date(Date.now() + duration)),
+            expired_at: DateUtil.toISO(new Date(Date.now() + duration)),
         }),
         stringify: typia.json.createStringify<IToken.IPayload>(),
         encrypt: (plain) =>

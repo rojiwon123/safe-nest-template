@@ -32,7 +32,7 @@ const _prisma = new PrismaClient({
 
 export const prisma = _prisma.$extends({
     client: {
-        $safeTransaction: async <T, E extends Result.Error.IFailure>(
+        $safeTransaction: async <T, E>(
             closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
         ): Promise<Result<T, E>> => {
             const rollback = new Error("transaction rollback");
@@ -66,7 +66,7 @@ export const prisma = _prisma.$extends({
      *
      * If closure return `Result.Error` instance, transaction execute rollback.
      */
-    $safeTransaction: () => <T, E extends Result.Error.IFailure>(
+    $safeTransaction: () => <T, E>(
         closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
     ) => Promise<Result<T, E>>;
 };

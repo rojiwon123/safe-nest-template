@@ -1,4 +1,4 @@
-import { Regex } from "./global";
+import { Regex } from "./common";
 
 export namespace IToken {
     export interface IPayload {

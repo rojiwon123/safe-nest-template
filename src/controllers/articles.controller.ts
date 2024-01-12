@@ -4,8 +4,7 @@ import * as nest from "@nestjs/common";
 import { ArticlesUsecase } from "@APP/application/articles.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
-import { Regex } from "@APP/types/global";
-import { Failure } from "@APP/utils/failure";
+import { Regex } from "@APP/types/common";
 import { Result } from "@APP/utils/result";
 
 @nest.Controller("articles")
@@ -41,6 +40,6 @@ export class ArticlesController {
         const result = await ArticlesUsecase.get(article_id);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
         const error = Result.Error.flatten(result);
-        throw Failure.Http.fromInternal(error, nest.HttpStatus.NOT_FOUND);
+        throw new nest.NotFoundException(error);
     }
 }

@@ -1,6 +1,6 @@
 import { IOauth } from "./IOauth";
 import { IToken } from "./IToken";
-import { Regex } from "./global";
+import { Regex } from "./common";
 
 export interface IAuthentication {
     access_token: IToken.IOutput;

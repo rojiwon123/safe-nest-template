@@ -73,7 +73,7 @@ export namespace GithubSDK {
      */
     export const getAccessToken = async (
         code: string,
-    ): Promise<Result<string, Failure.Internal<ErrorCode.Authentication>>> => {
+    ): Promise<Result<string, Failure<ErrorCode.Oauth.Fail>>> => {
         try {
             const response = await fetch<
                 {
@@ -113,11 +113,10 @@ export namespace GithubSDK {
 
             return typia.is<IGetAccessToken>(response)
                 ? Result.Ok.map(response.access_token)
-                : Result.Error.map(new Failure.Internal("AUTHENTICATION_FAIL"));
-        } catch {
-            return Result.Error.map(
-                new Failure.Internal("AUTHENTICATION_FAIL"),
-            );
+                : Result.Error.map(new Failure("Oauth Fail"));
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : undefined;
+            return Result.Error.map(new Failure("Oauth Fail", message));
         }
     };
 
@@ -125,9 +124,7 @@ export namespace GithubSDK {
         <T extends object>(path: string) =>
         async (
             access_token: string,
-        ): Promise<
-            Result<Primitive<T>, Failure.Internal<ErrorCode.Authentication>>
-        > => {
+        ): Promise<Result<Primitive<T>, Failure<ErrorCode.Oauth.Fail>>> => {
             const response = (await propagate(
                 {
                     host: API_URL,
@@ -152,7 +149,7 @@ export namespace GithubSDK {
                 | IPropagation.IBranch<false, string, { message: string }>;
             return response.success
                 ? Result.Ok.map(response.data)
-                : Result.Error.map(new Failure.Internal("AUTHENTICATION_FAIL"));
+                : Result.Error.map(new Failure("Oauth Fail"));
         };
 
     export const getUser = get<IUser>("/user");

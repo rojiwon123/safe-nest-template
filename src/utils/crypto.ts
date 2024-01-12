@@ -1,6 +1,8 @@
 import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
 
+import { ErrorCode } from "@APP/types/ErrorCode";
+
 import { Failure } from "./failure";
 import { Result } from "./result";
 
@@ -12,8 +14,6 @@ export namespace Crypto {
      * 문자열 암호화
      * - plain: 평문
      * - key: 암호화 키, 32 byte string
-     *
-     * 암호화 형식에 맞지 않는 key를 입력했거나 기타 이유로 암호화에 실패할 수 있다.
      */
     export const encrypt = ({
         plain,
@@ -21,7 +21,7 @@ export namespace Crypto {
     }: {
         plain: string;
         key: string;
-    }): Result.Ok<string> => {
+    }): string => {
         const iv = crypto.randomBytes(IV_LEN);
         const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
             authTagLength: TAG_LEN,
@@ -29,9 +29,9 @@ export namespace Crypto {
         const encrypted =
             cipher.update(plain, "utf8", "base64") + cipher.final("base64");
         const tag = cipher.getAuthTag();
-        return Result.Ok.map(
-            `${iv.toString("base64")}.${tag.toString("base64")}.${encrypted}`,
-        );
+        return `${iv.toString("base64")}.${tag.toString(
+            "base64",
+        )}.${encrypted}`;
     };
 
     /**
@@ -51,18 +51,24 @@ export namespace Crypto {
     }: {
         token: string;
         key: string;
-    }): Result<string, Failure.Internal<"INVALID">> => {
-        const [iv, tag, encrypted] = token.split(".");
-        if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-            return Result.Error.map(new Failure.Internal("INVALID"));
+    }): Result<string, Failure<ErrorCode.Authentication.Invalid>> => {
+        try {
+            const [iv, tag, encrypted] = token.split(".");
+            if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
+                return Result.Error.map(new Failure("Authentication Invalid"));
+            const decipher = crypto
+                .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
+                .setAuthTag(Buffer.from(tag, "base64"));
 
-        const decipher = crypto
-            .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
-            .setAuthTag(Buffer.from(tag, "base64"));
-
-        return Result.Ok.map(
-            decipher.update(encrypted, "base64", "utf8") +
-                decipher.final("utf8"),
-        );
+            return Result.Ok.map(
+                decipher.update(encrypted, "base64", "utf8") +
+                    decipher.final("utf8"),
+            );
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : undefined;
+            return Result.Error.map(
+                new Failure("Authentication Invalid", message),
+            );
+        }
     };
 }

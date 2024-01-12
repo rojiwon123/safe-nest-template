@@ -1,8 +1,7 @@
 import { mock } from "node:test";
 import typia from "typia";
 
-import { Oauth } from "@APP/externals/oauth";
-import { ErrorCode } from "@APP/types/ErrorCode";
+import { Oauth } from "@APP/infrastructure/externals/oauth";
 import { IOauth } from "@APP/types/IOauth";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
@@ -45,9 +44,7 @@ export namespace Mocker {
         implement(Oauth.Github, "getProfile", async (code) => {
             if (code === "test_fail")
                 return Result.Error.map(
-                    new Failure.Internal<ErrorCode.Authentication>(
-                        "AUTHENTICATION_FAIL",
-                    ),
+                    new Failure("Oauth Fail", "mocking exception"),
                 );
             return Result.Ok.map({
                 oauth_sub: code,
@@ -58,9 +55,7 @@ export namespace Mocker {
         implement(Oauth.Kakao, "getProfile", async (code) => {
             if (code === "test_fail")
                 return Result.Error.map(
-                    new Failure.Internal<ErrorCode.Authentication>(
-                        "AUTHENTICATION_FAIL",
-                    ),
+                    new Failure("Oauth Fail", "mocking exception"),
                 );
             return Result.Ok.map({
                 oauth_sub: code,

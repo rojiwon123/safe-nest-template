@@ -13,7 +13,7 @@ export namespace Oauth {
     ) => Promise<
         Result<
             { oauth_sub: string; profile: IOauth.IProfile },
-            Failure.Internal<ErrorCode.Authentication>
+            Failure<ErrorCode.Oauth.Fail>
         >
     >;
     export namespace Kakao {
