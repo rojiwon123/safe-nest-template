@@ -2,8 +2,8 @@ import { Prisma, PrismaClient } from "@PRISMA";
 
 import { Result } from "@APP/utils/result";
 
-import { Configuration } from "../config";
-import { Logger } from "../logger";
+import { Configuration } from "./config";
+import { Logger } from "./logger";
 
 const _prisma = new PrismaClient({
     datasources: { database: { url: Configuration.DATABASE_URL } },
