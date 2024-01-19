@@ -16,7 +16,6 @@
     <li><a href="#api-문서화">API 문서화 방식</a></li>
     <li><a href="./ERD.md">erd 문서</a></li>
     <li><a href="https://rojiwon123.github.io/nestia-template/">Swagger UI</a></li>
-    <li><a href="#커밋-컨벤션">커밋 컨벤션</a></li>
   </ol>
 </details>
 
@@ -54,35 +53,6 @@ npm run build:nestia
 ```bash
 npm run swagger
 ```
-
-## 커밋 컨벤션
-
-1. 유다시티 컨벤션을 기반으로 깃모지를 활용한 깃 컨벤션을 적용한다.
-
--   [유다시티 스타일 설명 블로그](https://haesoo9410.tistory.com/300)
-
--   [깃모지 설명 블로그](https://treasurebear.tistory.com/70)
-
-## 컨벤션 표기 예시
-
-| Udacity  | Gitmoji               | emoji | description                 |
-| -------- | --------------------- | ----- | --------------------------- |
-| feat     | :sparkles:            | ✨    | 기능 추가                   |
-| fix      | :bug:                 | 🐛    | 버그 수정                   |
-| hotfix   | :ambulance:           | 🚑    | 긴급 수정                   |
-| (hot)fix | :lock:                | 🔒    | 보안 이슈 해결              |
-| docs     | :memo:                | 📝    | 문서 업데이트               |
-| style    | :art:                 | 🎨    | 코드 구조, 포매팅 관련 수정 |
-| style    | :truck:               | 🚚    | 리소스 이동, 이름 변경      |
-| refactor | :recycle:             | ♻️    | 프로덕션 코드 리팩토링      |
-| test     | :white_check_mark:    | ✅    | 테스트 추가/수정            |
-| chore    | :arrow_up:            | ⬆    | dependencies 업데이트       |
-| chore    | :construction_worker: | 👷    | CI 빌드 시스템 추가/수정    |
-| chore    | :wrench:              | 🔧    | 설정 파일 추가/수정         |
-| chore    | :heavy_plus_sign:     | ➕    | dependency 추가             |
-| chore    | :heavy_minus_sign:    | ➖    | dependency 제거             |
-| chore    | :card_file_box:       | 🗃️    | DB 관련 수정 사항 적용      |
-| release  | :bookmark:            | 🔖    | 새로운 버전 출시            |
 
 ## Appendix
 
