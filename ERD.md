@@ -10,19 +10,19 @@
 ```mermaid
 erDiagram
 "users" {
-    String id PK
-    String name
-    String image_url "nullable"
-    DateTime created_at
-    DateTime updated_at "nullable"
-    DateTime deleted_at "nullable"
+  String id PK
+  String name
+  String image_url "nullable"
+  DateTime created_at
+  DateTime updated_at "nullable"
+  DateTime deleted_at "nullable"
 }
 "articles" {
-    String id PK
-    String author_id FK
-    String body
-    DateTime created_at
-    DateTime deleted_at "nullable"
+  String id PK
+  String author_id FK
+  String body
+  DateTime created_at
+  DateTime deleted_at "nullable"
 }
 "articles" }o--|| "users" : author
 ```
@@ -60,12 +60,12 @@ Root Entity of Article
 ```mermaid
 erDiagram
 "users" {
-    String id PK
-    String name
-    String image_url "nullable"
-    DateTime created_at
-    DateTime updated_at "nullable"
-    DateTime deleted_at "nullable"
+  String id PK
+  String name
+  String image_url "nullable"
+  DateTime created_at
+  DateTime updated_at "nullable"
+  DateTime deleted_at "nullable"
 }
 ```
 
