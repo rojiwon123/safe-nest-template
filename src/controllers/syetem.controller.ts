@@ -1,5 +1,5 @@
 import core from "@nestia/core";
-import * as nest from "@nestjs/common";
+import nest from "@nestjs/common";
 
 @nest.Controller("health")
 export class SystemController {

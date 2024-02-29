@@ -85,7 +85,7 @@
         ],
 
         /* Interop Constraints */
-        // "allowSyntheticDefaultImports": true, // true if esModuleInterop is true
+        "allowSyntheticDefaultImports": true, // true if esModuleInterop is true
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "isolatedModules": true,
@@ -97,7 +97,7 @@
         "experimentalDecorators": true,
         // "lib": [],
         // "moduleDetection": "force",
-        "target": "ES2022",
+        "target": "ESNext",
         "useDefineForClassFields": true,
 
         /* Projects */

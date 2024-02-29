@@ -1,5 +1,5 @@
 import core from "@nestia/core";
-import * as nest from "@nestjs/common";
+import nest from "@nestjs/common";
 
 import { ArticlesUsecase } from "@APP/application/articles.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
