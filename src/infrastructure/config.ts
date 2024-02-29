@@ -40,6 +40,10 @@ interface IEnv {
     readonly KAKAO_CLIENT_SECRET: string;
     readonly KAKAO_REDIRECT_URI: string;
 
-    readonly ACCESS_TOKEN_KEY: string;
-    readonly REFRESH_TOKEN_KEY: string;
+    readonly ACCESS_TOKEN_KEY: string &
+        typia.tags.MinLength<32> &
+        typia.tags.MaxLength<32>;
+    readonly REFRESH_TOKEN_KEY: string &
+        typia.tags.MinLength<32> &
+        typia.tags.MaxLength<32>;
 }
