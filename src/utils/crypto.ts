@@ -1,10 +1,7 @@
-import { isUndefined } from "@fxts/core";
-import crypto from "crypto";
+import { isUndefined } from '@fxts/core';
+import crypto from 'crypto';
 
-import { ErrorCode } from "@APP/types/ErrorCode";
-
-import { Failure } from "./failure";
-import { Result } from "./result";
+import { Result } from './result';
 
 export namespace Crypto {
     const IV_LEN = 12;
@@ -23,14 +20,14 @@ export namespace Crypto {
         key: string;
     }): string => {
         const iv = crypto.randomBytes(IV_LEN);
-        const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
+        const cipher = crypto.createCipheriv('aes-256-gcm', key, iv, {
             authTagLength: TAG_LEN,
         });
         const encrypted =
-            cipher.update(plain, "utf8", "base64") + cipher.final("base64");
+            cipher.update(plain, 'utf8', 'base64') + cipher.final('base64');
         const tag = cipher.getAuthTag();
-        return `${iv.toString("base64")}.${tag.toString(
-            "base64",
+        return `${iv.toString('base64')}.${tag.toString(
+            'base64',
         )}.${encrypted}`;
     };
 
@@ -51,24 +48,21 @@ export namespace Crypto {
     }: {
         token: string;
         key: string;
-    }): Result<string, Failure<ErrorCode.Authentication.Invalid>> => {
+    }): Result<string, 'TOKEN_INVALID'> => {
         try {
-            const [iv, tag, encrypted] = token.split(".");
+            const [iv, tag, encrypted] = token.split('.');
             if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Result.Error.map(new Failure("Authentication Invalid"));
+                return Result.Error.map('TOKEN_INVALID');
             const decipher = crypto
-                .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))
-                .setAuthTag(Buffer.from(tag, "base64"));
+                .createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64'))
+                .setAuthTag(Buffer.from(tag, 'base64'));
 
             return Result.Ok.map(
-                decipher.update(encrypted, "base64", "utf8") +
-                    decipher.final("utf8"),
+                decipher.update(encrypted, 'base64', 'utf8') +
+                    decipher.final('utf8'),
             );
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : undefined;
-            return Result.Error.map(
-                new Failure("Authentication Invalid", message),
-            );
+        } catch {
+            return Result.Error.map('TOKEN_INVALID');
         }
     };
 }

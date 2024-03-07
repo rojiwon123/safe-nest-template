@@ -1,6 +1,5 @@
-import { IPropagation } from "@nestia/fetcher";
-
-import { IPage } from "@APP/types/IPage";
+import { IPage } from '@SRC/common/dto';
+import { IPropagation } from '@nestia/fetcher';
 
 export namespace APIValidator {
     class APIValidation extends Error {
@@ -8,23 +7,25 @@ export namespace APIValidator {
             public expected: { success: boolean; status: IPropagation.Status },
             public actual: { success: boolean; status: IPropagation.Status },
         ) {
-            super("The API response is not as expected");
-            this.name = "APIValidation";
+            super('The API response is not as expected');
+            this.name = 'APIValidation';
         }
     }
     type Success<
         P extends IPropagation.IBranch<boolean, unknown, any>,
         Status,
-    > = P extends IPropagation.IBranch<boolean, Status, any>
-        ? P["success"]
-        : never;
+    > =
+        P extends IPropagation.IBranch<boolean, Status, any>
+            ? P['success']
+            : never;
 
     type Body<
         P extends IPropagation.IBranch<boolean, unknown, any>,
         Status extends IPropagation.Status,
-    > = P extends IPropagation.IBranch<boolean, Status, any>
-        ? P["data"]
-        : never;
+    > =
+        P extends IPropagation.IBranch<boolean, Status, any>
+            ? P['data']
+            : never;
 
     export const assert =
         <
@@ -59,7 +60,7 @@ export namespace APIValidator {
         ) =>
         (input: unknown): T => {
             const body = assertEquals(input);
-            if (body.data.length === 0) throw Error("list is empty");
+            if (body.data.length === 0) throw Error('list is empty');
             return body;
         };
 }

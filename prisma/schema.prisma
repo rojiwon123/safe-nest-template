@@ -5,7 +5,7 @@ datasource database {
 
 generator db {
   provider = "prisma-client-js"
-  output   = "../db"
+  output   = "./client"
 }
 
 generator erd {
@@ -28,10 +28,10 @@ model users {
   id         String     @id @database.Uuid
   ///  displayed name of user
   ///
-  name       String    
+  name       String
   ///  url of user profile image
   ///
-  image_url  String?   
+  image_url  String?
   created_at DateTime   @database.Timestamptz
   updated_at DateTime?  @database.Timestamptz
   deleted_at DateTime?  @database.Timestamptz
@@ -54,7 +54,7 @@ model articles {
   ///
   author_id  String    @database.Uuid
   author     users     @relation(fields: [author_id], references: [id])
-  body       String   
+  body       String
   created_at DateTime  @database.Timestamptz
   deleted_at DateTime? @database.Timestamptz
 }

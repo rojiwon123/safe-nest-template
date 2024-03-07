@@ -1,9 +1,9 @@
-import typia from "typia";
+import typia from 'typia';
 
-import { Num } from "./common";
+import { Num } from './type';
 
 export namespace IPage {
-    export type SortType = "latest" | "oldest";
+    export type SortType = 'latest' | 'oldest';
     export interface IPaginated<T> {
         data: T[];
         page: Num.Int64;

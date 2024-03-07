@@ -4,11 +4,11 @@ on:
     workflow_dispatch:
         inputs:
             suffix:
-                description: "Suffix to Append to Tag Names"
+                description: 'Suffix to Append to Tag Names'
                 required: false
                 type: string
             deploy:
-                description: "Deploy Docker Image"
+                description: 'Deploy Docker Image'
                 required: true
                 default: false
                 type: boolean

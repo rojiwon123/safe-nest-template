@@ -7,15 +7,15 @@ export namespace Result {
             input instanceof Promise ? input.then(cb) : cb(input);
 
     export interface Ok<T> {
-        readonly type: "ok";
+        readonly type: 'ok';
         readonly ok: T;
     }
     export namespace Ok {
         export const is = <T, E>(
             result: Result<T, E>,
-        ): result is Result.Ok<T> => result.type === "ok";
+        ): result is Result.Ok<T> => result.type === 'ok';
 
-        export const map = <T>(ok: T): Result.Ok<T> => ({ type: "ok", ok });
+        export const map = <T>(ok: T): Result.Ok<T> => ({ type: 'ok', ok });
         export const flatten = <T>(ok: Result.Ok<T>): T => ok.ok;
 
         export function lift<T, R>(
@@ -30,16 +30,16 @@ export namespace Result {
     }
 
     export interface Error<E> {
-        readonly type: "error";
+        readonly type: 'error';
         readonly error: E;
     }
     export namespace Error {
         export const is = <T, E>(
             result: Result<T, E>,
-        ): result is Result.Error<E> => result.type === "error";
+        ): result is Result.Error<E> => result.type === 'error';
 
         export const map = <E>(error: E): Result.Error<E> => ({
-            type: "error",
+            type: 'error',
             error,
         });
         export const flatten = <E>(error: Result.Error<E>): E => error.error;

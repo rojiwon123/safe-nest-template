@@ -1,62 +1,111 @@
-import winston from "winston";
+import * as nest from '@nestjs/common';
+import util from 'util';
+import winston from 'winston';
 
-import { pick } from "@APP/utils/fx";
+import { Configuration } from './config';
 
-import { Configuration } from "./config";
+type LogMethod = (message: unknown) => void;
 
-const transports: winston.transport =
-    Configuration.NODE_ENV === "production"
-        ? new winston.transports.Stream({
-              level: "warn",
-              stream: process.stdout, // 외부 스트림으로 변경할 것
-              format: winston.format.printf(
-                  (info) => `--- LOG LEVEL: ${info.level} ---\n` + info.message,
-              ),
-          })
-        : new winston.transports.Console({
-              level: "silly",
-              format: winston.format.combine(
-                  winston.format.colorize({
-                      message: true,
-                      colors: { info: "white" },
-                  }),
-                  winston.format.printf(pick("message")),
-              ),
-          });
+/** LoggerService interface */
+interface ILogger extends Readonly<Record<nest.LogLevel, LogMethod>> {}
 
-export const Logger: Logger = winston.createLogger({ transports });
+const stringify = (input: unknown) => util.inspect(input, { depth: 5 });
 
-export type Logger = Record<LogLevel, (message: unknown) => Logger>;
+namespace Winston {
+    const logger = winston.createLogger({
+        levels: {
+            FATAL: 0,
+            ERROR: 1,
+            WARN: 2,
+            LOG: 3,
+            VERBOSE: 4,
+            DEBUG: 5,
+        },
+        level: Configuration.NODE_ENV === 'production' ? 'LOG' : 'DEBUG',
+        transports: new winston.transports.Stream({
+            stream: process.stdout,
+            format: winston.format.combine(
+                winston.format.printf(
+                    (info) => `[${info.level}] ${info.message}`,
+                ),
+                ...(Configuration.NODE_ENV !== 'production'
+                    ? [
+                          winston.format.colorize({
+                              message: true,
+                              colors: {
+                                  FATAL: 'purple',
+                                  ERROR: 'red',
+                                  WARN: 'yellow',
+                                  LOG: 'white',
+                                  VERBOSE: 'white',
+                                  DEBUG: 'white',
+                              },
+                          }),
+                      ]
+                    : []),
+            ),
+        }),
+    });
 
-type LogLevel =
-    | "error"
-    | "warn"
-    | "info"
-    | "http"
-    | "verbose"
-    | "debug"
-    | "silly";
+    export const write =
+        (level: 'FATAL' | 'ERROR' | 'WARN' | 'LOG' | 'VERBOSE' | 'DEBUG') =>
+        (message: unknown): void => {
+            logger.log(level, stringify(message).replaceAll('\\n', '\n'));
+        };
+}
+
+export const logger: ILogger = {
+    fatal(message) {
+        if (message instanceof Error) {
+            const { message: msg, name, stack, ...meta } = message;
+            Winston.write('FATAL')(
+                stack
+                    ? stack + stringify(meta)
+                    : { name, message: msg, ...meta },
+            );
+            return;
+        }
+        Winston.write('FATAL')(message);
+    },
+    error(message) {
+        if (message instanceof Error) {
+            const { message: msg, name, stack, ...meta } = message;
+            Winston.write('ERROR')(
+                stack
+                    ? stack + stringify(meta)
+                    : { name, message: msg, ...meta },
+            );
+            return;
+        }
+        Winston.write('ERROR')(message);
+    },
+    warn: Winston.write('WARN'),
+    log: Winston.write('LOG'),
+    verbose: Winston.write('VERBOSE'),
+    debug: Winston.write('DEBUG'),
+};
 
 /**
-   const AwsStream = () => {
-        const client = new CloudWatchLogsClient({
-            region: Configuration.AWS_REGION,
+ * lambda 환경에서는 별도의 로그 스트림 연결이 필요 없음
+import { CloudWatchLogsClient, PutLogEventsCommand } from '@aws-sdk/client-cloudwatch-logs';
+import { Writable } from 'stream';
+const aws_client = new CloudWatchLogsClient();
+new Writable({
+    write(chunk, _, callback) {
+        const command = new PutLogEventsCommand({
+            logGroupName: Configuration.AWS_LOG_GROUP,
+            logStreamName: Configuration.NODE_ENV,
+            logEvents: [
+                {
+                    message: chunk.toString(),
+                    timestamp: Date.now(),
+                },
+            ],
         });
-        return new Writable({
-            write(chunk, encoding, callback) {
-                const log = chunk.toString();
-                const command = new PutLogEventsCommand({
-                    logGroupName: Configuration.AWS_LOG_GROUP,
-                    logStreamName: Configuration.NODE_ENV,
-                    logEvents: [{ message: log, timestamp: Date.now() }],
-                });
-                client
-                    .send(command)
-                    .then(() => {
-                        callback();
-                    })
-                    .catch(console.log);
-            },
-        });
-    };
- */
+        aws_client
+            .send(command)
+            .then(() => callback())
+            .catch(console.log);
+    },
+})
+*/

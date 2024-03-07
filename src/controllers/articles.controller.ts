@@ -1,13 +1,12 @@
-import core from "@nestia/core";
-import nest from "@nestjs/common";
+import { IArticle } from '@SRC/app/articles/dto';
+import { ArticlesUsecase } from '@SRC/app/articles/usecase';
+import { ErrorCode } from '@SRC/common/error_code';
+import { Regex } from '@SRC/common/type';
+import { Result } from '@SRC/utils/result';
+import core from '@nestia/core';
+import * as nest from '@nestjs/common';
 
-import { ArticlesUsecase } from "@APP/application/articles.usecase";
-import { ErrorCode } from "@APP/types/ErrorCode";
-import { IArticle } from "@APP/types/IArticle";
-import { Regex } from "@APP/types/common";
-import { Result } from "@APP/utils/result";
-
-@nest.Controller("articles")
+@nest.Controller('articles')
 export class ArticlesController {
     /**
      * 게시글 목록을 불러옵니다.
@@ -33,13 +32,13 @@ export class ArticlesController {
      * @return 게시글 상세 정보
      */
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
-    @core.TypedRoute.Get(":article_id")
+    @core.TypedRoute.Get(':article_id')
     async get(
-        @core.TypedParam("article_id") article_id: Regex.UUID,
+        @core.TypedParam('article_id') article_id: Regex.UUID,
     ): Promise<IArticle> {
         const result = await ArticlesUsecase.get(article_id);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
-        const error = Result.Error.flatten(result);
-        throw new nest.NotFoundException(error);
+        const error_code = Result.Error.flatten(result);
+        throw new nest.NotFoundException(error_code);
     }
 }

@@ -10,11 +10,11 @@ export namespace DateUtil {
         const time = date ?? new Date();
 
         const year = time.getFullYear();
-        const month = `${time.getMonth() + 1}`.padStart(2, "0");
-        const day = `${time.getDate()}`.padStart(2, "0");
-        const hours = `${time.getHours()}`.padStart(2, "0");
-        const minutes = `${time.getMinutes()}`.padStart(2, "0");
-        const seconds = `${time.getSeconds()}`.padStart(2, "0");
+        const month = `${time.getMonth() + 1}`.padStart(2, '0');
+        const day = `${time.getDate()}`.padStart(2, '0');
+        const hours = `${time.getHours()}`.padStart(2, '0');
+        const minutes = `${time.getMinutes()}`.padStart(2, '0');
+        const seconds = `${time.getSeconds()}`.padStart(2, '0');
 
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
@@ -24,8 +24,8 @@ export namespace DateUtil {
         const time = date ?? new Date();
 
         const year = time.getFullYear();
-        const month = `${time.getMonth() + 1}`.padStart(2, "0");
-        const day = `${time.getDate()}`.padStart(2, "0");
+        const month = `${time.getMonth() + 1}`.padStart(2, '0');
+        const day = `${time.getDate()}`.padStart(2, '0');
 
         return `${year}-${month}-${day}`;
     };
@@ -34,9 +34,9 @@ export namespace DateUtil {
     export const toTime = (date?: Date): string => {
         const time = date ?? new Date();
 
-        const hours = `${time.getHours()}`.padStart(2, "0");
-        const minutes = `${time.getMinutes()}`.padStart(2, "0");
-        const seconds = `${time.getSeconds()}`.padStart(2, "0");
+        const hours = `${time.getHours()}`.padStart(2, '0');
+        const minutes = `${time.getMinutes()}`.padStart(2, '0');
+        const seconds = `${time.getSeconds()}`.padStart(2, '0');
 
         return `${hours}:${minutes}:${seconds}`;
     };

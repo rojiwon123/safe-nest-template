@@ -1,10 +1,9 @@
-import typia from "typia";
+import { ErrorCode } from '@SRC/common/error_code';
+import { Regex } from '@SRC/common/type';
+import { Result } from '@SRC/utils/result';
+import typia from 'typia';
 
-import { ErrorCode } from "@APP/types/ErrorCode";
-import { IArticle } from "@APP/types/IArticle";
-import { Regex } from "@APP/types/common";
-import { Failure } from "@APP/utils/failure";
-import { Result } from "@APP/utils/result";
+import { IArticle } from './dto';
 
 export namespace ArticlesUsecase {
     export const getList = async (
@@ -19,7 +18,7 @@ export namespace ArticlesUsecase {
 
     export const get = async (
         article_id: Regex.UUID,
-    ): Promise<Result<IArticle, Failure<ErrorCode.Article.NotFound>>> => {
+    ): Promise<Result<IArticle, ErrorCode.Article.NotFound>> => {
         return Result.Ok.map({ ...typia.random<IArticle>(), id: article_id });
     };
 }

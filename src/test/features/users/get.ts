@@ -1,11 +1,10 @@
-import { IConnection } from "@nestia/fetcher";
-import { HttpStatus } from "@nestjs/common";
-import api from "@project/api";
-import typia from "typia";
-
-import { APIValidator } from "@APP/test/internal/validator";
-import { IUser } from "@APP/types/IUser";
-import { Random } from "@APP/utils/random";
+import { IUser } from '@SRC/app/users/dto';
+import { APIValidator } from '@SRC/test/internal/validator';
+import { Random } from '@SRC/utils/random';
+import { IConnection } from '@nestia/fetcher';
+import { HttpStatus } from '@nestjs/common';
+import api from '@project/api';
+import typia from 'typia';
 
 const test = api.functional.users.get;
 

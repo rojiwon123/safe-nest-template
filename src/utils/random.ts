@@ -1,7 +1,6 @@
-import { randomInt, randomUUID } from "crypto";
-import typia from "typia";
-
-import { Num, Regex } from "@APP/types/common";
+import { Num, Regex } from '@SRC/common/type';
+import { randomInt, randomUUID } from 'crypto';
+import typia from 'typia';
 
 export namespace Random {
     export const uuid = (): Regex.UUID => randomUUID();
@@ -17,11 +16,11 @@ export namespace Random {
     export const double = (max: number): Num.Double => Math.random() * max;
     export const string = (length: number) => {
         const chars =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
         return Array.from({ length }, () =>
             chars.charAt(int({ max: chars.length })),
-        ).join("");
+        ).join('');
     };
     export const iso = typia.createRandom<Regex.DateTime>();
 }

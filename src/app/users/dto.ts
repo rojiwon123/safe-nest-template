@@ -1,4 +1,4 @@
-import { Regex } from "./common";
+import { Regex } from '@SRC/common/type';
 
 export interface IUser {
     id: Regex.UUID;

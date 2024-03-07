@@ -1,10 +1,10 @@
-import { isNull } from "@fxts/core";
+import { isNull } from '@fxts/core';
 
 export const compare =
-    (sort: "asc" | "desc") =>
+    (sort: 'asc' | 'desc') =>
     <T>(map: (input: T) => number) =>
     (a: T, b: T) =>
-        sort === "desc" ? map(b) - map(a) : map(a) - map(b);
+        sort === 'desc' ? map(b) - map(a) : map(a) - map(b);
 
 export namespace Entity {
     export const isDeleted = <T extends { deleted_at: Date | null }>(

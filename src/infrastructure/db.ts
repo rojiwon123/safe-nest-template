@@ -1,43 +1,36 @@
-import { Prisma, PrismaClient } from "@PRISMA";
+import { Prisma, PrismaClient } from '@PRISMA';
+import { Result } from '@SRC/utils/result';
 
-import { Result } from "@APP/utils/result";
+import { Configuration } from './config';
+import { logger } from './logger';
 
-import { Configuration } from "./config";
-import { Logger } from "./logger";
-
-const _prisma = new PrismaClient({
+const prisma = new PrismaClient({
     datasources: { database: { url: Configuration.DATABASE_URL } },
-    log: ((mode: typeof Configuration.NODE_ENV) => {
-        switch (mode) {
-            case "development":
-                return [
-                    { emit: "stdout", level: "error" },
-                    { emit: "stdout", level: "warn" },
-                    { emit: "stdout", level: "info" },
-                    { emit: "event", level: "query" },
-                ];
-            case "test":
-                return [
-                    { emit: "stdout", level: "error" },
-                    { emit: "stdout", level: "warn" },
-                ];
-            case "production":
-                return [
-                    { emit: "stdout", level: "error" },
-                    { emit: "stdout", level: "warn" },
-                ];
-        }
-    })(Configuration.NODE_ENV),
+    log:
+        Configuration.NODE_ENV === 'development'
+            ? [
+                  { emit: 'stdout', level: 'error' },
+                  { emit: 'stdout', level: 'warn' },
+                  { emit: 'stdout', level: 'info' },
+                  { emit: 'event', level: 'query' },
+              ]
+            : [
+                  { emit: 'stdout', level: 'error' },
+                  { emit: 'stdout', level: 'warn' },
+              ],
 });
 
-export const prisma = _prisma.$extends({
+if (Configuration.NODE_ENV === 'development')
+    prisma.$on('query', (e) => logger.warn(e));
+
+export const db = prisma.$extends({
     client: {
         $safeTransaction: async <T, E>(
             closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
         ): Promise<Result<T, E>> => {
-            const rollback = new Error("transaction rollback");
+            const rollback = new Error('transaction rollback');
             try {
-                const end: Result.Ok<T> = await _prisma.$transaction(
+                const end: Result.Ok<T> = await prisma.$transaction(
                     async (tx) => {
                         const result = await closure(tx);
                         if (Result.Error.is(result)) {
@@ -56,11 +49,11 @@ export const prisma = _prisma.$extends({
         },
     },
 }) as unknown as Prisma.TransactionClient & {
-    $transaction: typeof _prisma.$transaction;
+    $transaction: typeof prisma.$transaction;
     /** Connect with the databas */
-    $connect: typeof _prisma.$connect;
+    $connect: typeof prisma.$connect;
     /** Disconnect from the database */
-    $disconnect: typeof _prisma.$disconnect;
+    $disconnect: typeof prisma.$disconnect;
     /**
      * Transaction with `Result` Instance
      *
@@ -74,13 +67,3 @@ export const prisma = _prisma.$extends({
 // extends를 통해 orm method의 반환값을 변경할 수 있다.
 // 그래서 PrismaClient 타입 정보가 충돌하는데, 나는 반환값을 변경하는 extends를 추가하지 않았으므로
 // as keyword로 타입을 변경하였다.
-
-if (Configuration.NODE_ENV === "development") {
-    _prisma.$on("query", (e) => {
-        Logger.warn("\n--- Query ---");
-        Logger.info(e.query);
-        Logger.debug("\n--- Params ---");
-        Logger.info(e.params);
-        Logger.info(`\nDuration: \x1b[32m${e.duration}ms\x1b[0m`);
-    });
-}

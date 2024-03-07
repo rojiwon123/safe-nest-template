@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "steoates.autoimport",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "prisma.prisma"
+    ]
+}

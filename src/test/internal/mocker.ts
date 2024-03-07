@@ -1,10 +1,4 @@
-import { mock } from "node:test";
-import typia from "typia";
-
-import { Oauth } from "@APP/infrastructure/externals/oauth";
-import { IOauth } from "@APP/types/IOauth";
-import { Failure } from "@APP/utils/failure";
-import { Result } from "@APP/utils/result";
+import { mock } from 'node:test';
 
 export namespace Mocker {
     type MethodNames<T extends object> = {
@@ -23,44 +17,10 @@ export namespace Mocker {
         module: T,
         methodName: M,
     ) => {
-        const mocker = (module[methodName] as any)["mock"];
+        const mocker = (module[methodName] as any)['mock'];
         if (mocker == undefined) return;
-        mocker["restore"]();
+        mocker['restore']();
     };
 
-    export const init = () => {
-        implement(
-            Oauth.Kakao,
-            "getUrlForLogin",
-            () => "http://localhost:4000/login",
-        );
-
-        implement(
-            Oauth.Github,
-            "getUrlForLogin",
-            () => "http://localhost:4000/login",
-        );
-
-        implement(Oauth.Github, "getProfile", async (code) => {
-            if (code === "test_fail")
-                return Result.Error.map(
-                    new Failure("Oauth Fail", "mocking exception"),
-                );
-            return Result.Ok.map({
-                oauth_sub: code,
-                profile: { ...typia.random<IOauth.IProfile>(), name: code },
-            });
-        });
-
-        implement(Oauth.Kakao, "getProfile", async (code) => {
-            if (code === "test_fail")
-                return Result.Error.map(
-                    new Failure("Oauth Fail", "mocking exception"),
-                );
-            return Result.Ok.map({
-                oauth_sub: code,
-                profile: { ...typia.random<IOauth.IProfile>(), name: code },
-            });
-        });
-    };
+    export const init = () => {};
 }

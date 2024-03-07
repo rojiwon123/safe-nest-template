@@ -8,6 +8,9 @@ db
 build
 tbuild
 packages
+
+prisma/client
+
 # log
 
 test_log.md

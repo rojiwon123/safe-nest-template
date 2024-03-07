@@ -32,8 +32,8 @@
         // "moduleSuffix": [],
         // "noResolve": false,
         "paths": {
-            "@PRISMA": ["./db"],
-            "@APP/*": ["./src/*"],
+            "@PRISMA": ["./prisma/client"],
+            "@SRC/*": ["./src/*"],
             "@TEST/*": ["./src/test/*"]
         },
         "resolveJsonModule": true,
@@ -85,7 +85,7 @@
         ],
 
         /* Interop Constraints */
-        "allowSyntheticDefaultImports": true, // true if esModuleInterop is true
+        // "allowSyntheticDefaultImports": true, // true if esModuleInterop is true
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "isolatedModules": true,
