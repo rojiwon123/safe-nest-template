@@ -15,15 +15,16 @@ export class ExceptionFilter implements nest.ExceptionFilter {
 
         if (this.isHttpException(exception)) {
             const status = exception.getStatus();
-            const message = exception.message;
-            httpAdapter.reply(res, message, status);
+            const { code = 'NATIVE_ERROR', message } =
+                exception.getResponse() as { code?: string; message?: string };
+            httpAdapter.reply(res, { code, message }, status);
             return;
         }
 
         logger.error(exception);
         const status = nest.HttpStatus.INTERNAL_SERVER_ERROR;
-        const message = 'NTERNAL_SERVER_ERROR';
-        httpAdapter.reply(res, message, status);
+        const code = 'NTERNAL_SERVER_ERROR';
+        httpAdapter.reply(res, { code }, status);
     }
 
     isHttpException(error: unknown): error is nest.HttpException {

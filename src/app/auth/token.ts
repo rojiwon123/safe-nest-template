@@ -45,13 +45,14 @@ export namespace Token {
             key: Configuration.ACCESS_TOKEN_KEY,
         });
         if (Result.Error.is(decrypted))
-            return Result.Error.map('PERMISSION_INVALID');
+            return Result.Error.map({ code: 'PERMISSION_INVALID' });
         const plain = Result.Ok.flatten(decrypted);
         const payload =
             typia.json.isParse<IAuthentication.ITokenPayload>(plain);
-        if (isNull(payload)) return Result.Error.map('PERMISSION_INVALID');
+        if (isNull(payload))
+            return Result.Error.map({ code: 'PERMISSION_INVALID' });
         if (now > new Date(payload.expired_at))
-            return Result.Error.map('PERMISSION_EXPIRED');
+            return Result.Error.map({ code: 'PERMISSION_EXPIRED' });
         return Result.Ok.map(payload);
     };
 }
