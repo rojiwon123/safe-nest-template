@@ -33,4 +33,4 @@ tsconfig.test.json
 .eslintrc.js
 .gitignore
 .prettierignore
-prettier.config.js
+prettier.config.cjs

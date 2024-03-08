@@ -1,7 +1,8 @@
+import typia from 'typia';
+
 import { ErrorCode } from '@SRC/common/error_code';
 import { Regex } from '@SRC/common/type';
 import { Result } from '@SRC/utils/result';
-import typia from 'typia';
 
 import { IUser } from './dto';
 

@@ -1,7 +1,8 @@
-import { Backend } from '@SRC/backend';
-import { Configuration } from '@SRC/infrastructure/config';
 import { DynamicExecutor } from '@nestia/e2e';
 import { IConnection } from '@nestia/fetcher';
+
+import { Backend } from '@SRC/backend';
+import { Configuration } from '@SRC/infrastructure/config';
 
 import { TestAnalyzer } from './internal/analyzer';
 

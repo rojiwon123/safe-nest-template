@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from '@PRISMA';
+
 import { Result } from '@SRC/utils/result';
 
 import { Configuration } from './config';

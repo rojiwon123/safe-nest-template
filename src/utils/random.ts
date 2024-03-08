@@ -1,6 +1,7 @@
-import { Num, Regex } from '@SRC/common/type';
 import { randomInt, randomUUID } from 'crypto';
 import typia from 'typia';
+
+import { Num, Regex } from '@SRC/common/type';
 
 export namespace Random {
     export const uuid = (): Regex.UUID => randomUUID();

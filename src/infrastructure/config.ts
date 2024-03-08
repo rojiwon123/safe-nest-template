@@ -1,6 +1,7 @@
-import { Random } from '@SRC/utils/random';
 import dotenv from 'dotenv';
 import typia from 'typia';
+
+import { Random } from '@SRC/utils/random';
 
 const init = () => {
     switch (process.env['NODE_ENV']) {
