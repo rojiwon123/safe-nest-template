@@ -1,11 +1,11 @@
 import { isNull } from '@fxts/core';
 import typia from 'typia';
 
-import { ErrorCode } from '@SRC/common/error_code';
+import { Crypto } from '@SRC/common/crypto';
+import { Exception } from '@SRC/common/exception';
+import { Result } from '@SRC/common/result';
 import { Configuration } from '@SRC/infrastructure/config';
-import { Crypto } from '@SRC/utils/crypto';
 import { DateUtil } from '@SRC/utils/date';
-import { Result } from '@SRC/utils/result';
 
 import { IAuthentication } from './dto';
 
@@ -38,7 +38,7 @@ export namespace Token {
         token: string,
     ): Result<
         IAuthentication.ITokenPayload,
-        ErrorCode.Permission.Expired | ErrorCode.Permission.Invalid
+        Exception.Permission.Expired | Exception.Permission.Invalid
     > => {
         const now = new Date();
         const decrypted = Crypto.decrypt({

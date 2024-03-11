@@ -1,4 +1,4 @@
-import { IPage } from '@SRC/common/dto';
+import { IPage } from '@SRC/common/page';
 import { Regex } from '@SRC/common/type';
 
 import { IUser } from '../users/dto';

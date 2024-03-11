@@ -1,6 +1,6 @@
 import { IPropagation } from '@nestia/fetcher';
 
-import { IPage } from '@SRC/common/dto';
+import { IPage } from '@SRC/common/page';
 
 export namespace APIValidator {
     class APIValidation extends Error {

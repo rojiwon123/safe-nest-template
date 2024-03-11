@@ -1,8 +1,8 @@
 import typia from 'typia';
 
-import { ErrorCode } from '@SRC/common/error_code';
+import { Exception } from '@SRC/common/exception';
+import { Result } from '@SRC/common/result';
 import { Regex } from '@SRC/common/type';
-import { Result } from '@SRC/utils/result';
 
 import { IUser } from './dto';
 
@@ -11,7 +11,7 @@ export namespace User {
         () =>
         async (input: {
             id: Regex.UUID;
-        }): Promise<Result<IUser, ErrorCode.User.NotFound>> => {
+        }): Promise<Result<IUser, Exception.User.NotFound>> => {
             return Result.Ok.map({ ...typia.random<IUser>(), id: input.id });
         };
 }

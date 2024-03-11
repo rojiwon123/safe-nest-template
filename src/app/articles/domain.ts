@@ -1,8 +1,8 @@
 import typia from 'typia';
 
-import { ErrorCode } from '@SRC/common/error_code';
+import { Exception } from '@SRC/common/exception';
+import { Result } from '@SRC/common/result';
 import { Regex } from '@SRC/common/type';
-import { Result } from '@SRC/utils/result';
 
 import { IArticle } from './dto';
 
@@ -11,7 +11,7 @@ export namespace Article {
         () =>
         async (input: {
             id: Regex.UUID;
-        }): Promise<Result<IArticle, ErrorCode.Article.NotFound>> => {
+        }): Promise<Result<IArticle, Exception.Article.NotFound>> => {
             return Result.Ok.map({ ...typia.random<IArticle>(), id: input.id });
         };
 }
