@@ -1,8 +1,10 @@
 import * as nest from '@nestjs/common';
 
-export class Exception<T extends string> extends nest.HttpException {
+export class Exception<
+    T extends IException<string>,
+> extends nest.HttpException {
     constructor(
-        public readonly body: IException<T>,
+        public readonly body: T,
         status: number,
     ) {
         super(body, status);
