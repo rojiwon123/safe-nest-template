@@ -7,11 +7,6 @@ on:
                 description: 'Suffix to Append to Tag Names'
                 required: false
                 type: string
-            deploy:
-                description: 'Deploy Docker Image'
-                required: true
-                default: false
-                type: boolean
 
 permissions:
     id-token: write
@@ -46,12 +41,7 @@ jobs:
             - name: Setup NodeJS
               uses: actions/setup-node@main
               with:
-                  node-version: 18
-
-            - name: Setup Registry
-              run: |
-                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-                  echo "@rojiwon123:registry=https://npm.pkg.github.com" >> ~/.npmrc
+                  node-version: 20
 
             - name: Install
               run: npm ci && npm run build:prisma && npm run build:sdk
@@ -107,14 +97,9 @@ jobs:
             - name: Setup NodeJS
               uses: actions/setup-node@main
               with:
-                  node-version: 18
+                  node-version: 20
 
-            - name: Setup Registry
-              run: |
-                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-                  echo "@rojiwon123:registry=https://npm.pkg.github.com" >> ~/.npmrc
-
-            - name: Install & Build
+            - name: Install
               run: npm ci && npm run build:prisma && npm run build:swagger
 
             - name: Commit to gh-pages
@@ -130,29 +115,28 @@ jobs:
                   git commit -m "Update swagger.json"
                   git push --set-upstream origin gh-pages
 
-    deploy-image:
-        runs-on: ubuntu-latest
-        needs: create-release-note
-        if: github.event.inputs.deploy == 'true'
-        steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@main
-
-            - name: Configure AWS credentials 🔒
-              uses: aws-actions/configure-aws-credentials@v2
-              with:
-                  role-to-assume: ${{ secrets.AWS_ECR_ROLE }}
-                  aws-region: ${{ env.AWS_REGION }}
-
-            - name: Login to Amazon ECR 🔒
-              id: login-ecr
-              uses: aws-actions/amazon-ecr-login@v1
-
-            - name: Image Build and Push to Amazon ECR ✨
-              id: build-image
-              env:
-                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-                  IMAGE_TAG: ${{ needs.create-release-note.outputs.release }}
-              run: |
-                  docker build --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+#    deploy-image:
+#        runs-on: ubuntu-latest
+#        needs: create-release-note
+#        steps:
+#            - name: Checkout 🛎️
+#              uses: actions/checkout@main
+#
+#            - name: Configure AWS credentials 🔒
+#              uses: aws-actions/configure-aws-credentials@v2
+#              with:
+#                  role-to-assume: ${{ secrets.AWS_ECR_ROLE }}
+#                  aws-region: ${{ env.AWS_REGION }}
+#
+#            - name: Login to Amazon ECR 🔒
+#              id: login-ecr
+#              uses: aws-actions/amazon-ecr-login@v1
+#
+#            - name: Image Build and Push to Amazon ECR ✨
+#              id: build-image
+#              env:
+#                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#                  IMAGE_TAG: ${{ needs.create-release-note.outputs.release }}
+#              run: |
+#                  docker build --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+#                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

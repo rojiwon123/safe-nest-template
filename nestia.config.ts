@@ -3,7 +3,7 @@ import type nestia from '@nestia/sdk';
 const NESTIA_CONFIG: nestia.INestiaConfig = {
     input: 'src/controllers',
     output: './sdk',
-    simulate: true,
+    simulate: false,
     propagate: true,
     clone: true,
     primitive: true,

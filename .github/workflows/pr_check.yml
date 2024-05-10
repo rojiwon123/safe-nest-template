@@ -40,11 +40,6 @@ jobs:
             - name: Checkout 🛎️
               uses: actions/checkout@main
 
-            - name: Setup Registry
-              run: |
-                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-                  echo "@rojiwon123:registry=https://npm.pkg.github.com" >> ~/.npmrc
-
             - name: Install
               run: npm ci && npm run build:prisma && npm run build:sdk
 

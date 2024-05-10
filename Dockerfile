@@ -1,4 +1,4 @@
-FROM  node:18-alpine AS builder
+FROM  node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -9,7 +9,7 @@ COPY . .
 RUN npm run build:prisma
 RUN npm run build && npm prune --omit=dev
 
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 
 RUN apk add --no-cache tini
 

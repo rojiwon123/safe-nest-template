@@ -1,32 +1,32 @@
 import * as nest from '@nestjs/common';
 
 export class Exception<
-    T extends IException<string>,
+    T extends Exception.IBody<string>,
 > extends nest.HttpException {
     constructor(
         public readonly body: T,
         status: number,
     ) {
-        super(body, status);
+        super(body.message ?? body.code, status);
         this.body = body;
     }
 }
 
-export interface IException<T extends string> {
-    code: T;
-    message?: string;
-}
 export namespace Exception {
+    export interface IBody<T extends string> {
+        readonly code: T;
+        readonly message?: string | undefined;
+    }
     export namespace Permission {
-        export type Required = IException<'PERMISSION_REQUIRED'>;
-        export type Invalid = IException<'PERMISSION_INVALID'>;
-        export type Expired = IException<'PERMISSION_EXPIRED'>;
+        export type Required = IBody<'PERMISSION_REQUIRED'>;
+        export type Invalid = IBody<'PERMISSION_INVALID'>;
+        export type Expired = IBody<'PERMISSION_EXPIRED'>;
     }
     export namespace User {
-        export type NotFound = IException<'USER_NOT_FOUND'>;
-        export type AlreadyExist = IException<'USER_ALREADY_EXIST'>;
+        export type NotFound = IBody<'USER_NOT_FOUND'>;
+        export type AlreadyExist = IBody<'USER_ALREADY_EXIST'>;
     }
     export namespace Article {
-        export type NotFound = IException<'ARTICLE_NOT_FOUND'>;
+        export type NotFound = IBody<'ARTICLE_NOT_FOUND'>;
     }
 }

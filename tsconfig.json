@@ -4,7 +4,7 @@
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
         // "alwaysStrict": true, // strict mode family
-        "exactOptionalPropertyTypes": true,
+        "exactOptionalPropertyTypes": false,
         "noFallthroughCasesInSwitch": false,
         //  "noImplicitAny": true, // strict mode family
         "noImplicitOverride": true,
@@ -81,7 +81,10 @@
                 "afterDeclarations": true
             },
             { "transform": "typia/lib/transform" },
-            { "transform": "@nestia/core/lib/transform" }
+            {
+                "transform": "@nestia/core/lib/transform",
+                "validate": "assertEquals"
+            }
         ],
 
         /* Interop Constraints */
