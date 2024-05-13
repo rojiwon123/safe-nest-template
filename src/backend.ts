@@ -1,4 +1,4 @@
-import { DynamicModule } from '@nestia/core';
+import core from '@nestia/core';
 import * as nest from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
@@ -16,37 +16,37 @@ const date = () =>
     });
 
 export class Backend {
-    private constructor(private readonly _application: nest.INestApplication) {}
+    private constructor(private readonly _app: nest.INestApplication) {}
 
-    static async create(
+    static async start(
         options: nest.NestApplicationOptions = {},
     ): Promise<Backend> {
         await db.$connect();
         const app = await NestFactory.create(
-            await DynamicModule.mount(controllers, {
+            await core.DynamicModule.mount(controllers, {
                 imports: [InfraModule],
             }),
             options,
         );
-        app.use(cookieParser()).use(
-            helmet({ contentSecurityPolicy: true, hidePoweredBy: true }),
-        );
+        await app
+            .use(
+                cookieParser(),
+                helmet({ contentSecurityPolicy: true, hidePoweredBy: true }),
+            )
+            .init();
+        await app.listen(Configuration.PORT);
+        logger.log(`Server start ${date()}`);
         const backend = new Backend(app);
         process.on('SIGINT', async () => {
-            await backend.close();
+            await backend.end();
             process.exit(0);
         });
         return backend;
     }
 
-    async open() {
-        await this._application.listen(Configuration.PORT);
-        logger.log(`Server open ${date()}`);
-    }
-
-    async close() {
-        await this._application.close();
+    async end() {
+        await this._app.close();
         await db.$disconnect();
-        logger.log(`Server close ${date()}`);
+        logger.log(`Server end ${date()}`);
     }
 }

@@ -28,15 +28,15 @@ const init = () => {
           } as unknown as IEnv)
         : typia.assert<IEnv>({ PORT: 4000, ...process.env });
 };
-export const Configuration: IEnv = init();
+export const Configuration = Object.freeze(init());
 
 interface IEnv {
-    readonly NODE_ENV: 'development' | 'production' | 'test';
+    NODE_ENV: 'development' | 'production' | 'test';
     /** @default 4000 */
-    readonly PORT: number;
-    readonly DATABASE_URL: string;
+    PORT: number;
+    DATABASE_URL: string;
 
-    readonly ACCESS_TOKEN_KEY: string &
+    ACCESS_TOKEN_KEY: string &
         typia.tags.MinLength<32> &
         typia.tags.MaxLength<32>;
 }

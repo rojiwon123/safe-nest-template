@@ -1,111 +1,121 @@
-import * as nest from '@nestjs/common';
+import * as cloudwatch from '@aws-sdk/client-cloudwatch-logs';
+import stream from 'stream';
 import util from 'util';
 import winston from 'winston';
 
 import { Configuration } from './config';
 
-type LogMethod = (message: unknown) => void;
-
-/** LoggerService interface */
-interface ILogger extends Readonly<Record<nest.LogLevel, LogMethod>> {}
-
-const stringify = (input: unknown) => util.inspect(input, { depth: 5 });
-
-namespace Winston {
-    const logger = winston.createLogger({
-        levels: {
-            FATAL: 0,
-            ERROR: 1,
-            WARN: 2,
-            LOG: 3,
-            VERBOSE: 4,
-            DEBUG: 5,
-        },
-        level: Configuration.NODE_ENV === 'production' ? 'LOG' : 'DEBUG',
-        transports: new winston.transports.Stream({
-            stream: process.stdout,
-            format: winston.format.combine(
-                winston.format.printf(
-                    (info) => `[${info.level}] ${info.message}`,
-                ),
-                ...(Configuration.NODE_ENV !== 'production'
-                    ? [
-                          winston.format.colorize({
-                              message: true,
-                              colors: {
-                                  FATAL: 'purple',
-                                  ERROR: 'red',
-                                  WARN: 'yellow',
-                                  LOG: 'white',
-                                  VERBOSE: 'white',
-                                  DEBUG: 'white',
-                              },
-                          }),
-                      ]
-                    : []),
-            ),
-        }),
-    });
-
-    export const write =
-        (level: 'FATAL' | 'ERROR' | 'WARN' | 'LOG' | 'VERBOSE' | 'DEBUG') =>
-        (message: unknown): void => {
-            logger.log(level, stringify(message).replaceAll('\\n', '\n'));
-        };
+interface LogLevel {
+    FATAL: 0;
+    ERROR: 1;
+    WARN: 2;
+    INFO: 3; // log
+    DEBUG: 4;
 }
 
-export const logger: ILogger = {
-    fatal(message) {
-        if (message instanceof Error) {
-            const { message: msg, name, stack, ...meta } = message;
-            Winston.write('FATAL')(
-                stack
-                    ? stack + stringify(meta)
-                    : { name, message: msg, ...meta },
-            );
-            return;
-        }
-        Winston.write('FATAL')(message);
+const inspect_options: Record<keyof LogLevel, util.InspectOptions> = {
+    FATAL: { colors: false, sorted: false },
+    ERROR: { colors: false, sorted: false },
+    WARN: { colors: false, sorted: false },
+    INFO: { colors: false, sorted: false },
+    DEBUG: {
+        colors: false,
+        sorted: false,
+        depth: null,
+        showHidden: true,
+        showProxy: true,
+        maxArrayLength: null,
+        numericSeparator: true,
     },
-    error(message) {
-        if (message instanceof Error) {
-            const { message: msg, name, stack, ...meta } = message;
-            Winston.write('ERROR')(
-                stack
-                    ? stack + stringify(meta)
-                    : { name, message: msg, ...meta },
-            );
-            return;
-        }
-        Winston.write('ERROR')(message);
-    },
-    warn: Winston.write('WARN'),
-    log: Winston.write('LOG'),
-    verbose: Winston.write('VERBOSE'),
-    debug: Winston.write('DEBUG'),
 };
 
-/**
- * lambda 환경에서는 별도의 로그 스트림 연결이 필요 없음
-import { CloudWatchLogsClient, PutLogEventsCommand } from '@aws-sdk/client-cloudwatch-logs';
-import { Writable } from 'stream';
-const aws_client = new CloudWatchLogsClient();
-new Writable({
-    write(chunk, _, callback) {
-        const command = new PutLogEventsCommand({
-            logGroupName: Configuration.AWS_LOG_GROUP,
-            logStreamName: Configuration.NODE_ENV,
-            logEvents: [
-                {
-                    message: chunk.toString(),
-                    timestamp: Date.now(),
-                },
-            ],
-        });
-        aws_client
-            .send(command)
-            .then(() => callback())
-            .catch(console.log);
-    },
-})
-*/
+const stringify = (level: keyof LogLevel, ...messages: unknown[]) =>
+    messages
+        .map((message) =>
+            typeof message === 'string'
+                ? message
+                : util.inspect(message, inspect_options[level]),
+        )
+        .join(' ');
+
+const CONSOLE_TRANSPORT = new winston.transports.Stream({
+    stream: process.stdout,
+    format: winston.format.combine(
+        winston.format.colorize({
+            message: true,
+            colors: {
+                FATAL: 'red',
+                ERROR: 'red',
+                WARN: 'yellow',
+                INFO: 'white',
+                DEBUG: 'white',
+            } satisfies Record<keyof LogLevel, string>,
+        }),
+        winston.format.printf((info) => `[${info.level}] ` + info.message),
+    ),
+});
+
+const aws_log_client = new cloudwatch.CloudWatchLogsClient({
+    region: 'ap-northeast-2',
+});
+
+const timestamp = () =>
+    new Date().toLocaleString('ko', { timeZone: 'Asia/Seoul' });
+
+const LOG_STREAM_TRANSPORT = new winston.transports.Stream({
+    stream: new stream.Writable({
+        write(chunk, _, callback) {
+            const message = typeof chunk === 'string' ? chunk : '';
+            const timestamp = Date.now();
+            return aws_log_client
+                .send(
+                    new cloudwatch.PutLogEventsCommand({
+                        logGroupName: '',
+                        logStreamName: '',
+                        logEvents: [{ message, timestamp }],
+                    }),
+                )
+                .then(() => callback(null))
+                .catch(callback);
+        },
+    }),
+    format: winston.format.printf(
+        (info) => `[${info.level}] ${timestamp()} ${info.message}`,
+    ),
+});
+
+const PRODUCTION_MODE = Configuration.NODE_ENV === 'production';
+
+const LOG_LEVEL: keyof LogLevel = PRODUCTION_MODE ? 'INFO' : 'DEBUG';
+
+const winston_logger = winston.createLogger({
+    levels: {
+        FATAL: 0,
+        ERROR: 1,
+        WARN: 2,
+        INFO: 3, // log
+        DEBUG: 4,
+    } satisfies LogLevel,
+    level: LOG_LEVEL,
+    format: winston.format((info) => {
+        info.message = stringify(info.level as keyof LogLevel, ...info.message);
+        return info;
+    })(),
+    transports: PRODUCTION_MODE ? [LOG_STREAM_TRANSPORT] : [CONSOLE_TRANSPORT],
+});
+
+const write =
+    (level: keyof LogLevel) =>
+    (...message: unknown[]) => {
+        winston_logger.log(level, { message });
+    };
+
+export const logger = Object.freeze({
+    fatal: write('FATAL'),
+    error: write('ERROR'),
+    warn: write('WARN'),
+    /** same with logger.info */
+    log: write('INFO'),
+    info: write('INFO'),
+    debug: write('DEBUG'),
+});

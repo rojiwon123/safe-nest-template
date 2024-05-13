@@ -1,9 +1,7 @@
 import { Backend } from './backend';
 import { logger } from './infrastructure/logger';
 
-void Backend.create({
+void Backend.start({
     logger: false,
     cors: { credentials: false },
-})
-    .then((app) => app.open())
-    .catch(logger.fatal);
+}).catch(logger.fatal);
