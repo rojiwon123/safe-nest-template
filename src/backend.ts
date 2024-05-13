@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 import { Configuration } from './infrastructure/config';
-import { db } from './infrastructure/db';
+// import { db } from './infrastructure/db';
 import { InfraModule } from './infrastructure/infra.module';
 import { logger } from './infrastructure/logger';
 
@@ -21,7 +21,7 @@ export class Backend {
     static async start(
         options: nest.NestApplicationOptions = {},
     ): Promise<Backend> {
-        await db.$connect();
+        //   await db.$connect();
         const app = await NestFactory.create(
             await core.DynamicModule.mount(controllers, {
                 imports: [InfraModule],
@@ -46,7 +46,7 @@ export class Backend {
 
     async end() {
         await this._app.close();
-        await db.$disconnect();
+        //     await db.$disconnect();
         logger.log(`Server end ${date()}`);
     }
 }

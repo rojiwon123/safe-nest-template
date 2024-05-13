@@ -1,15 +1,15 @@
 import dotenv from 'dotenv';
 import typia from 'typia';
 
-import { Random } from '@SRC/utils/random';
+import { Random } from '@SRC/common/random';
 
 const init = () => {
     switch (process.env['NODE_ENV']) {
         case 'development':
-            dotenv.config({ path: '.env' });
+            dotenv.config({ path: '.env', override: true });
             break;
         case 'test':
-            dotenv.config({ path: '.env.test' });
+            dotenv.config({ path: '.env.test', override: true });
             break;
         case 'production':
             break;
@@ -22,9 +22,9 @@ const init = () => {
     return process.env['NODE_ENV'] === 'test'
         ? ({
               PORT: 4000,
-              ...process.env,
               ACCESS_TOKEN_KEY: Random.string(32),
               REFRESH_TOKEN_KEY: Random.string(32),
+              ...process.env,
           } as unknown as IEnv)
         : typia.assert<IEnv>({ PORT: 4000, ...process.env });
 };

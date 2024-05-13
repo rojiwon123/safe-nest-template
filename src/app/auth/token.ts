@@ -2,10 +2,10 @@ import { isNull } from '@fxts/core';
 import typia from 'typia';
 
 import { Crypto } from '@SRC/common/crypto';
+import { DateUtil } from '@SRC/common/date';
 import { Exception } from '@SRC/common/exception';
 import { Result } from '@SRC/common/result';
 import { Configuration } from '@SRC/infrastructure/config';
-import { DateUtil } from '@SRC/utils/date';
 
 import { IAuthentication } from './dto';
 
@@ -38,7 +38,7 @@ export namespace Token {
         token: string,
     ): Result<
         IAuthentication.ITokenPayload,
-        Exception.Permission.Expired | Exception.Permission.Invalid
+        Exception.Authentication.Expired | Exception.Authentication.Invalid
     > => {
         const now = new Date();
         const decrypted = Crypto.decrypt({
@@ -46,14 +46,14 @@ export namespace Token {
             key: Configuration.ACCESS_TOKEN_KEY,
         });
         if (Result.Error.is(decrypted))
-            return Result.Error.map({ code: 'PERMISSION_INVALID' });
+            return Result.Error.map({ code: 'AUTHENTICATION_INVALID' });
         const plain = Result.Ok.flatten(decrypted);
         const payload =
             typia.json.isParse<IAuthentication.ITokenPayload>(plain);
         if (isNull(payload))
-            return Result.Error.map({ code: 'PERMISSION_INVALID' });
+            return Result.Error.map({ code: 'AUTHENTICATION_INVALID' });
         if (now > new Date(payload.expired_at))
-            return Result.Error.map({ code: 'PERMISSION_EXPIRED' });
+            return Result.Error.map({ code: 'AUTHENTICATION_EXPIRED' });
         return Result.Ok.map(payload);
     };
 }

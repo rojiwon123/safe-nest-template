@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 
-import { ExceptionFilter } from './exception.filter';
+import { AllExceptionFilter } from './all-exception.filter';
 
 @Module({
-    providers: [{ provide: APP_FILTER, useClass: ExceptionFilter }],
+    providers: [{ provide: APP_FILTER, useClass: AllExceptionFilter }],
 })
 export class InfraModule {}

@@ -15,13 +15,15 @@ export namespace Random {
     }): Num.Int64 => randomInt(min, max);
     /** `0 <= n < max` */
     export const double = (max: number): Num.Double => Math.random() * max;
-    export const string = (length: number) => {
+    export function string(max: number): string;
+    export function string(min: number, max: number): string;
+    export function string(min: number, max?: number) {
         const chars =
             'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
+        const length = max === undefined ? min : int({ min, max });
         return Array.from({ length }, () =>
             chars.charAt(int({ max: chars.length })),
         ).join('');
-    };
+    }
     export const iso = typia.createRandom<Regex.DateTime>();
 }

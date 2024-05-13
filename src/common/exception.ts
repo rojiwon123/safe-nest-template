@@ -1,27 +1,36 @@
-import * as nest from '@nestjs/common';
+interface IBody<T extends string> {
+    /**
+     * 예외 분류 코드
+     */
+    code: T;
+    /**
+     * 세부 예외 사항
+     */
+    message?: string;
+}
 
-export class Exception<
-    T extends Exception.IBody<string>,
-> extends nest.HttpException {
+export class Exception extends Error {
     constructor(
-        public readonly body: T,
-        status: number,
+        public readonly body: IBody<string>,
+        public readonly status: number,
     ) {
-        super(body.message ?? body.code, status);
-        this.body = body;
+        super(body.code);
+    }
+
+    static throw(body: IBody<string>, status: number): never {
+        throw new Exception(body, status);
     }
 }
 
 export namespace Exception {
-    export interface IBody<T extends string> {
-        readonly code: T;
-        readonly message?: string | undefined;
+    export type SystemError = IBody<'SYSTEM_ERROR'>;
+
+    export namespace Authentication {
+        export type Required = IBody<'AUTHENTICATION_REQUIRED'>;
+        export type Invalid = IBody<'AUTHENTICATION_INVALID'>;
+        export type Expired = IBody<'AUTHENTICATION_EXPIRED'>;
     }
-    export namespace Permission {
-        export type Required = IBody<'PERMISSION_REQUIRED'>;
-        export type Invalid = IBody<'PERMISSION_INVALID'>;
-        export type Expired = IBody<'PERMISSION_EXPIRED'>;
-    }
+
     export namespace User {
         export type NotFound = IBody<'USER_NOT_FOUND'>;
         export type AlreadyExist = IBody<'USER_ALREADY_EXIST'>;

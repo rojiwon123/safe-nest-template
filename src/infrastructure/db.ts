@@ -10,19 +10,24 @@ const prisma = new PrismaClient({
     log:
         Configuration.NODE_ENV === 'development'
             ? [
-                  { emit: 'stdout', level: 'error' },
-                  { emit: 'stdout', level: 'warn' },
-                  { emit: 'stdout', level: 'info' },
+                  { emit: 'event', level: 'error' },
+                  { emit: 'event', level: 'warn' },
+                  { emit: 'event', level: 'info' },
                   { emit: 'event', level: 'query' },
               ]
             : [
-                  { emit: 'stdout', level: 'error' },
-                  { emit: 'stdout', level: 'warn' },
+                  { emit: 'event', level: 'error' },
+                  { emit: 'event', level: 'warn' },
               ],
 });
 
-if (Configuration.NODE_ENV === 'development')
-    prisma.$on('query', (e) => logger.warn(e));
+prisma.$on('error', logger.error);
+prisma.$on('warn', logger.warn);
+
+if (Configuration.NODE_ENV === 'development') {
+    prisma.$on('query', logger.info);
+    prisma.$on('info', logger.info);
+}
 
 export const db = prisma.$extends({
     client: {

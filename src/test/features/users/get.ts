@@ -4,8 +4,8 @@ import api from '@project/api';
 import typia from 'typia';
 
 import { IUser } from '@SRC/app/users/dto';
+import { Random } from '@SRC/common/random';
 import { APIValidator } from '@SRC/test/internal/validator';
-import { Random } from '@SRC/utils/random';
 
 const test = api.functional.users.get;
 

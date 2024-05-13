@@ -30,7 +30,7 @@ export namespace APIValidator {
 
     export const assert =
         <
-            P extends IPropagation.IBranch<boolean, unknown, any>,
+            P extends IPropagation.IBranch<boolean, number, any>,
             S extends IPropagation.Status,
         >(
             response: Promise<P>,

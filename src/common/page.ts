@@ -11,7 +11,7 @@ export namespace IPage {
     }
 
     export interface ISearch {
-        /** @default 0 */
+        /** @default 1 */
         page?: Num.Int64 & typia.tags.Minimum<1>;
         /** @default 10 */
         size?: Num.Int64 & typia.tags.Minimum<10> & typia.tags.Maximum<50>;

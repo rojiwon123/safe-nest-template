@@ -15,8 +15,7 @@ const getArg = (key: string): string | undefined => {
 
 void (async () => {
     // Mocker.run();
-    const app = await Backend.create({ logger: false });
-    await app.open();
+    const app = await Backend.start({ logger: false });
     const connection: IConnection = {
         host: `http://localhost:${Configuration.PORT}`,
     };
@@ -41,7 +40,7 @@ void (async () => {
             }
         },
     })(features);
-    await app.close();
+    await app.end();
 
     const analyzed = TestAnalyzer.analyze(report);
     const md = process.argv.includes('-f');
