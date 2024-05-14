@@ -39,7 +39,7 @@ export namespace KakaoSDK {
     export const getTokens = (
         code: string,
     ): Promise<Result<ITokens, IAuthError>> =>
-        fetch.method.post
+        fetch.request.post
             .urlencoded({
                 url: AUTH_URL + '/oauth/token',
                 body: {
@@ -70,27 +70,28 @@ export namespace KakaoSDK {
                 }),
             );
 
-    /**
-     * {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#req-user-info 사용자 기본 정보 가져오기}
-     */
-    export const getUser =
-        (parameter: IMeRequestParameter) =>
-        (access_token: string): Promise<Result<IGetUserResponse, IAPIError>> =>
-            fetch.method
+    const get =
+        <T>({
+            parser,
+            path,
+        }: {
+            parser: (input: unknown) => T;
+            path: string;
+        }) =>
+        (
+            access_token: string,
+            query: fetch.IQuery = {},
+        ): Promise<Result<T, IAPIError>> =>
+            fetch.request
                 .get({
-                    url: API_URL + '/v2/user/me?',
-                    query: {
-                        secure_resource: parameter.secure_resource ?? true,
-                        property_keys: JSON.stringify(parameter.property_keys),
-                    },
-                    headers: {
-                        authorization: `Bearer ${access_token}`,
-                    },
+                    url: new URL(path, API_URL).toString(),
+                    query,
+                    headers: { authorization: `Bearer ${access_token}` },
                 })
                 .then(
                     fetch.response.match({
                         200: fetch.response.json((body) =>
-                            Result.Ok.map(typia.assert<IGetUserResponse>(body)),
+                            Result.Ok.map(parser(body)),
                         ),
                         _: fetch.response.json((body) =>
                             Result.Error.map(typia.assert<IAPIError>(body)),
@@ -103,6 +104,53 @@ export namespace KakaoSDK {
                         code: 0,
                     }),
                 );
+
+    export const post =
+        <T>({
+            parser,
+            path,
+        }: {
+            parser: (input: unknown) => T;
+            path: string;
+        }) =>
+        (access_token: string, body: fetch.IQuery) =>
+            fetch.request.post
+                .urlencoded({
+                    url: new URL(path, API_URL).toString(),
+                    body,
+                    headers: { authorization: `Bearer ${access_token}` },
+                })
+                .then(
+                    fetch.response.match({
+                        200: fetch.response.json((body) =>
+                            Result.Ok.map(parser(body)),
+                        ),
+                        _: fetch.response.json((body) =>
+                            Result.Error.map(typia.assert<IAPIError>(body)),
+                        ),
+                    }),
+                )
+                .catch(() =>
+                    Result.Error.map<IAPIError>({
+                        msg: 'unexpected_error',
+                        code: 0,
+                    }),
+                );
+
+    /**
+     * {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#req-user-info 사용자 기본 정보 가져오기}
+     */
+    export const getUser = (
+        access_token: string,
+        parameter: IMeRequestParameter,
+    ) =>
+        get({
+            parser: typia.createAssert<IGetUserResponse>(),
+            path: '/v2/user/me',
+        })(access_token, {
+            secure_resource: parameter.secure_resource ?? true,
+            property_keys: JSON.stringify(parameter.property_keys),
+        });
 
     export interface IOauth2Options {
         /**
