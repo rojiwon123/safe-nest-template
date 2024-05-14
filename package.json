@@ -42,7 +42,7 @@
         "@nestjs/common": "^10.3.8",
         "@nestjs/core": "^10.3.8",
         "@nestjs/platform-express": "^10.3.8",
-        "@rojiwon123/fetch": "^0.1.1",
+        "@rojiwon123/fetch": "^0.1.5",
         "cookie-parser": "^1.4.6",
         "dotenv": "^16.4.5",
         "helmet": "^7.1.0",
