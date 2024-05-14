@@ -70,7 +70,7 @@ export namespace KakaoSDK {
                 }),
             );
 
-    const get =
+    export const get =
         <T>({
             parser,
             path,
@@ -152,7 +152,7 @@ export namespace KakaoSDK {
             property_keys: JSON.stringify(parameter.property_keys),
         });
 
-    export interface IOauth2Options {
+    interface IOauth2Options {
         /**
          * 앱 REST API 키
          *
