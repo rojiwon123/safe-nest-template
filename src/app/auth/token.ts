@@ -3,6 +3,7 @@ import typia from 'typia';
 import { Crypto } from '@SRC/common/crypto';
 import { DateUtil } from '@SRC/common/date';
 import { Exception } from '@SRC/common/exception';
+import { Option } from '@SRC/common/option';
 import { Result } from '@SRC/common/result';
 import { Configuration } from '@SRC/infrastructure/config';
 
@@ -40,16 +41,17 @@ export namespace Token {
         Crypto.decrypt({
             token,
             key: Configuration.ACCESS_TOKEN_KEY,
-        }).match(
-            (some) => {
-                const payload =
-                    typia.json.isParse<IAuthentication.ITokenPayload>(some);
-                return payload === null
-                    ? Result.Err({ code: 'AUTHENTICATION_INVALID' })
-                    : DateUtil.toDate() > DateUtil.toDate(payload.expired_at)
-                      ? Result.Err({ code: 'AUTHENTICATION_EXPIRED' })
-                      : Result.Ok(payload);
-            },
-            () => Result.Err({ code: 'AUTHENTICATION_INVALID' }),
-        );
+        })
+            .flatMap(
+                Option.unit(
+                    typia.json.createIsParse<IAuthentication.ITokenPayload>(),
+                ),
+            )
+            .match(
+                (some) =>
+                    DateUtil.toDate() > DateUtil.toDate(some.expired_at)
+                        ? Result.Err({ code: 'AUTHENTICATION_EXPIRED' })
+                        : Result.Ok(some),
+                () => Result.Err({ code: 'AUTHENTICATION_INVALID' }),
+            );
 }

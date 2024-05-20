@@ -21,4 +21,14 @@ export namespace Option {
         flatMap: () => None(),
         match: (_, fn) => fn(),
     });
+    export const unit =
+        <Args extends unknown[], T>(
+            f: (...args: Args) => T | null | undefined,
+        ) =>
+        (...args: Args): Option<NonNullable<T>> => {
+            const value = f(...args);
+            return value === null || value === undefined
+                ? Option.None()
+                : Option.Some(value);
+        };
 }
