@@ -50,7 +50,7 @@ export const db = prisma.$extends({
                 .catch((error: unknown) => {
                     if (Object.is(rollback, error))
                         return Result.Err<T, E>(rollback.cause as E);
-                    throw error;
+                    throw error; // unexpected error
                 });
         },
     },
@@ -63,9 +63,9 @@ export const db = prisma.$extends({
     /**
      * Transaction with `Result` Instance
      *
-     * If closure return `Result.Error` instance, transaction execute rollback.
+     * If closure return `Result.Err` instance, transaction execute rollback.
      */
-    $safeTransaction: () => <T, E>(
+    $safeTransaction: <T, E>(
         closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
     ) => Promise<Result<T, E>>;
 };

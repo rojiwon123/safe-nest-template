@@ -43,9 +43,9 @@ export namespace Token {
             token,
             key: Configuration.ACCESS_TOKEN_KEY,
         }).match(
-            (ok) => {
+            (some) => {
                 const payload =
-                    typia.json.isParse<IAuthentication.ITokenPayload>(ok);
+                    typia.json.isParse<IAuthentication.ITokenPayload>(some);
                 return payload === null
                     ? Result.Err({ code: 'AUTHENTICATION_INVALID' })
                     : DateUtil.toDate() > DateUtil.toDate(payload.expired_at)

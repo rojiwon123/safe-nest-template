@@ -1,7 +1,7 @@
 import { isUndefined } from '@fxts/core';
 import crypto from 'crypto';
 
-import { Result } from './result';
+import { Option } from './option';
 
 export namespace Crypto {
     const IV_LEN = 12;
@@ -48,20 +48,20 @@ export namespace Crypto {
     }: {
         token: string;
         key: string;
-    }): Result<string, 'TOKEN_INVALID'> => {
+    }): Option<string> => {
         try {
             const [iv, tag, encrypted] = token.split('.');
             if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Result.Err('TOKEN_INVALID');
+                return Option.None();
             const decipher = crypto
                 .createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64'))
                 .setAuthTag(Buffer.from(tag, 'base64'));
-            return Result.Ok(
+            return Option.Some(
                 decipher.update(encrypted, 'base64', 'utf8') +
                     decipher.final('utf8'),
             );
         } catch {
-            return Result.Err('TOKEN_INVALID');
+            return Option.None();
         }
     };
 }
