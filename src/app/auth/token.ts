@@ -9,20 +9,18 @@ import { Configuration } from '@SRC/infrastructure/config';
 import { IAuthentication } from './dto';
 
 export namespace Token {
-    const hour = 1000 * 60 * 60 * 1;
-
-    const duration = hour * 3;
-
+    const duration = () => DateUtil.hour(3);
     export const generate = ({
         user_id,
     }: Pick<
         IAuthentication.ITokenPayload,
         'user_id'
     >): IAuthentication.IToken => {
+        DateUtil.hour(3);
         const payload: IAuthentication.ITokenPayload = {
             type: 'access',
             user_id,
-            expired_at: DateUtil.toISO(new Date(Date.now() + duration)),
+            expired_at: DateUtil.toISO(duration()),
         };
         const expired_at = payload.expired_at;
         const plain = typia.json.stringify(payload);

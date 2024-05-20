@@ -57,8 +57,8 @@ export namespace Crypto {
                 .createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64'))
                 .setAuthTag(Buffer.from(tag, 'base64'));
             return Option.Some(
-                decipher.update(encrypted, 'base64', 'utf8') +
-                    decipher.final('utf8'),
+                decipher.update(encrypted, 'base64', 'utf-8') +
+                    decipher.final('utf-8'),
             );
         } catch {
             return Option.None();
