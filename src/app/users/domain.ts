@@ -11,7 +11,6 @@ export namespace User {
         () =>
         async (input: {
             id: Regex.UUID;
-        }): Promise<Result<IUser, Exception.User.NotFound>> => {
-            return Result.Ok.map({ ...typia.random<IUser>(), id: input.id });
-        };
+        }): Promise<Result<IUser, Exception.User.NotFound>> =>
+            Result.Ok({ ...typia.random<IUser>(), id: input.id });
 }

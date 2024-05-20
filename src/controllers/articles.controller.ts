@@ -4,7 +4,6 @@ import * as nest from '@nestjs/common';
 import { IArticle } from '@SRC/app/articles/dto';
 import { ArticlesUsecase } from '@SRC/app/articles/usecase';
 import { Exception } from '@SRC/common/exception';
-import { Result } from '@SRC/common/result';
 import { Regex } from '@SRC/common/type';
 
 @nest.Controller('articles')
@@ -20,8 +19,7 @@ export class ArticlesController {
     async getList(
         @core.TypedQuery() query: IArticle.ISearch,
     ): Promise<IArticle.IPaginated> {
-        const result = await ArticlesUsecase.getList(query);
-        return Result.Ok.flatten(result);
+        return ArticlesUsecase.getList(query);
     }
 
     /**
@@ -37,9 +35,13 @@ export class ArticlesController {
     async get(
         @core.TypedParam('article_id') article_id: Regex.UUID,
     ): Promise<IArticle> {
-        const result = await ArticlesUsecase.get(article_id);
-        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
-        const error = Result.Error.flatten(result);
-        throw new Exception(error, nest.HttpStatus.NOT_FOUND);
+        return ArticlesUsecase.get(article_id).then((result) =>
+            result.match(
+                (ok) => ok,
+                (err) => {
+                    throw new Exception(err, nest.HttpStatus.NOT_FOUND);
+                },
+            ),
+        );
     }
 }

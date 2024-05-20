@@ -53,17 +53,17 @@ export namespace GithubSDK {
             )
             .then((input) =>
                 typia.is<IAccessToken>(input)
-                    ? Result.Ok.map(input)
+                    ? Result.Ok<IAccessToken, IAuthError>(input)
                     : typia.is<IAuthError>(input)
-                      ? Result.Error.map(input)
-                      : Result.Error.map<IAuthError>({
+                      ? Result.Err<IAccessToken, IAuthError>(input)
+                      : Result.Err<IAccessToken, IAuthError>({
                             error: 'unexpected_error',
                             error_description: '',
                             error_uri: '',
                         }),
             )
             .catch(() =>
-                Result.Error.map<IAuthError>({
+                Result.Err<IAccessToken, IAuthError>({
                     error: 'unexpected_error',
                     error_description: '',
                     error_uri: '',
@@ -94,13 +94,22 @@ export namespace GithubSDK {
                 })
                 .then(
                     fetch.response.match({
-                        200: fetch.response.json((body) =>
-                            Result.Ok.map(parser(body)),
+                        200: fetch.response.json(
+                            (body): Result.Ok<T, IAPIError> =>
+                                Result.Ok(parser(body)),
                         ),
-                        _: fetch.response.json((body) =>
-                            Result.Error.map(typia.assert<IAPIError>(body)),
+                        _: fetch.response.json(
+                            (body): Result.Err<T, IAPIError> =>
+                                Result.Err(typia.assert<IAPIError>(body)),
                         ),
                     }),
+                )
+                .catch(
+                    (): Result<T, IAPIError> =>
+                        Result.Err({
+                            message: 'unexpected_err',
+                            documentation_url: '',
+                        }),
                 );
 
     export const command =
@@ -130,12 +139,21 @@ export namespace GithubSDK {
                 .then(
                     fetch.response.match({
                         200: fetch.response.json((body) =>
-                            Result.Ok.map(parser(body)),
+                            Result.Ok<T, IAPIError>(parser(body)),
                         ),
                         _: fetch.response.json((body) =>
-                            Result.Error.map(typia.assert<IAPIError>(body)),
+                            Result.Err<T, IAPIError>(
+                                typia.assert<IAPIError>(body),
+                            ),
                         ),
                     }),
+                )
+                .catch(
+                    (): Result<T, IAPIError> =>
+                        Result.Err({
+                            message: 'unexpected_err',
+                            documentation_url: '',
+                        }),
                 );
 
     export const getUser = (access_token: string) =>

@@ -1,4 +1,3 @@
-import { isNull } from '@fxts/core';
 import typia from 'typia';
 
 import { Crypto } from '@SRC/common/crypto';
@@ -39,21 +38,20 @@ export namespace Token {
     ): Result<
         IAuthentication.ITokenPayload,
         Exception.Authentication.Expired | Exception.Authentication.Invalid
-    > => {
-        const now = new Date();
-        const decrypted = Crypto.decrypt({
+    > =>
+        Crypto.decrypt({
             token,
             key: Configuration.ACCESS_TOKEN_KEY,
-        });
-        if (Result.Error.is(decrypted))
-            return Result.Error.map({ code: 'AUTHENTICATION_INVALID' });
-        const plain = Result.Ok.flatten(decrypted);
-        const payload =
-            typia.json.isParse<IAuthentication.ITokenPayload>(plain);
-        if (isNull(payload))
-            return Result.Error.map({ code: 'AUTHENTICATION_INVALID' });
-        if (now > new Date(payload.expired_at))
-            return Result.Error.map({ code: 'AUTHENTICATION_EXPIRED' });
-        return Result.Ok.map(payload);
-    };
+        }).match(
+            (ok) => {
+                const payload =
+                    typia.json.isParse<IAuthentication.ITokenPayload>(ok);
+                return payload === null
+                    ? Result.Err({ code: 'AUTHENTICATION_INVALID' })
+                    : DateUtil.toDate() > DateUtil.toDate(payload.expired_at)
+                      ? Result.Err({ code: 'AUTHENTICATION_EXPIRED' })
+                      : Result.Ok(payload);
+            },
+            () => Result.Err({ code: 'AUTHENTICATION_INVALID' }),
+        );
 }

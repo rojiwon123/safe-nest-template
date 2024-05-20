@@ -35,23 +35,23 @@ export const db = prisma.$extends({
             closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
         ): Promise<Result<T, E>> => {
             const rollback = new Error('transaction rollback');
-            try {
-                const end: Result.Ok<T> = await prisma.$transaction(
-                    async (tx) => {
-                        const result = await closure(tx);
-                        if (Result.Error.is(result)) {
-                            rollback.cause = result;
-                            throw rollback;
-                        }
-                        return result;
-                    },
-                );
-                return end;
-            } catch (error: unknown) {
-                if (Object.is(rollback, error))
-                    return rollback.cause as Result.Error<E>;
-                throw error; // unexpected error
-            }
+            return prisma
+                .$transaction((tx) =>
+                    closure(tx).then((result) =>
+                        result.match(
+                            (ok) => Result.Ok<T, E>(ok),
+                            (err) => {
+                                rollback.cause = err;
+                                throw rollback;
+                            },
+                        ),
+                    ),
+                )
+                .catch((error: unknown) => {
+                    if (Object.is(rollback, error))
+                        return Result.Err<T, E>(rollback.cause as E);
+                    throw error;
+                });
         },
     },
 }) as unknown as Prisma.TransactionClient & {

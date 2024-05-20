@@ -55,15 +55,19 @@ export namespace KakaoSDK {
             .then(
                 fetch.response.match({
                     '200': fetch.response.json((body) =>
-                        Result.Ok.map(typia.assert<ITokens>(body)),
+                        Result.Ok<ITokens, IAuthError>(
+                            typia.assert<ITokens>(body),
+                        ),
                     ),
                     _: fetch.response.json((body) =>
-                        Result.Error.map(typia.assert<IAuthError>(body)),
+                        Result.Err<ITokens, IAuthError>(
+                            typia.assert<IAuthError>(body),
+                        ),
                     ),
                 }),
             )
             .catch(() =>
-                Result.Error.map<IAuthError>({
+                Result.Err<ITokens, IAuthError>({
                     error: 'unexpected_error',
                     error_description: 'unexpected_error',
                     error_code: 'unexpected_error',
@@ -91,15 +95,17 @@ export namespace KakaoSDK {
                 .then(
                     fetch.response.match({
                         200: fetch.response.json((body) =>
-                            Result.Ok.map(parser(body)),
+                            Result.Ok<T, IAPIError>(parser(body)),
                         ),
                         _: fetch.response.json((body) =>
-                            Result.Error.map(typia.assert<IAPIError>(body)),
+                            Result.Err<T, IAPIError>(
+                                typia.assert<IAPIError>(body),
+                            ),
                         ),
                     }),
                 )
                 .catch(() =>
-                    Result.Error.map<IAPIError>({
+                    Result.Err<T, IAPIError>({
                         msg: 'unexpected_error',
                         code: 0,
                     }),
@@ -123,15 +129,17 @@ export namespace KakaoSDK {
                 .then(
                     fetch.response.match({
                         200: fetch.response.json((body) =>
-                            Result.Ok.map(parser(body)),
+                            Result.Ok<T, IAPIError>(parser(body)),
                         ),
                         _: fetch.response.json((body) =>
-                            Result.Error.map(typia.assert<IAPIError>(body)),
+                            Result.Err<T, IAPIError>(
+                                typia.assert<IAPIError>(body),
+                            ),
                         ),
                     }),
                 )
                 .catch(() =>
-                    Result.Error.map<IAPIError>({
+                    Result.Err<T, IAPIError>({
                         msg: 'unexpected_error',
                         code: 0,
                     }),

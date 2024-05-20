@@ -11,7 +11,6 @@ export namespace Article {
         () =>
         async (input: {
             id: Regex.UUID;
-        }): Promise<Result<IArticle, Exception.Article.NotFound>> => {
-            return Result.Ok.map({ ...typia.random<IArticle>(), id: input.id });
-        };
+        }): Promise<Result<IArticle, Exception.Article.NotFound>> =>
+            Result.Ok({ ...typia.random<IArticle>(), id: input.id });
 }
