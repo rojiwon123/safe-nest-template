@@ -1,26 +1,45 @@
-export type Result<O, E> = Result.Ok<O, E> | Result.Err<O, E>;
+import { Option } from './option';
+
+const kind = Symbol('Result');
+const OkSymbol = Symbol('Ok');
+const ErrSymbol = Symbol('Err');
+
+export interface Result<O, E> {
+    [kind]: typeof OkSymbol | typeof ErrSymbol;
+    ok: Option<O>;
+    err: Option<E>;
+    /**
+     * lift method for ok case
+     */
+    mapOk: <O2>(f: (ok: O) => O2) => Result<O2, E>;
+    /**
+     * lift method for err case
+     */
+    mapErr: <E2>(f: (err: E) => E2) => Result<O, E2>;
+    /**
+     * Ok flatMap method
+     */
+    andThen: <O2, E2>(f: (ok: O) => Result<O2, E2>) => Result<O2, E | E2>;
+    match: <O2, E2>(fn1: (input: O) => O2, fn2: (input: E) => E2) => O2 | E2;
+}
+
 export namespace Result {
-    const kind = Symbol('Result');
-    const OkSymbol = Symbol('Ok');
-    const ErrSymbol = Symbol('Err');
-    export interface Ok<O, E> {
-        [kind]: typeof OkSymbol;
-        ok: O;
-        match: <O2, E2>(fn1: (input: O) => O2, fn2: (input: E) => E2) => O2;
-    }
-    export interface Err<O, E> {
-        [kind]: typeof ErrSymbol;
-        err: E;
-        match: <O2, E2>(fn1: (input: O) => O2, fn2: (input: E) => E2) => E2;
-    }
-    export const Ok = <O, E>(input: O): Ok<O, E> => ({
+    export const Ok = <O, E>(input: O): Result<O, E> => ({
         [kind]: OkSymbol,
-        ok: input,
+        ok: Option.Some(input),
+        err: Option.None(),
+        mapOk: (f) => Ok(f(input)),
+        mapErr: () => Ok(input),
+        andThen: (f) => f(input),
         match: (fn) => fn(input),
     });
-    export const Err = <O, E>(input: E): Err<O, E> => ({
+    export const Err = <O, E>(input: E): Result<O, E> => ({
         [kind]: ErrSymbol,
-        err: input,
+        ok: Option.None(),
+        err: Option.Some(input),
+        mapOk: () => Err(input),
+        mapErr: (f) => Err(f(input)),
+        andThen: () => Err(input),
         match: (_, fn) => fn(input),
     });
 }

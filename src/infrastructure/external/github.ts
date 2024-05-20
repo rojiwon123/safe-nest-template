@@ -94,22 +94,21 @@ export namespace GithubSDK {
                 })
                 .then(
                     fetch.response.match({
-                        200: fetch.response.json(
-                            (body): Result.Ok<T, IAPIError> =>
-                                Result.Ok(parser(body)),
+                        200: fetch.response.json((body) =>
+                            Result.Ok<T, IAPIError>(parser(body)),
                         ),
-                        _: fetch.response.json(
-                            (body): Result.Err<T, IAPIError> =>
-                                Result.Err(typia.assert<IAPIError>(body)),
+                        _: fetch.response.json((body) =>
+                            Result.Err<T, IAPIError>(
+                                typia.assert<IAPIError>(body),
+                            ),
                         ),
                     }),
                 )
-                .catch(
-                    (): Result<T, IAPIError> =>
-                        Result.Err({
-                            message: 'unexpected_err',
-                            documentation_url: '',
-                        }),
+                .catch(() =>
+                    Result.Err<T, IAPIError>({
+                        message: 'unexpected_err',
+                        documentation_url: '',
+                    }),
                 );
 
     export const command =
