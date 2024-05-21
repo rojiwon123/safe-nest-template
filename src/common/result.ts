@@ -42,6 +42,11 @@ export namespace Result {
         andThen: () => Err(input),
         match: (_, fn) => fn(input),
     });
+
+    export const match =
+        <O1, O2, E1, E2>(fn1: (input: O1) => O2, fn2: (input: E1) => E2) =>
+        (result: Result<O1, E1>): O2 | E2 =>
+            result.match(fn1, fn2);
 }
 
 /**

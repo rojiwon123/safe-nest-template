@@ -4,6 +4,7 @@ import * as nest from '@nestjs/common';
 import { IArticle } from '@SRC/app/articles/dto';
 import { ArticlesUsecase } from '@SRC/app/articles/usecase';
 import { Exception } from '@SRC/common/exception';
+import { Result } from '@SRC/common/result';
 import { Regex } from '@SRC/common/type';
 
 @nest.Controller('articles')
@@ -35,8 +36,8 @@ export class ArticlesController {
     async get(
         @core.TypedParam('article_id') article_id: Regex.UUID,
     ): Promise<IArticle> {
-        return ArticlesUsecase.get(article_id).then((result) =>
-            result.match(
+        return ArticlesUsecase.get(article_id).then(
+            Result.match(
                 (ok) => ok,
                 (err) => {
                     throw new Exception(err, nest.HttpStatus.NOT_FOUND);
