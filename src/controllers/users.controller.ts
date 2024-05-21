@@ -22,9 +22,7 @@ export class UsersController {
         return UsersUsecase.get(user_id).then((result) =>
             result.match(
                 (ok) => ok,
-                (err) => {
-                    throw new Exception(err, nest.HttpStatus.NOT_FOUND);
-                },
+                (err) => Exception.throw(err, nest.HttpStatus.NOT_FOUND),
             ),
         );
     }

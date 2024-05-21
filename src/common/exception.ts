@@ -16,7 +16,6 @@ export class Exception extends Error {
     ) {
         super(body.code);
     }
-
     static throw(body: IBody<string>, status: number): never {
         throw new Exception(body, status);
     }
