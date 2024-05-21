@@ -42,9 +42,9 @@ export namespace Token {
             token,
             key: Configuration.ACCESS_TOKEN_KEY,
         })
-            .flatMap(
+            .flatMap((token) =>
                 Option.unit(
-                    typia.json.createIsParse<IAuthentication.ITokenPayload>(),
+                    typia.json.isParse<IAuthentication.ITokenPayload>(token),
                 ),
             )
             .match(
