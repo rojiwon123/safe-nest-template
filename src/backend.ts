@@ -10,43 +10,49 @@ import { InfraModule } from './infrastructure/infra.module';
 import { logger } from './infrastructure/logger';
 
 const controllers = `${__dirname}/controllers`;
-const date = () =>
-    new Date().toLocaleString(undefined, {
-        timeZoneName: 'longGeneric',
-    });
+
+const tapLog =
+    (command: 'start' | 'end') =>
+    <T>(input: T) => {
+        logger.log(
+            `Server ${command} ${new Date().toLocaleString(undefined, {
+                timeZoneName: 'longGeneric',
+            })}`,
+        );
+        return input;
+    };
 
 export class Backend {
-    private constructor(private readonly _app: nest.INestApplication) {}
-
-    static async start(
-        options: nest.NestApplicationOptions = {},
-    ): Promise<Backend> {
-        //   await db.$connect();
-        const app = await NestFactory.create(
-            await core.DynamicModule.mount(controllers, {
-                imports: [InfraModule],
-            }),
-            options,
+    private constructor(private readonly _app: nest.INestApplication) {
+        process.on('SIGINT', () =>
+            this.end()
+                // .then(() => db.$connect())
+                .then(() => process.exit(0)),
         );
-        await app
-            .use(
-                cookieParser(),
-                helmet({ contentSecurityPolicy: true, hidePoweredBy: true }),
+    }
+
+    static async start(options: nest.NestApplicationOptions = {}) {
+        //   await db.$connect();
+        return core.DynamicModule.mount(controllers, {
+            imports: [InfraModule],
+        })
+            .then((module) => NestFactory.create(module, options))
+            .then((app) =>
+                app.use(
+                    cookieParser(),
+                    helmet({
+                        contentSecurityPolicy: true,
+                        hidePoweredBy: true,
+                    }),
+                ),
             )
-            .init();
-        await app.listen(Configuration.PORT);
-        logger.log(`Server start ${date()}`);
-        const backend = new Backend(app);
-        process.on('SIGINT', async () => {
-            await backend.end();
-            process.exit(0);
-        });
-        return backend;
+            .then((app) => app.init())
+            .then((app) => app.listen(Configuration.PORT).then(() => app))
+            .then(tapLog('start'))
+            .then((app) => new Backend(app));
     }
 
     async end() {
-        await this._app.close();
-        //     await db.$disconnect();
-        logger.log(`Server end ${date()}`);
+        return this._app.close().then(tapLog('end'));
     }
 }
