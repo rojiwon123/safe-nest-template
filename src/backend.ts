@@ -22,37 +22,35 @@ const tapLog =
         return input;
     };
 
-export class Backend {
-    private constructor(private readonly _app: nest.INestApplication) {
-        process.on('SIGINT', () =>
-            this.end()
-                // .then(() => db.$connect())
-                .then(() => process.exit(0)),
-        );
-    }
-
-    static async start(options: nest.NestApplicationOptions = {}) {
-        //   await db.$connect();
-        return core.DynamicModule.mount(controllers, {
+interface Backend {
+    end: () => Promise<void>;
+}
+export namespace Backend {
+    export const start = (
+        options: nest.NestApplicationOptions = {},
+    ): Promise<Backend> =>
+        core.DynamicModule.mount(controllers, {
             imports: [InfraModule],
         })
             .then((module) => NestFactory.create(module, options))
             .then((app) =>
-                app.use(
-                    cookieParser(),
-                    helmet({
-                        contentSecurityPolicy: true,
-                        hidePoweredBy: true,
-                    }),
-                ),
+                app
+                    .use(
+                        cookieParser(),
+                        helmet({
+                            contentSecurityPolicy: true,
+                            hidePoweredBy: true,
+                        }),
+                    )
+                    .init(),
             )
-            .then((app) => app.init())
             .then((app) => app.listen(Configuration.PORT).then(() => app))
             .then(tapLog('start'))
-            .then((app) => new Backend(app));
-    }
+            .then((app) => {
+                const end = () => app.close().then(tapLog('end'));
+                process.on('SIGINT', () => end().then(() => process.exit(0)));
+                return { end };
+            });
 
-    async end() {
-        return this._app.close().then(tapLog('end'));
-    }
+    export const end = (backend: Backend) => backend.end();
 }

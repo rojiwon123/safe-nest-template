@@ -24,24 +24,40 @@ export interface Result<O, E> {
 }
 
 export namespace Result {
-    export const Ok = <O, E>(input: O): Result<O, E> => ({
-        [kind]: OkSymbol,
-        ok: Option.Some(input),
-        err: Option.None(),
-        mapOk: (f) => Ok(f(input)),
-        mapErr: () => Ok(input),
-        andThen: (f) => f(input),
-        match: (fn) => fn(input),
-    });
-    export const Err = <O, E>(input: E): Result<O, E> => ({
-        [kind]: ErrSymbol,
-        ok: Option.None(),
-        err: Option.Some(input),
-        mapOk: () => Err(input),
-        mapErr: (f) => Err(f(input)),
-        andThen: () => Err(input),
-        match: (_, fn) => fn(input),
-    });
+    const define = <O, E>(result: Result<O, E>) =>
+        Object.defineProperties(result, {
+            [kind]: { writable: false, enumerable: false, configurable: false },
+            ok: { writable: false, enumerable: false, configurable: false },
+            err: { writable: false, enumerable: false, configurable: false },
+            mapOk: { writable: false, enumerable: false, configurable: false },
+            mapErr: { writable: false, enumerable: false, configurable: false },
+            andThen: {
+                writable: false,
+                enumerable: false,
+                configurable: false,
+            },
+            match: { writable: false, enumerable: false, configurable: false },
+        });
+    export const Ok = <O, E>(input: O): Result<O, E> =>
+        define<O, E>({
+            [kind]: OkSymbol,
+            ok: Option.Some(input),
+            err: Option.None(),
+            mapOk: (f) => Ok(f(input)),
+            mapErr: () => Ok(input),
+            andThen: (f) => f(input),
+            match: (fn) => fn(input),
+        });
+    export const Err = <O, E>(input: E): Result<O, E> =>
+        define<O, E>({
+            [kind]: ErrSymbol,
+            ok: Option.None(),
+            err: Option.Some(input),
+            mapOk: () => Err(input),
+            mapErr: (f) => Err(f(input)),
+            andThen: () => Err(input),
+            match: (_, fn) => fn(input),
+        });
 
     export const match =
         <O1, O2, E1, E2>(fn1: (input: O1) => O2, fn2: (input: E1) => E2) =>
