@@ -47,11 +47,11 @@ export namespace DateUtil {
     export const day = (day: number, now?: Date): Date => hour(day * 24, now);
 
     /**
-     * return `true` when `date1` is latest than `date2`.
+     * date1 - date2
      */
-    export const compare = (date1: Date, date2: Date): boolean =>
-        date1.getTime() > date2.getTime();
+    export const compare = (date1: Date, date2: Date): number =>
+        date1.getTime() - date2.getTime();
 
     export const isExpired = (input: Regex.DateTime | number | Date): boolean =>
-        compare(to(), typeof input === 'object' ? input : to(input));
+        compare(to(), typeof input === 'object' ? input : to(input)) >= 0;
 }
