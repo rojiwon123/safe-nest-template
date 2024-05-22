@@ -21,7 +21,7 @@ export namespace Token {
         const payload: IAuthentication.ITokenPayload = {
             type: 'access',
             user_id,
-            expired_at: DateUtil.toISO(duration()),
+            expired_at: DateUtil.toDateTime(duration()),
         };
         const expired_at = payload.expired_at;
         const plain = typia.json.stringify(payload);
@@ -49,7 +49,7 @@ export namespace Token {
             )
             .match(
                 (some) =>
-                    DateUtil.toDate() > DateUtil.toDate(some.expired_at)
+                    DateUtil.isExpired(some.expired_at)
                         ? Result.Err({ code: 'AUTHENTICATION_EXPIRED' })
                         : Result.Ok(some),
                 () => Result.Err({ code: 'AUTHENTICATION_INVALID' }),
