@@ -5,7 +5,7 @@ import { Result } from '@SRC/common/result';
 import { Configuration } from './config';
 import { logger } from './logger';
 
-const prisma = new PrismaClient({
+const _prisma = new PrismaClient({
     datasources: { database: { url: Configuration.DATABASE_URL } },
     log:
         Configuration.NODE_ENV === 'development'
@@ -21,21 +21,21 @@ const prisma = new PrismaClient({
               ],
 });
 
-prisma.$on('error', logger.error);
-prisma.$on('warn', logger.warn);
+_prisma.$on('error', logger.error);
+_prisma.$on('warn', logger.warn);
 
 if (Configuration.NODE_ENV === 'development') {
-    prisma.$on('query', logger.info);
-    prisma.$on('info', logger.info);
+    _prisma.$on('query', logger.info);
+    _prisma.$on('info', logger.info);
 }
 
-export const db = prisma.$extends({
+export const prisma = _prisma.$extends({
     client: {
         $safeTransaction: async <T, E>(
             closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
         ): Promise<Result<T, E>> => {
             const rollback = new Error('transaction rollback');
-            return prisma
+            return _prisma
                 .$transaction((tx) =>
                     closure(tx).then((result) =>
                         result.match(
@@ -55,11 +55,11 @@ export const db = prisma.$extends({
         },
     },
 }) as unknown as Prisma.TransactionClient & {
-    $transaction: typeof prisma.$transaction;
+    $transaction: typeof _prisma.$transaction;
     /** Connect with the databas */
-    $connect: typeof prisma.$connect;
+    $connect: typeof _prisma.$connect;
     /** Disconnect from the database */
-    $disconnect: typeof prisma.$disconnect;
+    $disconnect: typeof _prisma.$disconnect;
     /**
      * Transaction with `Result` Instance
      *
