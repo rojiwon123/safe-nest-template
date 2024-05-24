@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { config } from './infrastructure/config';
 import { InfraModule } from './infrastructure/infra.module';
 import { logger } from './infrastructure/logger';
+import { disconnectPrisma } from './infrastructure/prisma';
 
 const controllers = `${__dirname}/controllers`;
 
@@ -46,7 +47,8 @@ export namespace Backend {
             .then((app) => app.listen(config('PORT')).then(() => app))
             .then(tapLog('start'))
             .then((app) => {
-                const end = () => app.close().then(tapLog('end'));
+                const end = () =>
+                    app.close().then(disconnectPrisma).then(tapLog('end'));
                 process.on('SIGINT', () => end().then(() => process.exit(0)));
                 return { end };
             });

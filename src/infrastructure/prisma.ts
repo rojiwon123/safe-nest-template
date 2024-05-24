@@ -8,10 +8,6 @@ import { logger } from './logger';
 
 export interface IPrismaClient extends Prisma.TransactionClient {
     $transaction: PrismaClient['$transaction'];
-    /** Connect with the databas */
-    $connect: PrismaClient['$connect'];
-    /** Disconnect from the database */
-    $disconnect: PrismaClient['$disconnect'];
     /**
      * Transaction with `Result` Instance
      *
@@ -22,7 +18,7 @@ export interface IPrismaClient extends Prisma.TransactionClient {
     ) => Promise<Result<T, E>>;
 }
 
-const once: Once<IPrismaClient> = Once.unit(() => {
+const once = Once.unit(() => {
     const client = new PrismaClient({
         datasources: { database: { url: config('DATABASE_URL') } },
         log:
@@ -77,8 +73,15 @@ const once: Once<IPrismaClient> = Once.unit(() => {
     }) as unknown as IPrismaClient;
 });
 
-export const initPrisma = () => once.init();
+export const prisma = new Proxy(
+    {},
+    {
+        get: (_, key: keyof IPrismaClient) => {
+            console.log('hello');
+            once.run()[key];
+        },
+    },
+) as IPrismaClient;
 
-export const prisma = <T extends keyof IPrismaClient>(
-    key: T,
-): IPrismaClient[T] => once.run()[key];
+export const connectPrisma = async () => {}; // client.$connect();
+export const disconnectPrisma = async () => {};
