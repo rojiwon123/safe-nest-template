@@ -43,7 +43,7 @@ void (async () => {
     await backend.end();
 
     const analyzed = TestAnalyzer.analyze(report);
-    const md = process.argv.includes('-f');
+    const md = process.argv.includes('--report');
     TestAnalyzer.report(analyzed, md);
     process.exit(analyzed.state);
 })();

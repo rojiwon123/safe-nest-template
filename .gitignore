@@ -17,6 +17,8 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+test.md
+
 test_log.md
 test_log.txt
 
