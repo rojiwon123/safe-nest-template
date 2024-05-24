@@ -53,7 +53,6 @@
     "devDependencies": {
         "@nestia/e2e": "^0.4.3",
         "@nestia/sdk": "^3.2.0",
-        "@prisma/client": "^5.14.0",
         "@project/api": "file:packages/api",
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
         "@types/cookie-parser": "^1.4.7",
