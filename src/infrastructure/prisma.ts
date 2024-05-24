@@ -53,14 +53,11 @@ const once = Once.unit(() => {
                 const rollback = new Error('transaction rollback');
                 return client
                     .$transaction((tx) =>
-                        closure(tx).then((result) =>
-                            result.match(
-                                (ok) => Result.Ok<T, E>(ok),
-                                (err) => {
-                                    rollback.cause = err;
-                                    throw rollback;
-                                },
-                            ),
+                        closure(tx).then(
+                            Result.match(Result.Ok<T, E>, (err) => {
+                                rollback.cause = err;
+                                throw rollback;
+                            }),
                         ),
                     )
                     .catch((error: unknown) => {
@@ -76,10 +73,7 @@ const once = Once.unit(() => {
 export const prisma = new Proxy(
     {},
     {
-        get: (_, key: keyof IPrismaClient) => {
-            console.log('hello');
-            once.run()[key];
-        },
+        get: (_, key: keyof IPrismaClient) => once.run()[key],
     },
 ) as IPrismaClient;
 
