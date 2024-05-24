@@ -3,10 +3,10 @@ const SomeSymbol = Symbol('Some');
 const NoneSymbol = Symbol('None');
 
 export interface Option<T> {
-    [kind]: typeof SomeSymbol | typeof NoneSymbol;
-    map: <R>(f: (input: T) => R) => Option<R>;
-    flatMap: <R>(f: (input: T) => Option<R>) => Option<R>;
-    match: <R1, R2>(fn1: (input: T) => R1, fn2: () => R2) => R1 | R2;
+    readonly [kind]: typeof SomeSymbol | typeof NoneSymbol;
+    readonly map: <R>(f: (input: T) => R) => Option<R>;
+    readonly flatMap: <R>(f: (input: T) => Option<R>) => Option<R>;
+    readonly match: <R1, R2>(fn1: (input: T) => R1, fn2: () => R2) => R1 | R2;
 }
 export namespace Option {
     const define = <T>(option: Option<T>) =>

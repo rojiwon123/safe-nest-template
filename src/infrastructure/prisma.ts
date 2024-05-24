@@ -1,65 +1,17 @@
 import { Prisma, PrismaClient } from '@PRISMA';
 
+import { Once } from '@SRC/common/once';
 import { Result } from '@SRC/common/result';
 
-import { Configuration } from './config';
+import { config } from './config';
 import { logger } from './logger';
 
-const _prisma = new PrismaClient({
-    datasources: { database: { url: Configuration.DATABASE_URL } },
-    log:
-        Configuration.NODE_ENV === 'development'
-            ? [
-                  { emit: 'event', level: 'error' },
-                  { emit: 'event', level: 'warn' },
-                  { emit: 'event', level: 'info' },
-                  { emit: 'event', level: 'query' },
-              ]
-            : [
-                  { emit: 'event', level: 'error' },
-                  { emit: 'event', level: 'warn' },
-              ],
-});
-
-_prisma.$on('error', logger.error);
-_prisma.$on('warn', logger.warn);
-
-if (Configuration.NODE_ENV === 'development') {
-    _prisma.$on('query', logger.info);
-    _prisma.$on('info', logger.info);
-}
-
-export const prisma = _prisma.$extends({
-    client: {
-        $safeTransaction: async <T, E>(
-            closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
-        ): Promise<Result<T, E>> => {
-            const rollback = new Error('transaction rollback');
-            return _prisma
-                .$transaction((tx) =>
-                    closure(tx).then((result) =>
-                        result.match(
-                            (ok) => Result.Ok<T, E>(ok),
-                            (err) => {
-                                rollback.cause = err;
-                                throw rollback;
-                            },
-                        ),
-                    ),
-                )
-                .catch((error: unknown) => {
-                    if (Object.is(rollback, error))
-                        return Result.Err<T, E>(rollback.cause as E);
-                    throw error; // unexpected error
-                });
-        },
-    },
-}) as unknown as Prisma.TransactionClient & {
-    $transaction: typeof _prisma.$transaction;
+export interface IPrismaClient extends Prisma.TransactionClient {
+    $transaction: PrismaClient['$transaction'];
     /** Connect with the databas */
-    $connect: typeof _prisma.$connect;
+    $connect: PrismaClient['$connect'];
     /** Disconnect from the database */
-    $disconnect: typeof _prisma.$disconnect;
+    $disconnect: PrismaClient['$disconnect'];
     /**
      * Transaction with `Result` Instance
      *
@@ -68,8 +20,65 @@ export const prisma = _prisma.$extends({
     $safeTransaction: <T, E>(
         closure: (tx: Prisma.TransactionClient) => Promise<Result<T, E>>,
     ) => Promise<Result<T, E>>;
-};
+}
 
-// extends를 통해 orm method의 반환값을 변경할 수 있다.
-// 그래서 PrismaClient 타입 정보가 충돌하는데, 나는 반환값을 변경하는 extends를 추가하지 않았으므로
-// as keyword로 타입을 변경하였다.
+const once: Once<IPrismaClient> = Once.unit(() => {
+    const client = new PrismaClient({
+        datasources: { database: { url: config('DATABASE_URL') } },
+        log:
+            config('NODE_ENV') === 'development'
+                ? [
+                      { emit: 'event', level: 'error' },
+                      { emit: 'event', level: 'warn' },
+                      { emit: 'event', level: 'info' },
+                      { emit: 'event', level: 'query' },
+                  ]
+                : [
+                      { emit: 'event', level: 'error' },
+                      { emit: 'event', level: 'warn' },
+                  ],
+    });
+
+    client.$on('error', logger.error);
+    client.$on('warn', logger.warn);
+
+    if (config('NODE_ENV') === 'development') {
+        client.$on('query', logger.info);
+        client.$on('info', logger.info);
+    }
+
+    return client.$extends({
+        client: {
+            $safeTransaction: async <T, E>(
+                closure: (
+                    tx: Prisma.TransactionClient,
+                ) => Promise<Result<T, E>>,
+            ): Promise<Result<T, E>> => {
+                const rollback = new Error('transaction rollback');
+                return client
+                    .$transaction((tx) =>
+                        closure(tx).then((result) =>
+                            result.match(
+                                (ok) => Result.Ok<T, E>(ok),
+                                (err) => {
+                                    rollback.cause = err;
+                                    throw rollback;
+                                },
+                            ),
+                        ),
+                    )
+                    .catch((error: unknown) => {
+                        if (Object.is(rollback, error))
+                            return Result.Err<T, E>(rollback.cause as E);
+                        throw error; // unexpected error
+                    });
+            },
+        },
+    }) as unknown as IPrismaClient;
+});
+
+export const initPrisma = () => once.init();
+
+export const prisma = <T extends keyof IPrismaClient>(
+    key: T,
+): IPrismaClient[T] => once.run()[key];

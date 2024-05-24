@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import typia from 'typia';
 
+import { Once } from '@SRC/common/once';
 import { Random } from '@SRC/common/random';
 
-const init = () => {
+const once = Once.unit(() => {
     switch (process.env['NODE_ENV']) {
         case 'development':
             dotenv.config({ path: '.env', override: true });
@@ -25,12 +26,16 @@ const init = () => {
               ACCESS_TOKEN_KEY: Random.string(32),
               REFRESH_TOKEN_KEY: Random.string(32),
               ...process.env,
-          } as unknown as IEnv)
-        : typia.assert<IEnv>({ PORT: 4000, ...process.env });
-};
-export const Configuration = Object.freeze(init());
+          } as unknown as IConfig)
+        : typia.assert<IConfig>({ PORT: 4000, ...process.env });
+});
 
-interface IEnv {
+export const config = <T extends keyof IConfig>(key: T): IConfig[T] =>
+    once.run()[key];
+
+export const initConfig = () => once.init();
+
+interface IConfig {
     NODE_ENV: 'development' | 'production' | 'test';
     /** @default 4000 */
     PORT: number;

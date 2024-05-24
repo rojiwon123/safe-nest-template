@@ -5,7 +5,7 @@ import { DateUtil } from '@SRC/common/date';
 import { Exception } from '@SRC/common/exception';
 import { Option } from '@SRC/common/option';
 import { Result } from '@SRC/common/result';
-import { Configuration } from '@SRC/infrastructure/config';
+import { config } from '@SRC/infrastructure/config';
 
 import { IAuthentication } from './dto';
 
@@ -27,7 +27,7 @@ export namespace Token {
         const plain = typia.json.stringify(payload);
         const token = Crypto.encrypt({
             plain,
-            key: Configuration.ACCESS_TOKEN_KEY,
+            key: config('ACCESS_TOKEN_KEY'),
         });
         return { token, expired_at };
     };
@@ -40,7 +40,7 @@ export namespace Token {
     > =>
         Crypto.decrypt({
             token,
-            key: Configuration.ACCESS_TOKEN_KEY,
+            key: config('ACCESS_TOKEN_KEY'),
         })
             .flatMap((token) =>
                 Option.unit(

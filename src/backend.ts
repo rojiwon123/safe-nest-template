@@ -4,8 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
-import { Configuration } from './infrastructure/config';
-// import { db } from './infrastructure/db';
+import { config } from './infrastructure/config';
 import { InfraModule } from './infrastructure/infra.module';
 import { logger } from './infrastructure/logger';
 
@@ -44,7 +43,7 @@ export namespace Backend {
                     )
                     .init(),
             )
-            .then((app) => app.listen(Configuration.PORT).then(() => app))
+            .then((app) => app.listen(config('PORT')).then(() => app))
             .then(tapLog('start'))
             .then((app) => {
                 const end = () => app.close().then(tapLog('end'));
