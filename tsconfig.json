@@ -32,7 +32,7 @@
         // "moduleSuffix": [],
         // "noResolve": false,
         "paths": {
-            "@PRISMA": ["./prisma/client"],
+            "@PRISMA": ["./prisma/client/index"],
             "@SRC/*": ["./src/*"],
             "@TEST/*": ["./src/test/*"]
         },
