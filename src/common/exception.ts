@@ -1,27 +1,30 @@
-interface IBody<T extends string> {
-    /**
-     * 예외 분류 코드
-     */
-    code: T;
-    /**
-     * 세부 예외 사항
-     */
-    message?: string;
-}
-
-export class Exception extends Error {
-    constructor(
-        public readonly body: IBody<string>,
-        public readonly status: number,
-    ) {
-        super(body.code);
-    }
-    static throw(body: IBody<string>, status: number): never {
-        throw new Exception(body, status);
-    }
-}
-
 export namespace Exception {
+    interface IBody<T extends string> {
+        /**
+         * 예외 분류 코드
+         */
+        code: T;
+        /**
+         * 세부 예외 사항
+         */
+        message?: string;
+    }
+
+    export class Http extends Error {
+        override name = 'HttpException';
+        constructor(
+            public readonly body: IBody<string>,
+            public readonly status: number,
+        ) {
+            super(body.code);
+        }
+
+        // curring을 쓰면 unreachable lint가 안먹힘 연산이 잘 안됨
+        static throw(body: IBody<string>, status: number): never {
+            throw new Http(body, status);
+        }
+    }
+
     export type SystemError = IBody<'SYSTEM_ERROR'>;
 
     export namespace Authentication {

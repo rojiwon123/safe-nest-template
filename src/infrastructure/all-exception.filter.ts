@@ -14,9 +14,9 @@ export class AllExceptionFilter implements nest.ExceptionFilter {
         const ctx = host.switchToHttp();
         const res = ctx.getResponse<Response>();
         const [body, status] =
-            exception instanceof Exception
+            exception instanceof Exception.Http
                 ? (() => {
-                      logger.warn(exception.status, exception.body);
+                      logger.warn(exception);
                       return [exception.body, exception.status];
                   })()
                 : this.isHttpException(exception)

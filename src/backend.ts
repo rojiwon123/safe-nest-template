@@ -7,7 +7,6 @@ import helmet from 'helmet';
 import { config } from './infrastructure/config';
 import { InfraModule } from './infrastructure/infra.module';
 import { logger } from './infrastructure/logger';
-import { disconnectPrisma } from './infrastructure/prisma';
 
 const controllers = `${__dirname}/controllers`;
 
@@ -25,13 +24,29 @@ const tapLog =
 interface Backend {
     end: () => Promise<void>;
 }
+
 export namespace Backend {
-    export const start = (
-        options: nest.NestApplicationOptions = {},
-    ): Promise<Backend> =>
-        core.DynamicModule.mount(controllers, {
-            imports: [InfraModule],
-        })
+    interface IOptions extends nest.NestApplicationOptions {
+        /**
+         * nest application 생성 전 실행되는 함수
+         */
+        preStart?: () => void | Promise<void>;
+        /**
+         * nest application이 종료된 후 실행되는 함수
+         */
+        postEnd?: () => void | Promise<void>;
+    }
+
+    const callAsync = async (fn?: () => unknown | Promise<unknown>) =>
+        fn ? fn() : null;
+
+    export const start = (options: IOptions = {}): Promise<Backend> =>
+        callAsync(options.preStart)
+            .then(() =>
+                core.DynamicModule.mount(controllers, {
+                    imports: [InfraModule],
+                }),
+            )
             .then((module) => NestFactory.create(module, options))
             .then((app) =>
                 app
@@ -48,7 +63,7 @@ export namespace Backend {
             .then(tapLog('start'))
             .then((app) => {
                 const end = () =>
-                    app.close().then(disconnectPrisma).then(tapLog('end'));
+                    app.close().then(options.postEnd).then(tapLog('end'));
                 process.on('SIGINT', () => end().then(() => process.exit(0)));
                 return { end };
             });

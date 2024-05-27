@@ -39,7 +39,7 @@ export class ArticlesController {
         return ArticlesUsecase.get(article_id).then(
             Result.match(
                 (ok) => ok,
-                (err) => Exception.throw(err, nest.HttpStatus.NOT_FOUND),
+                (err) => Exception.Http.throw(err, nest.HttpStatus.NOT_FOUND),
             ),
         );
     }
