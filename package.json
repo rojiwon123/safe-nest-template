@@ -12,7 +12,7 @@
         "build": "rimraf ./build && tsc -p ./tsconfig.build.json",
         "build:prisma": "rimraf ./prisma/client && prisma generate",
         "build:swagger": "rimraf ./packages/api/swagger/swagger.json && nestia swagger",
-        "build:sdk": "rimraf ./sdk && NODE_ENV=test nestia sdk && rimraf ./packages/sdk/lib && tsc -p ./tsconfig.sdk.json && rimraf ./sdk",
+        "build:sdk": "rimraf ./sdk && nestia sdk && rimraf ./packages/sdk/lib && tsc -p ./tsconfig.sdk.json && rimraf ./sdk",
         "build:nestia": "npm run build:sdk && npm run build:swagger",
         "build:test": "rimraf ./tbuild && tsc -p ./tsconfig.test.json",
         "--------------------init--------------------": "",
