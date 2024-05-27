@@ -67,7 +67,7 @@ const once = Once.unit(() => {
                     });
             },
         },
-    }) as unknown as IPrismaClient;
+    });
 });
 
 export const prisma = new Proxy(
@@ -77,5 +77,5 @@ export const prisma = new Proxy(
     },
 ) as IPrismaClient;
 
-export const connectPrisma = async () => {}; // client.$connect();
-export const disconnectPrisma = async () => {};
+export const connectPrisma = () => once.run().$connect();
+export const disconnectPrisma = () => once.run().$disconnect();
