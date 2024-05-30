@@ -2,9 +2,11 @@
 
 build
 tbuild
-packages/api/lib
-packages/api/swagger/swagger.json
-packages/api/packages-lock.json
+packages/**
+!packages/api
+packages/api/**
+!pacages/api/package.json
+!pacages/api/swagger
 prisma/client
 migrated
 sdk
