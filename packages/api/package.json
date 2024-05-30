@@ -10,16 +10,16 @@
         "type": "git",
         "url": "https://github.com/rojiwon123/nestia-template"
     },
-    "author": "industriously",
+    "author": "rojiwon123",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/rojiwon123/nestia-template/issues"
     },
     "homepage": "https://github.com/rojiwon123/nestia-template/packages/api#readme",
     "dependencies": {
-        "@nestia/fetcher": "^2.4.4",
-        "express": "^4.18.2",
+        "@nestia/fetcher": "^3.2.0",
+        "express": "^4.19.2",
         "swagger-ui-express": "^5.0.0",
-        "typia": "^5.3.9"
+        "typia": "^6.0.4"
     }
 }
