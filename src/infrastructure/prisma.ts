@@ -61,7 +61,7 @@ const once = Once.unit(() => {
                         ),
                     )
                     .catch((error: unknown) => {
-                        if (Object.is(rollback, error))
+                        if (error === rollback)
                             return Result.Err<T, E>(rollback.cause as E);
                         throw error; // unexpected error
                     });
