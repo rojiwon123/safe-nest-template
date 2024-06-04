@@ -22,6 +22,9 @@ export interface Result<O, E> {
     readonly andThen: <O2, E2>(
         f: (ok: O) => Result<O2, E2>,
     ) => Result<O2, E | E2>;
+    readonly andThenAsync: <O2, E2>(
+        f: (ok: O) => Promise<Result<O2, E2>>,
+    ) => Promise<Result<O2, E | E2>>;
     readonly match: <O2, E2>(
         fn1: (input: O) => O2,
         fn2: (input: E) => E2,
@@ -41,6 +44,11 @@ export namespace Result {
                 enumerable: false,
                 configurable: false,
             },
+            andThenAsync: {
+                writable: false,
+                enumerable: false,
+                configurable: false,
+            },
             match: { writable: false, enumerable: false, configurable: false },
         });
     export const Ok = <O, E>(input: O): Result<O, E> =>
@@ -51,6 +59,7 @@ export namespace Result {
             mapOk: (f) => Ok(f(input)),
             mapErr: () => Ok(input),
             andThen: (f) => f(input),
+            andThenAsync: async (f) => f(input),
             match: (fn) => fn(input),
         });
     export const Err = <O, E>(input: E): Result<O, E> =>
@@ -61,9 +70,25 @@ export namespace Result {
             mapOk: () => Err(input),
             mapErr: (f) => Err(f(input)),
             andThen: () => Err(input),
+            andThenAsync: async () => Err(input),
             match: (_, fn) => fn(input),
         });
-
+    export const mapOk =
+        <O, O2, E>(f: (ok: O) => O2) =>
+        (result: Result<O, E>): Result<O2, E> =>
+            result.mapOk(f);
+    export const mapErr =
+        <E, E2, O>(f: (err: E) => E2) =>
+        (result: Result<O, E>): Result<O, E2> =>
+            result.mapErr(f);
+    export const andThen =
+        <O, O2, E2, E>(f: (ok: O) => Result<O2, E2>) =>
+        (result: Result<O, E>): Result<O2, E | E2> =>
+            result.andThen(f);
+    export const andThenAsync =
+        <O, O2, E2, E>(f: (ok: O) => Promise<Result<O2, E2>>) =>
+        (result: Result<O, E>): Promise<Result<O2, E | E2>> =>
+            result.andThenAsync(f);
     export const match =
         <O1, O2, E1, E2>(fn1: (input: O1) => O2, fn2: (input: E1) => E2) =>
         (result: Result<O1, E1>): O2 | E2 =>
