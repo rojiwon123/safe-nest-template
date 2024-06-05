@@ -17,7 +17,6 @@ export namespace Token {
         IAuthentication.ITokenPayload,
         'user_id'
     >): IAuthentication.IToken => {
-        DateUtil.hour(3);
         const payload: IAuthentication.ITokenPayload = {
             type: 'access',
             user_id,
