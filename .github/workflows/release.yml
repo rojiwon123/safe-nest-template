@@ -17,6 +17,10 @@ env:
     DATABASE_URL: postgresql://test:test@localhost:5432/test
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+concurrency:
+    group: ${{ github.workflow }}
+    cancel-in-progress: true
+
 jobs:
     test:
         runs-on: ubuntu-latest
@@ -67,9 +71,7 @@ jobs:
               id: tag-name
               run: |
                   VERSION=$(node -p "require('./package.json').version")
-                  if [ "${{ github.ref_type }}" == "tag" ]; then
-                    echo tag_name="${{ github.ref_name }}"
-                  elif [ -n "${{ github.event.inputs.suffix }}" ]; then
+                  if [ -n "${{ github.event.inputs.suffix }}" ]; then
                     tag_name="v${VERSION}-${{ github.event.inputs.suffix }}"
                   else
                     tag_name="v${VERSION}"
@@ -78,7 +80,6 @@ jobs:
               shell: bash
 
             - name: Create Release Note 🔖
-              if: github.ref_type != 'tag'
               run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
@@ -86,10 +87,9 @@ jobs:
                   git push origin "${{ steps.tag-name.outputs.TAG_NAME }}"
                   gh release create "${{ steps.tag-name.outputs.TAG_NAME }}" -t "${{ steps.tag-name.outputs.TAG_NAME }}" --target "${{ github.sha }}" --generate-notes
 
-    update-swagger:
+    build-swagger:
         runs-on: ubuntu-latest
         needs: create-release-note
-        if: github.ref_type != 'tag'
         steps:
             - name: Checkout 🛎️
               uses: actions/checkout@main
@@ -99,20 +99,28 @@ jobs:
               with:
                   node-version: 20
 
-            - name: Install
+            - name: Setup Pages
+              uses: actions/configure-pages@v5
+
+            - name: Swagger Build
               run: npm ci && npm run build:prisma && npm run build:swagger
 
-            - name: Commit to gh-pages
-              run: |
-                  git config --global user.email "github-actions@github.com"
-                  git config --global user.name "Github Actions"
-                  git add .
-                  git commit -m "temp commit"
-                  git switch gh-pages
-                  git add ./swagger.json
-                  git commit -m "Update swagger.json"
-                  git push
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./packages/swagger
 
+    deploy-swagger:
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        needs: build-swagger
+        steps:
+            - name: Deploy to Github Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
+#
 #    deploy-image:
 #        runs-on: ubuntu-latest
 #        needs: create-release-note
