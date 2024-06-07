@@ -106,14 +106,12 @@ jobs:
               run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "Github Actions"
-                  git fetch origin gh-pages:gh-pages
                   git add .
                   git commit -m "temp commit"
                   git switch gh-pages
-                  mv ./packages/api/swagger/swagger.json ./swagger.json
                   git add ./swagger.json
                   git commit -m "Update swagger.json"
-                  git push --set-upstream origin gh-pages
+                  git push
 
 #    deploy-image:
 #        runs-on: ubuntu-latest

@@ -10,7 +10,7 @@ const NESTIA_CONFIG: nestia.INestiaConfig = {
     json: false,
     swagger: {
         decompose: true,
-        output: 'packages/api/swagger/swagger.json',
+        output: 'packages/swagger/swagger.json',
         servers: [
             { url: 'http://localhost:4000', description: 'Local Server' },
         ],
