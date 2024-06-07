@@ -7,8 +7,6 @@ on:
                 description: 'Suffix to Append to Tag Names'
                 required: false
                 type: string
-        branches:
-            - main
 
 permissions:
     id-token: write

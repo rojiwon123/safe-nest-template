@@ -2,7 +2,9 @@ import { DynamicExecutor } from '@nestia/e2e';
 import { IConnection } from '@nestia/fetcher';
 
 import { Backend } from '@SRC/backend';
-import { Configuration } from '@SRC/infrastructure/config';
+import { config, initConfig } from '@SRC/infrastructure/config';
+import { initLogger } from '@SRC/infrastructure/logger';
+import { connectPrisma, disconnectPrisma } from '@SRC/infrastructure/prisma';
 
 import { TestAnalyzer } from './internal/analyzer';
 
@@ -15,9 +17,15 @@ const getArg = (key: string): string | undefined => {
 
 void (async () => {
     // Mocker.run();
-    const backend = await Backend.start({ logger: false });
+    initConfig();
+    initLogger();
+    const backend = await Backend.start({
+        logger: false,
+        preStart: connectPrisma,
+        postEnd: disconnectPrisma,
+    });
     const connection: IConnection = {
-        host: `http://localhost:${Configuration.PORT}`,
+        host: `http://localhost:${config('PORT')}`,
     };
     const features = __dirname + '/features';
     const skip = getArg('--skip');
