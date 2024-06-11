@@ -1,5 +1,5 @@
 {
-    "name": "@project/api",
+    "name": "@rojiwon123/api",
     "version": "0.0.1",
     "description": "Type-Safe SDK & Swagger를 제공하는 API Helper",
     "main": "./index.js",
