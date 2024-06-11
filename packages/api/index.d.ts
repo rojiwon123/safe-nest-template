@@ -1,4 +1,4 @@
 import sdk from './lib';
 
-export { sdk };
+export * from './lib/module';
 export default sdk;

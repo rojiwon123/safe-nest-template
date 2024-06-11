@@ -8,7 +8,7 @@ import { config } from './infrastructure/config';
 import { InfraModule } from './infrastructure/infra.module';
 import { logger } from './infrastructure/logger';
 
-const controllers = `${__dirname}/controllers`;
+const controllers = `${__dirname}/controller`;
 
 const tapLog =
     (command: 'start' | 'end') =>

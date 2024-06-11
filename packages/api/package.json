@@ -2,7 +2,8 @@
     "name": "@rojiwon123/api",
     "version": "0.0.1",
     "description": "Type-Safe SDK & Swagger를 제공하는 API Helper",
-    "main": "./index.js",
+    "main": "./lib/index.js",
+    "typings": "./index.d.ts",
     "repository": {
         "type": "git",
         "url": "https://github.com/rojiwon123/nestia-template"
