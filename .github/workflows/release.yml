@@ -20,10 +20,6 @@ on:
                 default: false
                 type: boolean
 
-concurrency:
-    group: ${{ github.workflow }}
-    cancel-in-progress: true
-
 permissions:
     id-token: write
     contents: write
@@ -75,6 +71,9 @@ jobs:
         runs-on: ubuntu-latest
         needs: test
         if: github.event.inputs.release-note == 'true'
+        concurrency:
+            group: ${{ github.workflow }}-release-note
+            cancel-in-progress: true
 
         steps:
             - name: Checkout 🛎️
@@ -97,6 +96,9 @@ jobs:
         runs-on: ubuntu-latest
         needs: test
         if: github.event.inputs.swagger == 'true'
+        concurrency:
+            group: ${{ github.workflow }}-swagger
+            cancel-in-progress: true
 
         steps:
             - name: Checkout 🛎️
@@ -126,6 +128,9 @@ jobs:
         runs-on: ubuntu-latest
         needs: test
         if: github.event.inputs.sdk == 'true'
+        concurrency:
+            group: ${{ github.workflow }}-sdk
+            cancel-in-progress: true
 
         steps:
             - name: Checkout 🛎️
