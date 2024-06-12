@@ -1,6 +1,6 @@
 {
     "name": "nestia-template",
-    "version": "0.0.1",
+    "version": "0.0.0",
     "description": "nestia를 적용한 nestjs 서버",
     "main": "build/main",
     "scripts": {
