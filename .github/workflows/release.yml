@@ -103,13 +103,16 @@ jobs:
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
 
-            - name: Clean Working Directory
+            - name: Update Version
+              run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
+
+            - name: Git Commit
               run: |
                   git add .
                   git commit -m "chore: update version ${{ github.event.inputs.version }}"
 
-            - name: Update Version
-              run: npm version ${{ github.event.inputs.version }}
+            - name: Generate Tag
+              run: git tag v${{ github.event.inputs.version }}
 
             - name: Release Version 🔧
               run: git push origin --follow-tags
@@ -129,7 +132,7 @@ jobs:
               run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
-                  gh release create "${{ github.event.inputs.version }}" -t "${{ github.event.inputs.version }}" --target "${{ github.sha }}" --generate-notes
+                  gh release create v"${{ github.event.inputs.version }}" -t v"${{ github.event.inputs.version }}" --target "${{ github.sha }}" --generate-notes
 
     swagger:
         needs: update-version
