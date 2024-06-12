@@ -3,9 +3,6 @@ name: Release 🔖
 on:
     workflow_dispatch:
         inputs:
-            version:
-                required: false
-                type: string
             image:
                 required: true
                 default: false
@@ -35,27 +32,9 @@ env:
     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-    check-version:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@main
-
-            - name: tag check
-              run: |
-                  VERSION=$(node -p "require('./package.json').version")
-                  NEW_VERSION=${{ github.event.inputs.version }}
-                  if [ "$VERSION" = "$NEW_VERSION" ]; then
-                    echo "Version not changed"
-                    exit 1
-                  elif git rev-parse "v$VERSION" >/dev/null 2>&1; then
-                    echo "Tag v$VERSION already exist."
-                    exit 1
-                  fi
-              shell: bash
-
     test:
         runs-on: ubuntu-latest
+
         services:
             postgres:
                 image: postgres:14
@@ -70,6 +49,7 @@ jobs:
                     --health-retries 5
                 ports:
                     - 5432:5432
+
         steps:
             - name: Checkout 🛎️
               uses: actions/checkout@main
@@ -88,35 +68,7 @@ jobs:
             - name: Test 🧪
               run: npm run test
 
-    update-version:
-        needs:
-            - check-version
-            - test
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@main
-
-            - name: Setup NodeJS
-              uses: actions/setup-node@main
-              with:
-                  node-version: 20
-
-            - name: Install
-              run: npm ci
-
-            - name: Update Version
-              run: |
-                  git config --global user.email "github-actions@github.com"
-                  git config --global user.name "GitHub Actions"
-                  npm version ${{ github.event.inputs.version }} --no-git-tag-version
-                  git add .
-                  git commit -m "release: version v${{ github.event.inputs.version }}"
-                  git push
-
     release-note:
-        needs: update-version
         if: github.event.inputs.release-note == 'true'
         runs-on: ubuntu-latest
         concurrency:
@@ -129,15 +81,18 @@ jobs:
 
             - name: Create Release Note 🔖
               run: |
-                  VERSION=v${{ github.event.inputs.version }}
+                  VERSION=v$(node -p "require('./package.json').version")
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
+                  if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+                    echo "Tag v$VERSION already exist."
+                    exit 1
+                  fi
                   git tag -a "$VERSION" -m "release $VERSION"
                   git push origin "release $VERSION"
                   gh release create "$VERSION" -t "$VERSION" --target "${{ github.sha }}" --generate-notes
 
     swagger:
-        needs: update-version
         if: github.event.inputs.swagger == 'true'
         runs-on: ubuntu-latest
         concurrency:
@@ -169,11 +124,10 @@ jobs:
               uses: actions/deploy-pages@v4
 
     sdk:
-        needs: update-version
         if: github.event.inputs.sdk == 'true'
         runs-on: ubuntu-latest
         concurrency:
-            group: ${{ github.workflow }}-${{ github.event.inputs.version }}-sdk
+            group: ${{ github.workflow }}-sdk
             cancel-in-progress: true
 
         steps:
