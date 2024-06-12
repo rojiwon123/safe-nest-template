@@ -98,15 +98,20 @@ jobs:
             - name: Install
               run: npm ci
 
-            - name: Update Version & Release Tag 🔧
-              run: |
-                  VERSION=${{ github.event.inputs.version }}
+            - run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
-                  npm version $VERSION
+
+            - name: Update Version
+              run: npm version ${{ github.event.inputs.version }}
+
+            - name: Git Commit
+              run: |
                   git add .
-                  git commit -m "chore: update version $VERSION"
-                  git push origin --follow-tags
+                  git commit -m "chore: update version ${{ github.event.inputs.version }}"
+
+            - name: Release Version 🔧
+              run: git push origin --follow-tags
 
     release-note:
         needs: update-version
