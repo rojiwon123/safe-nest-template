@@ -98,17 +98,18 @@ jobs:
             - name: Install
               run: npm ci
 
-            - run: |
+            - name: Git Config
+              run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
 
-            - name: Update Version
-              run: npm version ${{ github.event.inputs.version }}
-
-            - name: Git Commit
+            - name: Clean Working Directory
               run: |
                   git add .
                   git commit -m "chore: update version ${{ github.event.inputs.version }}"
+
+            - name: Update Version
+              run: npm version ${{ github.event.inputs.version }}
 
             - name: Release Version 🔧
               run: git push origin --follow-tags
