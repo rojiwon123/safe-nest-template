@@ -71,7 +71,7 @@ jobs:
               with:
                   node-version: 20
 
-            - name: Install
+            - name: Install & Build
               run: npm ci && npm run build:sdk
 
             - name: Setup DB
@@ -96,15 +96,14 @@ jobs:
                   node-version: 20
 
             - name: Install
-              run: npm ci && npm run build:prisma
+              run: npm ci
 
             - name: Update Version & Release Tag 🔧
               run: |
                   VERSION=${{ github.event.inputs.version }}
-                  npm ci
-                  npm version $VERSION
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
+                  npm version $VERSION
                   git add .
                   git commit -m "chore: update version $VERSION"
                   git push origin --follow-tags
