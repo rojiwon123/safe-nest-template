@@ -105,6 +105,7 @@ jobs:
 
             - name: Update Version
               run: |
+                  git branch --show-current             
                   npm version ${{ github.event.inputs.version }} --no-git-tag-version
                   git add .
                   git commit -m "release: version v${{ github.event.inputs.version }}"
