@@ -3,10 +3,9 @@ name: Release 🔖
 on:
     workflow_dispatch:
         inputs:
-            release-note:
-                required: true
-                default: false
-                type: boolean
+            version:
+                required: false
+                type: string
             image:
                 required: true
                 default: false
@@ -32,8 +31,22 @@ env:
     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+    check-version:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: tag check
+              run: |
+                  VERSION=${{ github.event.inputs.version }}
+                  if git rev-parse "$VERSION" >/dev/null 2>&1; then
+                    echo "Tag $VERSION already exist."
+                    exit 1
+                  fi
+              shell: bash
+
     test:
-        if: github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         services:
             postgres:
@@ -67,10 +80,37 @@ jobs:
             - name: Test 🧪
               run: npm run test
 
-    release-note:
+    update-version:
+        needs:
+            - check-version
+            - test
         runs-on: ubuntu-latest
-        needs: test
-        if: github.event.inputs.release-note == 'true'
+
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@main
+              with:
+                  node-version: 20
+
+            - name: Install
+              run: npm ci && npm run build:prisma
+
+            - name: Update Version & Release Tag 🔧
+              run: |
+                  VERSION=${{ github.event.inputs.version }}
+                  npm version $VERSION
+                  git config --global user.email "github-actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git add .
+                  git commit -m "chore: update version $VERSION"
+                  git push origin --follow-tags
+
+    release-note:
+        needs: update-version
+        runs-on: ubuntu-latest
         concurrency:
             group: ${{ github.workflow }}-release-note
             cancel-in-progress: true
@@ -79,23 +119,16 @@ jobs:
             - name: Checkout 🛎️
               uses: actions/checkout@main
 
-            - name: Generate Release Tag 🔧
-              id: tag
-              run: echo "TAG_NAME=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-              shell: bash
-
             - name: Create Release Note 🔖
               run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
-                  git tag -a "${{ steps.tag.outputs.TAG_NAME }}" -m "${{ steps.tag.outputs.TAG_NAME }}"
-                  git push origin "${{ steps.tag.outputs.TAG_NAME }}"
-                  gh release create "${{ steps.tag.outputs.TAG_NAME }}" -t "${{ steps.tag.outputs.TAG_NAME }}" --target "${{ github.sha }}" --generate-notes
+                  gh release create "${{ github.event.inputs.version }}" -t "${{ github.event.inputs.version }}" --target "${{ github.sha }}" --generate-notes
 
     swagger:
-        runs-on: ubuntu-latest
-        needs: test
+        needs: update-version
         if: github.event.inputs.swagger == 'true'
+        runs-on: ubuntu-latest
         concurrency:
             group: ${{ github.workflow }}-swagger
             cancel-in-progress: true
@@ -125,11 +158,11 @@ jobs:
               uses: actions/deploy-pages@v4
 
     sdk:
-        runs-on: ubuntu-latest
-        needs: test
+        needs: update-version
         if: github.event.inputs.sdk == 'true'
+        runs-on: ubuntu-latest
         concurrency:
-            group: ${{ github.workflow }}-sdk
+            group: ${{ github.workflow }}-${{ github.event.inputs.version }}-sdk
             cancel-in-progress: true
 
         steps:
