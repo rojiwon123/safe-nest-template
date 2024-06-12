@@ -1,21 +1,21 @@
 {
-    "name": "@rojiwon123/api",
-    "version": "0.0.2",
-    "description": "Type-Safe SDK & Swagger를 제공하는 API Helper",
-    "main": "./lib/index.js",
-    "typings": "./index.d.ts",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/rojiwon123/nestia-template"
-    },
-    "author": "rojiwon123",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/rojiwon123/nestia-template/issues"
-    },
-    "homepage": "https://github.com/rojiwon123/nestia-template/packages/api#readme",
-    "dependencies": {
-        "typia": "^6.0.6",
-        "@nestia/fetcher": "^3.2.1"
-    }
+  "name": "@rojiwon123/api",
+  "version": "0.0.0",
+  "description": "Type-Safe SDK & Swagger를 제공하는 API Helper",
+  "main": "./lib/index.js",
+  "typings": "./index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rojiwon123/nestia-template"
+  },
+  "author": "rojiwon123",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rojiwon123/nestia-template/issues"
+  },
+  "homepage": "https://github.com/rojiwon123/nestia-template/packages/api#readme",
+  "dependencies": {
+    "typia": "^6.0.6",
+    "@nestia/fetcher": "^3.2.1"
+  }
 }

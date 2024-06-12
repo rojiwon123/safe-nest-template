@@ -1,6 +1,6 @@
 {
     "name": "nestia-template",
-    "version": "0.0.2",
+    "version": "0.0.0",
     "description": "nestia를 적용한 nestjs 서버",
     "main": "build/main",
     "scripts": {
@@ -16,8 +16,8 @@
         "build:test": "rimraf ./tbuild && tsc -p ./tsconfig.test.json",
         "--------------------init--------------------": "",
         "check": "ts-patch check",
-        "postinstall": "husky install",
-        "prepare": "ts-patch install && typia patch",
+        "postinstall": "husky",
+        "prepare": "ts-patch install && typia patch && npm run build:prisma",
         "prettier": "prettier . -w",
         "--------------------db--------------------": "",
         "db:sync": "npm run build:prisma && prisma migrate dev --name init --schema=./prisma/schemas",

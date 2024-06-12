@@ -72,7 +72,7 @@ jobs:
                   node-version: 20
 
             - name: Install
-              run: npm ci && npm run build:prisma && npm run build:sdk
+              run: npm ci && npm run build:sdk
 
             - name: Setup DB
               run: npm run db:deploy
@@ -101,6 +101,7 @@ jobs:
             - name: Update Version & Release Tag 🔧
               run: |
                   VERSION=${{ github.event.inputs.version }}
+                  npm ci
                   npm version $VERSION
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
@@ -146,7 +147,7 @@ jobs:
               uses: actions/configure-pages@v5
 
             - name: Swagger Build
-              run: npm ci && npm run build:prisma && npm run build:swagger
+              run: npm ci && npm run build:swagger
 
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
@@ -177,7 +178,7 @@ jobs:
                   scope: '@rojiwon123'
 
             - name: Swagger Build
-              run: npm ci && npm run build:prisma && npm run build:sdk
+              run: npm ci && npm run build:sdk
 
             - name: Publish
               run: npm publish ./packages/api --access restricted
