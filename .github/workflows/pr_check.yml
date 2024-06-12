@@ -61,7 +61,7 @@ jobs:
                       const comment = cmts.data.find(cmt => cmt.user.login === 'github-actions[bot]');
 
                       const fs = require('fs');
-                      const path = './test_log.md';
+                      const path = './test.md';
                       const body = fs.readFileSync(path, 'utf8');
                       comment
                           ? github.rest.issues.updateComment({ comment_id: comment.id, owner, repo, body })
