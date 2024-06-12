@@ -115,7 +115,7 @@ jobs:
               run: git tag v${{ github.event.inputs.version }}
 
             - name: Release Version 🔧
-              run: git push origin --follow-tags
+              run: git push --follow-tags
 
     release-note:
         needs: update-version
