@@ -39,7 +39,7 @@ jobs:
 
             - name: tag check
               run: |
-                  VERSION=${{ github.event.inputs.version }}
+                  VERSION=v${{ github.event.inputs.version }}
                   if git rev-parse "$VERSION" >/dev/null 2>&1; then
                     echo "Tag $VERSION already exist."
                     exit 1
