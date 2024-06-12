@@ -104,18 +104,16 @@ jobs:
                   git config --global user.name "GitHub Actions"
 
             - name: Update Version
-              run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
-
-            - name: Git Commit
               run: |
+                  npm version ${{ github.event.inputs.version }} --no-git-tag-version
                   git add .
-                  git commit -m "chore: update version ${{ github.event.inputs.version }}"
+                  git commit -m "release: version v${{ github.event.inputs.version }}"
+                  git push
 
-            - name: Generate Tag
-              run: git tag v${{ github.event.inputs.version }}
-
-            - name: Release Version 🔧
-              run: git push --follow-tags
+            - name: Generate & Release Tag 🔧
+              run: |
+                  git tag -a "v${{ github.event.inputs.version }}" -m "release ${{ github.event.inputs.version }}"
+                  git push origin "release ${{ github.event.inputs.version }}"
 
     release-note:
         needs: update-version
