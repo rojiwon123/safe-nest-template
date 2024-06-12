@@ -10,6 +10,10 @@ on:
                 required: true
                 default: false
                 type: boolean
+            release-note:
+                required: true
+                default: false
+                type: boolean
             swagger:
                 required: true
                 default: false
@@ -39,9 +43,13 @@ jobs:
 
             - name: tag check
               run: |
-                  VERSION=v${{ github.event.inputs.version }}
-                  if git rev-parse "$VERSION" >/dev/null 2>&1; then
-                    echo "Tag $VERSION already exist."
+                  VERSION=$(node -p "require('./package.json').version")
+                  NEW_VERSION=${{ github.event.inputs.version }}
+                  if [ "$VERSION" = "$NEW_VERSION" ]; then
+                    echo "Version not changed"
+                    exit 1
+                  elif git rev-parse "v$VERSION" >/dev/null 2>&1; then
+                    echo "Tag v$VERSION already exist."
                     exit 1
                   fi
               shell: bash
@@ -98,27 +106,18 @@ jobs:
             - name: Install
               run: npm ci
 
-            - name: Git Config
+            - name: Update Version
               run: |
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
-
-            - name: Update Version
-              run: |
                   npm version ${{ github.event.inputs.version }} --no-git-tag-version
                   git add .
                   git commit -m "release: version v${{ github.event.inputs.version }}"
                   git push
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Generate & Release Tag 🔧
-              run: |
-                  git tag -a "v${{ github.event.inputs.version }}" -m "release ${{ github.event.inputs.version }}"
-                  git push origin "release ${{ github.event.inputs.version }}"
 
     release-note:
         needs: update-version
+        if: github.event.inputs.release-note == 'true'
         runs-on: ubuntu-latest
         concurrency:
             group: ${{ github.workflow }}-release-note
@@ -130,9 +129,12 @@ jobs:
 
             - name: Create Release Note 🔖
               run: |
+                  VERSION=v${{ github.event.inputs.version }}
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
-                  gh release create v"${{ github.event.inputs.version }}" -t v"${{ github.event.inputs.version }}" --target "${{ github.sha }}" --generate-notes
+                  git tag -a "$VERSION" -m "release $VERSION"
+                  git push origin "release $VERSION"
+                  gh release create "$VERSION" -t "$VERSION" --target "${{ github.sha }}" --generate-notes
 
     swagger:
         needs: update-version
