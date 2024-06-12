@@ -89,7 +89,7 @@ jobs:
                     exit 1
                   fi
                   git tag -a "$VERSION" -m "release $VERSION"
-                  git push origin "release $VERSION"
+                  git push origin "$VERSION"
                   gh release create "$VERSION" -t "$VERSION" --target "${{ github.sha }}" --generate-notes
 
     swagger:
