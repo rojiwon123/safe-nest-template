@@ -3,8 +3,8 @@ import { Prisma, PrismaClient } from '@PRISMA';
 import { Once } from '@SRC/common/once';
 import { Result } from '@SRC/common/result';
 
-import { config } from './config';
-import { logger } from './logger';
+import { config } from '../config';
+import { logger } from '../logger';
 
 export interface IPrismaClient extends Prisma.TransactionClient {
     $transaction: PrismaClient['$transaction'];
@@ -70,12 +70,7 @@ const once = Once.unit(() => {
     });
 });
 
-export const prisma = new Proxy(
-    {},
-    {
-        get: (_, key: keyof IPrismaClient) => once.run()[key],
-    },
-) as IPrismaClient;
+export const prisma = once.run as unknown as () => IPrismaClient;
 
 export const connectPrisma = () => once.run().$connect();
 export const disconnectPrisma = () => once.run().$disconnect();
