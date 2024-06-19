@@ -2,7 +2,8 @@ FROM  node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
-COPY  package*.json tsconfig*.json nestia.config.ts ./
+COPY  ./prisma/schemas ./prisma/schemas
+COPY  package*.json tsconfig*.json ./
 RUN npm i -g npm && npm ci
 
 COPY ./src ./src
