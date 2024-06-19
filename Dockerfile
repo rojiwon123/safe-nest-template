@@ -2,10 +2,10 @@ FROM  node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
-COPY  package*.json tsconfig*.json ./
+COPY  package*.json tsconfig*.json nestia.config.ts ./
 RUN npm i -g npm && npm ci
 
-COPY . .
+COPY ./src ./src
 RUN npm run build && npm prune --omit=dev
 
 FROM node:20-alpine AS runner

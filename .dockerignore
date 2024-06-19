@@ -13,8 +13,9 @@ prisma/client
 
 # log
 
-test_log.md
-README.md
+*.log
+*.md
+*.txt
 
 # env
 
