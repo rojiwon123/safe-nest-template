@@ -39,8 +39,9 @@ export namespace KakaoSDK {
     export const getTokens = (
         code: string,
     ): Promise<Result<ITokens, IAuthError>> =>
-        fetch.request.post
+        fetch.request
             .urlencoded({
+                method: 'POST',
                 url: AUTH_URL + '/oauth/token',
                 body: {
                     grant_type: 'authorization_code',
@@ -87,7 +88,8 @@ export namespace KakaoSDK {
             query: fetch.IQuery = {},
         ): Promise<Result<T, IAPIError>> =>
             fetch.request
-                .get({
+                .query({
+                    method: 'GET',
                     url: new URL(path, API_URL).toString(),
                     query,
                     headers: { authorization: `Bearer ${access_token}` },
@@ -120,8 +122,9 @@ export namespace KakaoSDK {
             path: string;
         }) =>
         (access_token: string, body: fetch.IQuery) =>
-            fetch.request.post
+            fetch.request
                 .urlencoded({
+                    method: 'POST',
                     url: new URL(path, API_URL).toString(),
                     body,
                     headers: { authorization: `Bearer ${access_token}` },

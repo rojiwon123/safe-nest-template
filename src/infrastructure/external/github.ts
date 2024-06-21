@@ -35,8 +35,9 @@ export namespace GithubSDK {
     export const getAccessToken = (
         code: string,
     ): Promise<Result<IAccessToken, IAuthError>> =>
-        fetch.request.post
+        fetch.request
             .json({
+                method: 'POST',
                 url: new URL('/login/oauth/access_token', AUTH_URL).toString(),
                 body: {
                     client_id: options.client_id,
@@ -83,7 +84,8 @@ export namespace GithubSDK {
             query: fetch.IQuery = {},
         ): Promise<Result<T, IAPIError>> =>
             fetch.request
-                .get({
+                .query({
+                    method: 'GET',
                     url: new URL(path, API_URL).toString(),
                     query,
                     headers: {
@@ -118,14 +120,15 @@ export namespace GithubSDK {
             parser,
             stringify = JSON.stringify,
         }: {
-            method: 'post' | 'patch' | 'put';
+            method: 'POST' | 'PATCH' | 'PUT';
             path: string;
             parser: (input: unknown) => T;
             stringify?: (input: IBody) => string;
         }) =>
         (access_token: string, body: IBody): Promise<Result<T, IAPIError>> =>
-            fetch.request[method]
+            fetch.request
                 .json({
+                    method: method,
                     url: new URL(path, API_URL).toString(),
                     headers: {
                         authorization: 'Bearer ' + access_token,
