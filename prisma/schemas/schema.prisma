@@ -5,14 +5,14 @@ datasource database {
 
 generator db {
   provider        = "prisma-client-js"
-  output          = "./client"
+  output          = "../client"
   binaryTargets   = ["native", "rhel-openssl-3.0.x"]
   previewFeatures = ["prismaSchemaFolder"]
 }
 
 generator erd {
   provider = "prisma-markdown"
-  output   = "../ERD.md"
+  output   = "../../ERD.md"
   title    = "Template"
 }
 
