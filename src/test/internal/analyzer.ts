@@ -15,7 +15,7 @@ export namespace TestAnalyzer {
               state: -1;
               total_count: number;
               failed_count: number;
-              executions: (DynamicExecutor.IReport.IExecution & {
+              executions: (DynamicExecutor.IExecution & {
                   error: Error;
               })[];
           };
@@ -37,12 +37,17 @@ export namespace TestAnalyzer {
         if (executions.length === 0) {
             const elapsed_time = pipe(
                 report.executions,
-
                 groupBy((exe) => exe.location),
                 entries,
                 map(([location, exe]): [string, number] => [
                     location,
-                    exe.reduce((prev, curr) => prev + curr.time, 0),
+                    exe.reduce(
+                        (prev, curr) =>
+                            prev +
+                            new Date(curr.completed_at).getTime() -
+                            new Date(curr.started_at).getTime(),
+                        0,
+                    ),
                 ]),
                 toArray,
             );

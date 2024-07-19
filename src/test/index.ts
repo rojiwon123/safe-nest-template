@@ -3,8 +3,8 @@ import { IConnection } from '@nestia/fetcher';
 
 import { Backend } from '@SRC/backend';
 import { config, initConfig } from '@SRC/infrastructure/config';
+import { connectPrisma, disconnectPrisma } from '@SRC/infrastructure/db/prisma';
 import { initLogger } from '@SRC/infrastructure/logger';
-import { connectPrisma, disconnectPrisma } from '@SRC/infrastructure/prisma';
 
 import { TestAnalyzer } from './internal/analyzer';
 
@@ -27,10 +27,10 @@ void (async () => {
     const connection: IConnection = {
         host: `http://localhost:${config('PORT')}`,
     };
-    const features = __dirname + '/features';
     const skip = getArg('--skip');
     const only = getArg('--only');
     const report = await DynamicExecutor.validate({
+        location: __dirname + '/features',
         prefix: 'test_',
         parameters: () => [connection],
         filter: (name) => {
@@ -47,7 +47,8 @@ void (async () => {
                 throw error;
             }
         },
-    })(features);
+    });
+
     await backend.end();
 
     const analyzed = TestAnalyzer.analyze(report);
