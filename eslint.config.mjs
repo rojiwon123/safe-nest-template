@@ -1,10 +1,16 @@
-/** @type {import("eslint").ESLint.ConfigData} */
-module.exports = {
-    root: true,
-    plugins: ['@typescript-eslint', 'deprecation'],
-    extends: ['plugin:@typescript-eslint/recommended'],
-    parser: '@typescript-eslint/parser',
-    parserOptions: { project: ['tsconfig.json'] },
+import deprecation from 'eslint-plugin-deprecation';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(...tseslint.configs.recommended, {
+    files: ['src/**/*.ts'],
+    plugins: {
+        '@typescript-eslint': tseslint.plugin,
+        deprecation,
+    },
+    languageOptions: {
+        parser: tseslint.parser,
+        parserOptions: { project: ['tsconfig.json'] },
+    },
     rules: {
         // typescript rules
         '@typescript-eslint/interface-name-prefix': 'off',
@@ -22,4 +28,4 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'warn',
         'deprecation/deprecation': 'error',
     },
-};
+});
