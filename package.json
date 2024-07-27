@@ -19,7 +19,7 @@
         "postinstall": "husky",
         "prepare": "ts-patch install && typia patch && npm run build:prisma",
         "prettier": "prettier . -w",
-        "lint": "eslint ./src",
+        "lint": "eslint .",
         "--------------------db--------------------": "",
         "db:sync": "npm run build:prisma && prisma migrate dev --name init --schema=./prisma/schemas",
         "db:init": "prisma migrate reset --force",
@@ -51,6 +51,7 @@
         "winston": "^3.13.1"
     },
     "devDependencies": {
+        "@eslint/compat": "^1.1.1",
         "@nestia/e2e": "^0.7.0",
         "@nestia/sdk": "^3.8.0",
         "@project/api": "file:packages/api",
