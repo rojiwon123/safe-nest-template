@@ -1,5 +1,5 @@
 
-SYNC_SCRIPT="./packages/script/sync.cjs"
+SYNC_SCRIPT="./packages/script/pre_commit.cjs"
 
 node "$SYNC_SCRIPT" &
 

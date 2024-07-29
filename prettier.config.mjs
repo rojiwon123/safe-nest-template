@@ -1,5 +1,5 @@
 /** @type import("prettier").Config */
-module.exports = {
+const PRETTIER_CONFIG = {
     printWidth: 80,
     semi: true,
     tabWidth: 4,
@@ -17,3 +17,5 @@ module.exports = {
     importOrderSortSpecifiers: true,
     importOrderParserPlugins: ['decorators-legacy', 'typescript'],
 };
+
+export default PRETTIER_CONFIG;
