@@ -1,7 +1,7 @@
-import core from '@nestia/core';
-import * as nest from '@nestjs/common';
+import core from "@nestia/core";
+import * as nest from "@nestjs/common";
 
-@nest.Controller('health')
+@nest.Controller("health")
 export class SystemController {
     /**
      * Just for health checking API Server liveness.
@@ -11,7 +11,7 @@ export class SystemController {
      * @return hello world
      */
     @core.TypedRoute.Get()
-    async check(): Promise<'hello world'> {
-        return 'hello world';
+    async check(): Promise<"hello world"> {
+        return "hello world";
     }
 }

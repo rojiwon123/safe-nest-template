@@ -11,7 +11,7 @@ export namespace Exception {
     }
 
     export class Http extends Error {
-        override name = 'HttpException';
+        override name = "HttpException";
         constructor(
             public readonly body: IBody<string>,
             public readonly status: number,
@@ -25,19 +25,19 @@ export namespace Exception {
         }
     }
 
-    export type SystemError = IBody<'SYSTEM_ERROR'>;
+    export type SystemError = IBody<"SYSTEM_ERROR">;
 
     export namespace Authentication {
-        export type Required = IBody<'AUTHENTICATION_REQUIRED'>;
-        export type Invalid = IBody<'AUTHENTICATION_INVALID'>;
-        export type Expired = IBody<'AUTHENTICATION_EXPIRED'>;
+        export type Required = IBody<"AUTHENTICATION_REQUIRED">;
+        export type Invalid = IBody<"AUTHENTICATION_INVALID">;
+        export type Expired = IBody<"AUTHENTICATION_EXPIRED">;
     }
 
     export namespace User {
-        export type NotFound = IBody<'USER_NOT_FOUND'>;
-        export type AlreadyExist = IBody<'USER_ALREADY_EXIST'>;
+        export type NotFound = IBody<"USER_NOT_FOUND">;
+        export type AlreadyExist = IBody<"USER_ALREADY_EXIST">;
     }
     export namespace Article {
-        export type NotFound = IBody<'ARTICLE_NOT_FOUND'>;
+        export type NotFound = IBody<"ARTICLE_NOT_FOUND">;
     }
 }

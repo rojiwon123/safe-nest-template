@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ":'디버그 모드 실행",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "nodemon",
+            "runtimeArgs": ["--inspect"],
+            "program": "${workspaceFolder}/src/main.ts",
+            "restart": true,
+            "env": { "NODE_ENV": "development" },
+            "autoAttachChildProcesses": true,
+            "internalConsoleOptions": "openOnSessionStart",
+            "console": "integratedTerminal",
+            "skipFiles": ["**/<node_internals>/**", "**/node_modules/**", "prisma/client"]
+        }
+    ]
+}

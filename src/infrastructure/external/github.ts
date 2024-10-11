@@ -1,17 +1,17 @@
-import fetch from '@rojiwon123/fetch';
-import typia from 'typia';
+import fetch from "@rojiwon123/fetch";
+import typia from "typia";
 
-import { Result } from '@SRC/common/result';
+import { Result } from "@SRC/common/result";
 
 export namespace GithubSDK {
-    const AUTH_URL = 'https://github.com';
-    const API_URL = 'https://api.github.com';
+    const AUTH_URL = "https://github.com";
+    const API_URL = "https://api.github.com";
 
     const options: IOauth2Options = {
-        client_id: '',
-        client_secret: '',
-        redirect_uri: '',
-        scope: ['read:user'],
+        client_id: "",
+        client_secret: "",
+        redirect_uri: "",
+        scope: ["read:user"],
         allow_signup: true,
     };
 
@@ -19,11 +19,11 @@ export namespace GithubSDK {
      * Get Url for {@link https://docs.github.com/ko/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#1-request-a-users-github-identity Request a user's Github identity}
      */
     export const getAuthorizeURL = (): string => {
-        const url = new URL('/login/oauth/authorize', AUTH_URL);
-        url.searchParams.set('client_id', options.client_id);
-        url.searchParams.set('redirect_uri', options.redirect_uri);
-        url.searchParams.set('allow_signup', options.allow_signup + '');
-        url.searchParams.set('scope', options.scope.join(' '));
+        const url = new URL("/login/oauth/authorize", AUTH_URL);
+        url.searchParams.set("client_id", options.client_id);
+        url.searchParams.set("redirect_uri", options.redirect_uri);
+        url.searchParams.set("allow_signup", options.allow_signup + "");
+        url.searchParams.set("scope", options.scope.join(" "));
         return url.toString();
     };
 
@@ -32,20 +32,18 @@ export namespace GithubSDK {
      *
      * {@link https://docs.github.com/ko/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github Users are redirected back to your site by GitHub}
      */
-    export const getAccessToken = (
-        code: string,
-    ): Promise<Result<IAccessToken, IAuthError>> =>
+    export const getAccessToken = (code: string): Promise<Result<IAccessToken, IAuthError>> =>
         fetch.request
             .json({
-                method: 'POST',
-                url: new URL('/login/oauth/access_token', AUTH_URL).toString(),
+                method: "POST",
+                url: new URL("/login/oauth/access_token", AUTH_URL).toString(),
                 body: {
                     client_id: options.client_id,
                     client_secret: options.client_secret,
                     code,
                     redirect_uri: options.redirect_uri,
                 },
-                headers: { accept: 'application/json' },
+                headers: { accept: "application/json" },
             })
             .then(
                 fetch.response.match({
@@ -53,63 +51,46 @@ export namespace GithubSDK {
                 }),
             )
             .then((input) =>
-                typia.is<IAccessToken>(input)
-                    ? Result.Ok<IAccessToken, IAuthError>(input)
-                    : typia.is<IAuthError>(input)
-                      ? Result.Err<IAccessToken, IAuthError>(input)
-                      : Result.Err<IAccessToken, IAuthError>({
-                            error: 'unexpected_error',
-                            error_description: '',
-                            error_uri: '',
-                        }),
+                typia.is<IAccessToken>(input) ? Result.Ok<IAccessToken, IAuthError>(input)
+                : typia.is<IAuthError>(input) ? Result.Err<IAccessToken, IAuthError>(input)
+                : Result.Err<IAccessToken, IAuthError>({
+                        error: "unexpected_error",
+                        error_description: "",
+                        error_uri: "",
+                    }),
             )
             .catch(() =>
                 Result.Err<IAccessToken, IAuthError>({
-                    error: 'unexpected_error',
-                    error_description: '',
-                    error_uri: '',
+                    error: "unexpected_error",
+                    error_description: "",
+                    error_uri: "",
                 }),
             );
 
     export const query =
-        <T>({
-            path,
-            parser,
-        }: {
-            path: string;
-            parser: (input: unknown) => T;
-        }) =>
-        (
-            access_token: string,
-            query: fetch.IQuery = {},
-        ): Promise<Result<T, IAPIError>> =>
+        <T>({ path, parser }: { path: string; parser: (input: unknown) => T }) =>
+        (access_token: string, query: fetch.IQuery = {}): Promise<Result<T, IAPIError>> =>
             fetch.request
                 .query({
-                    method: 'GET',
+                    method: "GET",
                     url: new URL(path, API_URL).toString(),
                     query,
                     headers: {
-                        authorization: 'Bearer ' + access_token,
-                        accept: 'application/vnd.github+json',
-                        'X-Github-Api-Version': '2022-11-28',
+                        authorization: "Bearer " + access_token,
+                        accept: "application/vnd.github+json",
+                        "X-Github-Api-Version": "2022-11-28",
                     },
                 })
                 .then(
                     fetch.response.match({
-                        200: fetch.response.json((body) =>
-                            Result.Ok<T, IAPIError>(parser(body)),
-                        ),
-                        _: fetch.response.json((body) =>
-                            Result.Err<T, IAPIError>(
-                                typia.assert<IAPIError>(body),
-                            ),
-                        ),
+                        200: fetch.response.json((body) => Result.Ok<T, IAPIError>(parser(body))),
+                        _: fetch.response.json((body) => Result.Err<T, IAPIError>(typia.assert<IAPIError>(body))),
                     }),
                 )
                 .catch(() =>
                     Result.Err<T, IAPIError>({
-                        message: 'unexpected_err',
-                        documentation_url: '',
+                        message: "unexpected_err",
+                        documentation_url: "",
                     }),
                 );
 
@@ -120,7 +101,7 @@ export namespace GithubSDK {
             parser,
             stringify = JSON.stringify,
         }: {
-            method: 'POST' | 'PATCH' | 'PUT';
+            method: "POST" | "PATCH" | "PUT";
             path: string;
             parser: (input: unknown) => T;
             stringify?: (input: IBody) => string;
@@ -131,41 +112,30 @@ export namespace GithubSDK {
                     method: method,
                     url: new URL(path, API_URL).toString(),
                     headers: {
-                        authorization: 'Bearer ' + access_token,
-                        accept: 'application/vnd.github+json',
-                        'X-Github-Api-Version': '2022-11-28',
+                        authorization: "Bearer " + access_token,
+                        accept: "application/vnd.github+json",
+                        "X-Github-Api-Version": "2022-11-28",
                     },
                     body,
                     stringify,
                 })
                 .then(
                     fetch.response.match({
-                        200: fetch.response.json((body) =>
-                            Result.Ok<T, IAPIError>(parser(body)),
-                        ),
-                        _: fetch.response.json((body) =>
-                            Result.Err<T, IAPIError>(
-                                typia.assert<IAPIError>(body),
-                            ),
-                        ),
+                        200: fetch.response.json((body) => Result.Ok<T, IAPIError>(parser(body))),
+                        _: fetch.response.json((body) => Result.Err<T, IAPIError>(typia.assert<IAPIError>(body))),
                     }),
                 )
                 .catch(
                     (): Result<T, IAPIError> =>
                         Result.Err({
-                            message: 'unexpected_err',
-                            documentation_url: '',
+                            message: "unexpected_err",
+                            documentation_url: "",
                         }),
                 );
 
-    export const getUser = (access_token: string) =>
-        query({ path: 'user', parser: typia.createAssert<IPublicUser>() })(
-            access_token,
-        );
+    export const getUser = (access_token: string) => query({ path: "user", parser: typia.createAssert<IPublicUser>() })(access_token);
     export const getEmailList = (access_token: string) =>
-        query({ path: 'user/emails', parser: typia.createAssert<IEmail[]>() })(
-            access_token,
-        );
+        query({ path: "user/emails", parser: typia.createAssert<IEmail[]>() })(access_token);
 
     export interface IOauth2Options {
         /** The client ID you received from GitHub for your OAuth app. */
@@ -193,7 +163,7 @@ export namespace GithubSDK {
     export interface IAccessToken {
         access_token: string;
         scope: string;
-        token_type: 'bearer';
+        token_type: "bearer";
     }
     export interface IAuthError {
         error: string;
@@ -205,41 +175,41 @@ export namespace GithubSDK {
         documentation_url: string;
     }
     export type Scope =
-        | 'repo'
-        | 'repo:status'
-        | 'repo_deployment'
-        | 'public_repo'
-        | 'repo:invite'
-        | 'security_events'
-        | 'admin:repo_hook'
-        | 'write:repo_hook'
-        | 'read:repo_hook'
-        | 'admin:org'
-        | 'write:org'
-        | 'read:org'
-        | 'admin:public_key'
-        | 'write:public_key'
-        | 'read:public_key'
-        | 'admin:org_hook'
-        | 'gist'
-        | 'notifications'
-        | 'user'
-        | 'read:user'
-        | 'user:email'
-        | 'user:follow'
-        | 'project'
-        | 'read:project'
-        | 'delete_repo'
-        | 'write:discussion'
-        | 'read:discussion'
-        | 'write:packages'
-        | 'read:packages'
-        | 'delete:packages'
-        | 'admin:gpg_key'
-        | 'write:gpg_key'
-        | 'read:gpg_key'
-        | 'codespace'
-        | 'workflow';
+        | "repo"
+        | "repo:status"
+        | "repo_deployment"
+        | "public_repo"
+        | "repo:invite"
+        | "security_events"
+        | "admin:repo_hook"
+        | "write:repo_hook"
+        | "read:repo_hook"
+        | "admin:org"
+        | "write:org"
+        | "read:org"
+        | "admin:public_key"
+        | "write:public_key"
+        | "read:public_key"
+        | "admin:org_hook"
+        | "gist"
+        | "notifications"
+        | "user"
+        | "read:user"
+        | "user:email"
+        | "user:follow"
+        | "project"
+        | "read:project"
+        | "delete_repo"
+        | "write:discussion"
+        | "read:discussion"
+        | "write:packages"
+        | "read:packages"
+        | "delete:packages"
+        | "admin:gpg_key"
+        | "write:gpg_key"
+        | "read:gpg_key"
+        | "codespace"
+        | "workflow";
 
     /**
      * If options's scope don't include 'user' or 'read:user', you will get PublicUser.
@@ -313,7 +283,7 @@ export namespace GithubSDK {
         email: string;
         primary: boolean;
         verified: boolean;
-        visibility: 'public' | 'private' | null;
+        visibility: "public" | "private" | null;
         [k: string]: unknown;
     }
 }

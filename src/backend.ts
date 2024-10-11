@@ -1,21 +1,21 @@
-import core from '@nestia/core';
-import * as nest from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
+import core from "@nestia/core";
+import * as nest from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+import cookieParser from "cookie-parser";
+import helmet from "helmet";
 
-import { config } from './infrastructure/config';
-import { InfraModule } from './infrastructure/infra.module';
-import { logger } from './infrastructure/logger';
+import { config } from "./infrastructure/config";
+import { InfraModule } from "./infrastructure/infra.module";
+import { logger } from "./infrastructure/logger";
 
 const controllers = `${__dirname}/controller`;
 
 const tapLog =
-    (command: 'start' | 'end') =>
+    (command: "start" | "end") =>
     <T>(input: T) => {
         logger.log(
             `Server ${command} ${new Date().toLocaleString(undefined, {
-                timeZoneName: 'longGeneric',
+                timeZoneName: "longGeneric",
             })}`,
         );
         return input;
@@ -37,8 +37,7 @@ export namespace Backend {
         postEnd?: () => void | Promise<void>;
     }
 
-    const callAsync = async (fn?: () => unknown | Promise<unknown>) =>
-        fn ? fn() : null;
+    const callAsync = async (fn?: () => unknown | Promise<unknown>) => (fn ? fn() : null);
 
     export const start = (options: IOptions = {}): Promise<Backend> =>
         callAsync(options.preStart)
@@ -59,12 +58,11 @@ export namespace Backend {
                     )
                     .init(),
             )
-            .then((app) => app.listen(config('PORT')).then(() => app))
-            .then(tapLog('start'))
+            .then((app) => app.listen(config("PORT")).then(() => app))
+            .then(tapLog("start"))
             .then((app) => {
-                const end = () =>
-                    app.close().then(options.postEnd).then(tapLog('end'));
-                process.on('SIGINT', () => end().then(() => process.exit(0)));
+                const end = () => app.close().then(options.postEnd).then(tapLog("end"));
+                process.on("SIGINT", () => end().then(() => process.exit(0)));
                 return { end };
             });
 

@@ -1,37 +1,24 @@
-node_modules
 .github
 .vscode
-
-# file
-
-db
 build
-tbuild
+hooks
+node_modules
 packages
-
 prisma/client
-
-# log
-
-*.log
-*.md
-*.txt
-
-# env
-
+prisma/migrations
+src/test
+tbuild
 .env
 .env.*
-
-.npmrc
-
-.DS_Store
-
-# config
-
-nestia.config.ts
-tsconfig.api.json
-tsconfig.test.json
-.eslintrc.js
 .gitignore
+.npmrc
 .prettierignore
-prettier.config.cjs
+ERD.md
+eslint.config.mjs
+nestia.config.ts
+prettierconfig.mjs
+README.md
+setup_hook.sh
+TEST_REPORT.md
+tsconfig.sdk.json
+tsconfig.test.json

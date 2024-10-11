@@ -3,10 +3,10 @@
 ## Example
 
 ```ts
-import sdk from '@project/api';
+import sdk from "@project/api";
 
 const response = await sdk.functional.health.check({
-    host: 'http://localhost:4000',
+    host: "http://localhost:4000",
 });
 
 if (response.status !== 200)

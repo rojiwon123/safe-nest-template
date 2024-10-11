@@ -1,8 +1,8 @@
-import type nestia from '@nestia/sdk';
+import type nestia from "@nestia/sdk";
 
 const NESTIA_CONFIG: nestia.INestiaConfig = {
-    input: 'src/controller',
-    output: './sdk',
+    input: "src/controller",
+    output: "./sdk",
     simulate: false,
     propagate: true,
     clone: true,
@@ -10,16 +10,10 @@ const NESTIA_CONFIG: nestia.INestiaConfig = {
     json: false,
     swagger: {
         decompose: true,
-        output: 'packages/swagger/swagger.json',
-        servers: [
-            { url: 'http://localhost:4000', description: 'Local Server' },
-        ],
-        security: {
-            bearer: {
-                type: 'http',
-                scheme: 'bearer',
-            },
-        },
+        openapi: "3.0",
+        output: "packages/swagger/openapi.json",
+        servers: [{ url: "http://localhost:4000", description: "Local Server" }],
+        security: { bearer: { type: "http", scheme: "bearer" } },
     },
 };
 

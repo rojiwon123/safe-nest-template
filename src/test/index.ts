@@ -1,17 +1,16 @@
-import { DynamicExecutor } from '@nestia/e2e';
-import { IConnection } from '@nestia/fetcher';
+import { DynamicExecutor } from "@nestia/e2e";
+import { IConnection } from "@nestia/fetcher";
 
-import { Backend } from '@SRC/backend';
-import { config, initConfig } from '@SRC/infrastructure/config';
-import { connectPrisma, disconnectPrisma } from '@SRC/infrastructure/db/prisma';
-import { initLogger } from '@SRC/infrastructure/logger';
+import { Backend } from "@SRC/backend";
+import { config, initConfig } from "@SRC/infrastructure/config";
+import { connectPrisma, disconnectPrisma } from "@SRC/infrastructure/db/prisma";
+import { initLogger } from "@SRC/infrastructure/logger";
 
-import { TestAnalyzer } from './internal/analyzer';
+import { TestAnalyzer } from "./internal/analyzer";
 
 const getArg = (key: string): string | undefined => {
     const key_index = process.argv.findIndex((val) => val === key);
-    if (key_index === -1 || key_index + 1 >= process.argv.length)
-        return undefined;
+    if (key_index === -1 || key_index + 1 >= process.argv.length) return undefined;
     return process.argv[key_index + 1]!;
 };
 
@@ -25,13 +24,13 @@ void (async () => {
         postEnd: disconnectPrisma,
     });
     const connection: IConnection = {
-        host: `http://localhost:${config('PORT')}`,
+        host: `http://localhost:${config("PORT")}`,
     };
-    const skip = getArg('--skip');
-    const only = getArg('--only');
+    const skip = getArg("--skip");
+    const only = getArg("--only");
     const report = await DynamicExecutor.validate({
-        location: __dirname + '/features',
-        prefix: 'test_',
+        location: __dirname + "/features",
+        prefix: "test_",
         parameters: () => [connection],
         filter: (name) => {
             if (skip !== undefined) return !name.includes(skip);
@@ -52,7 +51,7 @@ void (async () => {
     await backend.end();
 
     const analyzed = TestAnalyzer.analyze(report);
-    const md = process.argv.includes('--report');
+    const md = process.argv.includes("--report");
     TestAnalyzer.report(analyzed, md);
     process.exit(analyzed.state);
 })();

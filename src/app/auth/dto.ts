@@ -1,8 +1,8 @@
-import { Regex } from '@SRC/common/type';
+import { Regex } from "@SRC/common/type";
 
 export namespace IAuthentication {
     export interface ITokenPayload {
-        type: 'access';
+        type: "access";
         user_id: Regex.UUID;
         expired_at: Regex.DateTime;
     }

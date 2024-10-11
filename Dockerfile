@@ -6,7 +6,7 @@ COPY  ./prisma/schemas ./prisma/schemas
 COPY  package*.json tsconfig*.json ./
 RUN npm i -g npm && npm ci
 
-COPY ./src ./src
+COPY . .
 RUN npm run build && npm prune --omit=dev
 
 FROM node:20-alpine AS runner

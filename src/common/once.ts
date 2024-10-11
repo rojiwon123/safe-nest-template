@@ -1,6 +1,6 @@
-import { Option } from './option';
+import { Option } from "./option";
 
-const kind = Symbol('Once');
+const kind = Symbol("Once");
 
 export interface Once<T> {
     readonly [kind]: typeof kind;

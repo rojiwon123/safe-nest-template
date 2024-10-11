@@ -1,8 +1,8 @@
-import { Option } from './option';
+import { Option } from "./option";
 
-const kind = Symbol('Result');
-const OkSymbol = Symbol('Ok');
-const ErrSymbol = Symbol('Err');
+const kind = Symbol("Result");
+const OkSymbol = Symbol("Ok");
+const ErrSymbol = Symbol("Err");
 
 export interface Result<O, E> {
     readonly [kind]: typeof OkSymbol | typeof ErrSymbol;
@@ -19,16 +19,9 @@ export interface Result<O, E> {
     /**
      * Ok flatMap method
      */
-    readonly andThen: <O2, E2>(
-        f: (ok: O) => Result<O2, E2>,
-    ) => Result<O2, E | E2>;
-    readonly andThenAsync: <O2, E2>(
-        f: (ok: O) => Promise<Result<O2, E2>>,
-    ) => Promise<Result<O2, E | E2>>;
-    readonly match: <O2, E2>(
-        fn1: (input: O) => O2,
-        fn2: (input: E) => E2,
-    ) => O2 | E2;
+    readonly andThen: <O2, E2>(f: (ok: O) => Result<O2, E2>) => Result<O2, E | E2>;
+    readonly andThenAsync: <O2, E2>(f: (ok: O) => Promise<Result<O2, E2>>) => Promise<Result<O2, E | E2>>;
+    readonly match: <O2, E2>(fn1: (input: O) => O2, fn2: (input: E) => E2) => O2 | E2;
 }
 
 export namespace Result {

@@ -1,6 +1,6 @@
-const kind = Symbol('Option');
-const SomeSymbol = Symbol('Some');
-const NoneSymbol = Symbol('None');
+const kind = Symbol("Option");
+const SomeSymbol = Symbol("Some");
+const NoneSymbol = Symbol("None");
 
 export interface Option<T> {
     readonly [kind]: typeof SomeSymbol | typeof NoneSymbol;
@@ -34,10 +34,6 @@ export namespace Option {
             flatMap: () => None(),
             match: (_, fn) => fn(),
         });
-    export const unit = <T>(
-        input: T | null | undefined,
-    ): Option<NonNullable<T>> =>
-        input === null || input === undefined
-            ? Option.None()
-            : Option.Some(input);
+    export const unit = <T>(input: T | null | undefined): Option<NonNullable<T>> =>
+        input === null || input === undefined ? Option.None() : Option.Some(input);
 }

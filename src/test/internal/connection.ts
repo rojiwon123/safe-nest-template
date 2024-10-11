@@ -1,4 +1,4 @@
-import { IConnection } from '@nestia/fetcher';
+import { IConnection } from "@nestia/fetcher";
 
 export namespace Connection {
     export const addHeader =
@@ -11,6 +11,5 @@ export namespace Connection {
                 [key]: value,
             },
         });
-    export const authorize = (token: string) =>
-        addHeader('authorization')(`Bearer ${token}`);
+    export const authorize = (token: string) => addHeader("authorization")(`Bearer ${token}`);
 }

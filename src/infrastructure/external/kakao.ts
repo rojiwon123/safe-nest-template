@@ -1,149 +1,107 @@
-import fetch from '@rojiwon123/fetch';
-import typia from 'typia';
+import fetch from "@rojiwon123/fetch";
+import typia from "typia";
 
-import { Result } from '@SRC/common/result';
+import { Result } from "@SRC/common/result";
 
 export namespace KakaoSDK {
-    const AUTH_URL = 'https://kauth.kakao.com';
-    const API_URL = 'https://kapi.kakao.com';
+    const AUTH_URL = "https://kauth.kakao.com";
+    const API_URL = "https://kapi.kakao.com";
 
     const options: IOauth2Options = {
-        client_id: '',
-        client_secret: '',
-        redirect_uri: '',
+        client_id: "",
+        client_secret: "",
+        redirect_uri: "",
         service_terms: [],
-        prompt: 'login',
+        prompt: "login",
     };
 
     /**
      * Get Url for {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-code 인가 코드 받기}
      */
     export const getAuthorizeURL = (): string => {
-        const url = new URL('/oauth/authorize', AUTH_URL);
-        url.searchParams.set('client_id', options.client_id);
-        url.searchParams.set('redirect_uri', options.redirect_uri);
-        if (options.prompt) url.searchParams.set('prompt', options.prompt);
-        if (options.service_terms.length > 0)
-            options.service_terms.forEach((term) =>
-                url.searchParams.append('service_terms', term),
-            );
-        if (options.state) url.searchParams.set('state', options.state);
-        if (options.nonce) url.searchParams.set('nonce', options.nonce);
-        url.searchParams.set('response_type', 'code');
+        const url = new URL("/oauth/authorize", AUTH_URL);
+        url.searchParams.set("client_id", options.client_id);
+        url.searchParams.set("redirect_uri", options.redirect_uri);
+        if (options.prompt) url.searchParams.set("prompt", options.prompt);
+        if (options.service_terms.length > 0) options.service_terms.forEach((term) => url.searchParams.append("service_terms", term));
+        if (options.state) url.searchParams.set("state", options.state);
+        if (options.nonce) url.searchParams.set("nonce", options.nonce);
+        url.searchParams.set("response_type", "code");
         return url.toString();
     };
 
     /**
      * {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-token 토큰 받기}
      */
-    export const getTokens = (
-        code: string,
-    ): Promise<Result<ITokens, IAuthError>> =>
+    export const getTokens = (code: string): Promise<Result<ITokens, IAuthError>> =>
         fetch.request
             .urlencoded({
-                method: 'POST',
-                url: AUTH_URL + '/oauth/token',
+                method: "POST",
+                url: AUTH_URL + "/oauth/token",
                 body: {
-                    grant_type: 'authorization_code',
+                    grant_type: "authorization_code",
                     client_id: options.client_id,
                     redirect_uri: options.redirect_uri,
                     code,
-                    ...(options.client_secret
-                        ? { client_secret: options.client_secret }
-                        : {}),
+                    ...(options.client_secret ? { client_secret: options.client_secret } : {}),
                 },
             })
             .then(
                 fetch.response.match({
-                    '200': fetch.response.json((body) =>
-                        Result.Ok<ITokens, IAuthError>(
-                            typia.assert<ITokens>(body),
-                        ),
-                    ),
-                    _: fetch.response.json((body) =>
-                        Result.Err<ITokens, IAuthError>(
-                            typia.assert<IAuthError>(body),
-                        ),
-                    ),
+                    "200": fetch.response.json((body) => Result.Ok<ITokens, IAuthError>(typia.assert<ITokens>(body))),
+                    _: fetch.response.json((body) => Result.Err<ITokens, IAuthError>(typia.assert<IAuthError>(body))),
                 }),
             )
             .catch(() =>
                 Result.Err<ITokens, IAuthError>({
-                    error: 'unexpected_error',
-                    error_description: 'unexpected_error',
-                    error_code: 'unexpected_error',
+                    error: "unexpected_error",
+                    error_description: "unexpected_error",
+                    error_code: "unexpected_error",
                 }),
             );
 
     export const get =
-        <T>({
-            parser,
-            path,
-        }: {
-            parser: (input: unknown) => T;
-            path: string;
-        }) =>
-        (
-            access_token: string,
-            query: fetch.IQuery = {},
-        ): Promise<Result<T, IAPIError>> =>
+        <T>({ parser, path }: { parser: (input: unknown) => T; path: string }) =>
+        (access_token: string, query: fetch.IQuery = {}): Promise<Result<T, IAPIError>> =>
             fetch.request
                 .query({
-                    method: 'GET',
+                    method: "GET",
                     url: new URL(path, API_URL).toString(),
                     query,
                     headers: { authorization: `Bearer ${access_token}` },
                 })
                 .then(
                     fetch.response.match({
-                        200: fetch.response.json((body) =>
-                            Result.Ok<T, IAPIError>(parser(body)),
-                        ),
-                        _: fetch.response.json((body) =>
-                            Result.Err<T, IAPIError>(
-                                typia.assert<IAPIError>(body),
-                            ),
-                        ),
+                        200: fetch.response.json((body) => Result.Ok<T, IAPIError>(parser(body))),
+                        _: fetch.response.json((body) => Result.Err<T, IAPIError>(typia.assert<IAPIError>(body))),
                     }),
                 )
                 .catch(() =>
                     Result.Err<T, IAPIError>({
-                        msg: 'unexpected_error',
+                        msg: "unexpected_error",
                         code: 0,
                     }),
                 );
 
     export const post =
-        <T>({
-            parser,
-            path,
-        }: {
-            parser: (input: unknown) => T;
-            path: string;
-        }) =>
+        <T>({ parser, path }: { parser: (input: unknown) => T; path: string }) =>
         (access_token: string, body: fetch.IQuery) =>
             fetch.request
                 .urlencoded({
-                    method: 'POST',
+                    method: "POST",
                     url: new URL(path, API_URL).toString(),
                     body,
                     headers: { authorization: `Bearer ${access_token}` },
                 })
                 .then(
                     fetch.response.match({
-                        200: fetch.response.json((body) =>
-                            Result.Ok<T, IAPIError>(parser(body)),
-                        ),
-                        _: fetch.response.json((body) =>
-                            Result.Err<T, IAPIError>(
-                                typia.assert<IAPIError>(body),
-                            ),
-                        ),
+                        200: fetch.response.json((body) => Result.Ok<T, IAPIError>(parser(body))),
+                        _: fetch.response.json((body) => Result.Err<T, IAPIError>(typia.assert<IAPIError>(body))),
                     }),
                 )
                 .catch(() =>
                     Result.Err<T, IAPIError>({
-                        msg: 'unexpected_error',
+                        msg: "unexpected_error",
                         code: 0,
                     }),
                 );
@@ -151,13 +109,10 @@ export namespace KakaoSDK {
     /**
      * {@link https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#req-user-info 사용자 기본 정보 가져오기}
      */
-    export const getUser = (
-        access_token: string,
-        parameter: IMeRequestParameter,
-    ) =>
+    export const getUser = (access_token: string, parameter: IMeRequestParameter) =>
         get({
             parser: typia.createAssert<IGetUserResponse>(),
-            path: '/v2/user/me',
+            path: "/v2/user/me",
         })(access_token, {
             secure_resource: parameter.secure_resource ?? true,
             property_keys: JSON.stringify(parameter.property_keys),
@@ -193,7 +148,7 @@ export namespace KakaoSDK {
          *
          * create: 사용자에게 카카오계정 신규 가입 후 로그인하도록 하기 위해 사용, 카카오계정 가입 페이지로 이동 후, 카카오계정 가입 완료 후 동의 화면 출력
          */
-        readonly prompt?: 'login' | 'none' | 'create';
+        readonly prompt?: "login" | "none" | "create";
         /**
          * 약관 선택해 동의 받기 요청 시 사용
          *
@@ -224,7 +179,7 @@ export namespace KakaoSDK {
         /**
          * 토큰 타입, bearer로 고정
          */
-        readonly token_type: 'bearer';
+        readonly token_type: "bearer";
         /**
          * 사용자 액세스 토큰 값
          */
@@ -286,12 +241,12 @@ export namespace KakaoSDK {
     }
 
     export type PropertyKey =
-        | 'kakao_account.profile'
-        | 'kakao_account.name'
-        | 'kakao_account.email'
-        | 'kakao_account.age_range'
-        | 'kakao_account.birthday'
-        | 'kakao_account.gender';
+        | "kakao_account.profile"
+        | "kakao_account.name"
+        | "kakao_account.email"
+        | "kakao_account.age_range"
+        | "kakao_account.birthday"
+        | "kakao_account.gender";
 
     export interface IGetUserResponse {
         /**
@@ -470,7 +425,7 @@ export namespace KakaoSDK {
          *
          * 필요한 동의 항목: 생일
          */
-        readonly birthday_type?: 'SOLAR' | 'LUNAR';
+        readonly birthday_type?: "SOLAR" | "LUNAR";
         /**
          * 사용자 동의 시 성별 제공 가능
          *
@@ -484,7 +439,7 @@ export namespace KakaoSDK {
          *
          * 필요한 동의 항목: 성별
          */
-        readonly gender?: 'female' | 'male';
+        readonly gender?: "female" | "male";
         /**
          * 사용자 동의 시 전화번호 제공 가능
          *

@@ -6,6 +6,8 @@
         "prisma.prisma",
         "bierner.github-markdown-preview",
         "github.vscode-pull-request-github",
-        "mhutchie.git-graph"
+        "github.vscode-github-actions",
+        "mhutchie.git-graph",
+        "ms-vscode.js-debug"
     ]
 }

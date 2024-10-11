@@ -1,12 +1,12 @@
-import core from '@nestia/core';
-import * as nest from '@nestjs/common';
+import core from "@nestia/core";
+import * as nest from "@nestjs/common";
 
-import { IUser } from '@SRC/app/users/dto';
-import { UsersUsecase } from '@SRC/app/users/usecase';
-import { Exception } from '@SRC/common/exception';
-import { Regex } from '@SRC/common/type';
+import { IUser } from "@SRC/app/users/dto";
+import { UsersUsecase } from "@SRC/app/users/usecase";
+import { Exception } from "@SRC/common/exception";
+import { Regex } from "@SRC/common/type";
 
-@nest.Controller('users')
+@nest.Controller("users")
 export class UsersController {
     /**
      * 사용자 정보를 불러옵니다.
@@ -17,8 +17,8 @@ export class UsersController {
      * @return 사용자 정보
      */
     @core.TypedException<Exception.User.NotFound>(nest.HttpStatus.NOT_FOUND)
-    @core.TypedRoute.Get(':user_id')
-    async get(@core.TypedParam('user_id') user_id: Regex.UUID): Promise<IUser> {
+    @core.TypedRoute.Get(":user_id")
+    async get(@core.TypedParam("user_id") user_id: Regex.UUID): Promise<IUser> {
         return UsersUsecase.get(user_id).then((result) =>
             result.match(
                 (ok) => ok,

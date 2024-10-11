@@ -1,7 +1,7 @@
-import { IPage } from '@SRC/common/page';
-import { Regex } from '@SRC/common/type';
+import { IPage } from "@SRC/common/page";
+import { Regex } from "@SRC/common/type";
 
-import { IUser } from '../users/dto';
+import { IUser } from "../users/dto";
 
 export interface IArticle {
     id: Regex.UUID;

@@ -50,10 +50,6 @@ npm run build:nestia
 
 -   swagger-ui 서버 실행
 
-```bash
-npm run swagger
-```
-
 ## Appendix
 
 -   [Nestia 공식 가이드](https://nestia.io/docs/)

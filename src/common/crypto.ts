@@ -1,7 +1,7 @@
-import { isUndefined } from '@fxts/core';
-import crypto from 'crypto';
+import { isUndefined } from "@fxts/core";
+import crypto from "crypto";
 
-import { Option } from './option';
+import { Option } from "./option";
 
 export namespace Crypto {
     const IV_LEN = 12;
@@ -12,23 +12,14 @@ export namespace Crypto {
      * - plain: 평문
      * - key: 암호화 키, 32 byte string
      */
-    export const encrypt = ({
-        plain,
-        key,
-    }: {
-        plain: string;
-        key: string;
-    }): string => {
+    export const encrypt = ({ plain, key }: { plain: string; key: string }): string => {
         const iv = crypto.randomBytes(IV_LEN);
-        const cipher = crypto.createCipheriv('aes-256-gcm', key, iv, {
+        const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
             authTagLength: TAG_LEN,
         });
-        const encrypted =
-            cipher.update(plain, 'utf8', 'base64') + cipher.final('base64');
+        const encrypted = cipher.update(plain, "utf8", "base64") + cipher.final("base64");
         const tag = cipher.getAuthTag();
-        return `${iv.toString('base64')}.${tag.toString(
-            'base64',
-        )}.${encrypted}`;
+        return `${iv.toString("base64")}.${tag.toString("base64")}.${encrypted}`;
     };
 
     /**
@@ -42,24 +33,12 @@ export namespace Crypto {
      *
      * 잘못된 토큰을 전달시 INVALID_TOKEN 에러를 리턴한다.
      */
-    export const decrypt = ({
-        token,
-        key,
-    }: {
-        token: string;
-        key: string;
-    }): Option<string> => {
+    export const decrypt = ({ token, key }: { token: string; key: string }): Option<string> => {
         try {
-            const [iv, tag, encrypted] = token.split('.');
-            if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Option.None();
-            const decipher = crypto
-                .createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64'))
-                .setAuthTag(Buffer.from(tag, 'base64'));
-            return Option.Some(
-                decipher.update(encrypted, 'base64', 'utf-8') +
-                    decipher.final('utf-8'),
-            );
+            const [iv, tag, encrypted] = token.split(".");
+            if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted)) return Option.None();
+            const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64")).setAuthTag(Buffer.from(tag, "base64"));
+            return Option.Some(decipher.update(encrypted, "base64", "utf-8") + decipher.final("utf-8"));
         } catch {
             return Option.None();
         }

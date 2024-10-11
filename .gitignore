@@ -1,12 +1,13 @@
 # build
 
+dist
 build
 tbuild
 packages/api/lib
-packages/swagger/swagger.json
 prisma/client
 migrated
 sdk
+openapi.json
 
 # Logs
 logs
@@ -23,6 +24,8 @@ test_log.txt
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+TEST_REPORT.md
 
 # Runtime data
 pids
@@ -98,7 +101,6 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
