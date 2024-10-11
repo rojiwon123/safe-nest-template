@@ -7,7 +7,11 @@ initLogger();
 
 Backend.start({
     logger: false,
-    cors: { origin: "*", credentials: false },
     // preStart: connectPrisma,
     // postEnd: disconnectPrisma,
-}).catch(logger.fatal);
+})
+    .then(Backend.listen)
+    .catch((err) => {
+        logger().fatal(err);
+        throw err;
+    });

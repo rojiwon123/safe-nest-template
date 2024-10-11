@@ -1,8 +1,10 @@
 import dotenv from "dotenv";
 import typia from "typia";
 
-import { Once } from "@SRC/common/once";
-import { Random } from "@SRC/common/random";
+import { Once } from "@SRC/util/once";
+import { Random } from "@SRC/util/random";
+
+import { LogType } from "./logger";
 
 const once = Once.unit(() => {
     switch (process.env["NODE_ENV"]) {
@@ -21,11 +23,13 @@ const once = Once.unit(() => {
     return process.env["NODE_ENV"] === "test" ?
             ({
                 PORT: 4000,
-                ACCESS_TOKEN_KEY: Random.string(32),
-                REFRESH_TOKEN_KEY: Random.string(32),
+                ORIGIN: "*",
+                LOG_LEVEL: "DEBUG",
+                SILENT: true,
+                ACCESS_TOKEN_KEY: Random.string({ min: 32, max: 33 }),
                 ...process.env,
-            } as unknown as IConfig)
-        :   typia.assert<IConfig>({ PORT: 4000, ...process.env });
+            } satisfies Partial<IConfig> as IConfig)
+        :   typia.assert<IConfig>({ PORT: 4000, LOG_LEVEL: "INFO", SILENT: false, ...process.env } satisfies Partial<IConfig>);
 });
 
 export const config = <T extends keyof IConfig>(key: T): IConfig[T] => once.run()[key];
@@ -39,4 +43,7 @@ interface IConfig {
     DATABASE_URL: string;
 
     ACCESS_TOKEN_KEY: string & typia.tags.MinLength<32> & typia.tags.MaxLength<32>;
+    ORIGIN: string;
+    LOG_LEVEL: LogType;
+    SILENT: boolean | `${boolean}`;
 }

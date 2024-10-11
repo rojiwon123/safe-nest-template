@@ -1,17 +1,12 @@
 import typia from "typia";
 
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+export type OmitKeyof<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-export type Mutable<T extends object> = {
-    -readonly [key in keyof T]: T[key];
-};
-
-export type PrismaReturn<T extends (...args: any[]) => any> = NonNullable<Awaited<ReturnType<T>>>;
-
+export type Regex<T extends string> = string & typia.tags.Pattern<T>;
 export namespace Regex {
     export type UUID = string & typia.tags.Format<"uuid">;
-    export type DateTime = string & typia.tags.Format<"date-time">;
-    export type URL = string & typia.tags.Format<"url">;
+    export type RFC3339 = string & typia.tags.Format<"date-time">;
+    export type URI = string & typia.tags.Format<"uri">;
     export type Email = string & typia.tags.Format<"email">;
 }
 

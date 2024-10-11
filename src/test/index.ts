@@ -1,12 +1,15 @@
 import { DynamicExecutor } from "@nestia/e2e";
-import { IConnection } from "@nestia/fetcher";
+import api from "@project/api";
 
 import { Backend } from "@SRC/backend";
 import { config, initConfig } from "@SRC/infrastructure/config";
-import { connectPrisma, disconnectPrisma } from "@SRC/infrastructure/db/prisma";
 import { initLogger } from "@SRC/infrastructure/logger";
 
-import { TestAnalyzer } from "./internal/analyzer";
+import { TestReport } from "./report";
+import { Seed } from "./seed";
+
+initConfig();
+initLogger();
 
 const getArg = (key: string): string | undefined => {
     const key_index = process.argv.findIndex((val) => val === key);
@@ -14,44 +17,44 @@ const getArg = (key: string): string | undefined => {
     return process.argv[key_index + 1]!;
 };
 
-void (async () => {
-    // Mocker.run();
-    initConfig();
-    initLogger();
-    const backend = await Backend.start({
-        logger: false,
-        preStart: connectPrisma,
-        postEnd: disconnectPrisma,
-    });
-    const connection: IConnection = {
-        host: `http://localhost:${config("PORT")}`,
-    };
+const pre_test = async () => {
+    //  await connectPrisma();
+    const backend = await Backend.start({ logger: false });
+    await backend.listen();
+    return backend;
+};
+
+const post_test = async (backend: Backend) => {
+    await backend.end();
+    await Seed.reset();
+    //  await disconnectPrisma();
+};
+
+const test = async () => {
+    const connection: api.IConnection = { host: `http://localhost:${config("PORT")}` };
     const skip = getArg("--skip");
     const only = getArg("--only");
     const report = await DynamicExecutor.validate({
+        prefix: "test",
         location: __dirname + "/features",
-        prefix: "test_",
         parameters: () => [connection],
         filter: (name) => {
             if (skip !== undefined) return !name.includes(skip);
             if (only !== undefined) return name.includes(only);
             return true;
         },
-        wrapper: async (_, closure) => {
-            try {
-                await closure(connection);
-            } catch (error) {
-                if (error instanceof Error) delete error.stack;
-                console.log(error);
-                throw error;
-            }
-        },
     });
+    return TestReport.report(report);
+};
 
-    await backend.end();
+export const run = async () => {
+    console.log("SETUP");
+    const backend = await pre_test();
+    console.log("TESTING ...");
+    process.exitCode = await test();
+    console.log("CLEAN UP");
+    await post_test(backend);
+    console.log("DONE! Check TEST_REPORT.md");
+};
 
-    const analyzed = TestAnalyzer.analyze(report);
-    const md = process.argv.includes("--report");
-    TestAnalyzer.report(analyzed, md);
-    process.exit(analyzed.state);
-})();
+void run();

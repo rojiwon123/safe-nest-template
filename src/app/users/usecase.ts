@@ -1,13 +1,13 @@
-import { Exception } from "@SRC/common/exception";
-import { Result } from "@SRC/common/result";
-import { Regex } from "@SRC/common/type";
+import typia from "typia";
 
-import { User } from "./domain";
-import { IUser } from "./dto";
+import { Exception } from "@SRC/util/exception";
+import { Result } from "@SRC/util/result";
 
-export namespace UsersUsecase {
-    export const get = async (user_id: Regex.UUID): Promise<Result<IUser, Exception.User.NotFound>> => {
-        const user = await User.get()({ id: user_id });
-        return user;
+import { UserDTO } from "./application/user.dto";
+import { User } from "./domain/user.interface";
+
+export namespace UserUsecase {
+    export const getProfile = async (input: User.Id): Promise<Result<UserDTO.Profile, Exception.User.NotFound>> => {
+        return Result.Ok({ ...typia.random<UserDTO.Profile>(), id: input.user_id });
     };
 }

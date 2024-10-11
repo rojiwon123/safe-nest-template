@@ -17,7 +17,7 @@
         "--------------------init--------------------": "",
         "check": "ts-patch check",
         "prepare": "ts-patch install && typia patch && npm run build:prisma",
-        "postinstall": "[ -f ./setup-hook.sh ] && /bin/sh ./setup-hook.sh || true",
+        "postinstall": "[ -f ./setup_hook.sh ] && /bin/sh ./setup_hook.sh || true",
         "prettier": "prettier . -w",
         "lint": "npx eslint .",
         "--------------------db--------------------": "",

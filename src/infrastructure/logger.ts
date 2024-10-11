@@ -3,71 +3,91 @@ import stream from "stream";
 import util from "util";
 import winston from "winston";
 
-import { Once } from "@SRC/common/once";
+import { DateTime } from "@SRC/util/datetime";
+import { freezeObject } from "@SRC/util/fn";
+import { Once } from "@SRC/util/once";
 
 import { config } from "./config";
 
-interface LogLevel {
-    FATAL: 0;
-    ERROR: 1;
-    WARN: 2;
-    INFO: 3; // log
-    DEBUG: 4;
-}
+type LogLevel = readonly ["FATAL", "ERROR", "WARN", "INFO", "DEBUG"];
 
-const inspect_options: Record<keyof LogLevel, util.InspectOptions> = {
-    FATAL: { colors: false, sorted: false },
-    ERROR: { colors: false, sorted: false },
-    WARN: { colors: false, sorted: false },
-    INFO: { colors: false, sorted: false },
-    DEBUG: {
-        colors: false,
-        sorted: false,
-        depth: null,
-        showHidden: true,
-        showProxy: true,
-        maxArrayLength: null,
-        numericSeparator: true,
-    },
+export type LogType = LogLevel[number];
+
+type _IndexOf<T extends readonly unknown[], K extends T[number]> = {
+    [I in keyof T]: T[I] extends K ? I : never;
+}[number];
+
+type IndexOf<T extends LogType> = _IndexOf<LogLevel, T> extends `${infer N extends number}` ? N : never;
+
+type LogLevels = { [T in LogType]: IndexOf<T> };
+const levels = (): LogLevels => ({
+    FATAL: 0,
+    ERROR: 1,
+    WARN: 2,
+    INFO: 3,
+    DEBUG: 4,
+});
+
+const timestamp = () => DateTime.unit().toLcaleString({ locales: "ko", options: { timeZone: "Asia/Seoul" } });
+const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): util.InspectOptions => {
+    switch (level) {
+        case "FATAL":
+            return { colors, sorted: false, depth: null };
+        case "ERROR":
+        case "WARN":
+        case "INFO":
+            return { colors, sorted: false };
+        case "DEBUG":
+            return { colors, sorted: false, depth: null, showHidden: true, showProxy: true, maxArrayLength: null, numericSeparator: true };
+        default:
+            return { colors };
+    }
 };
 
-const stringify = (level: keyof LogLevel, ...messages: unknown[]) =>
-    messages.map((message) => (typeof message === "string" ? message : util.inspect(message, inspect_options[level]))).join(" ");
+const isString = (input: unknown) => typeof input === "string";
 
-const timestamp = () => new Date().toLocaleString("ko", { timeZone: "Asia/Seoul" });
+const stringify = ({ colors = false }: { colors?: boolean } = {}) =>
+    winston.format((info) => {
+        const message = info.message;
+        if (isString(message)) info.message = message;
+        if (Array.isArray(message))
+            info.message = message
+                .map((input: unknown) => (isString(input) ? input : util.inspect(input, inspectOptions({ level: info.level, colors }))))
+                .join(" ");
+        return info;
+    })();
 
-const writer = Once.unit(() => {
-    const CONSOLE_TRANSPORT = new winston.transports.Stream({
+const localTransports = () => [
+    new winston.transports.Stream({
         stream: process.stdout,
         format: winston.format.combine(
+            stringify({ colors: true }),
             winston.format.colorize({
-                message: true,
+                level: true,
                 colors: {
                     FATAL: "red",
-                    ERROR: "red",
+                    ERROR: "blue",
                     WARN: "yellow",
-                    INFO: "white",
-                    DEBUG: "white",
-                } satisfies Record<keyof LogLevel, string>,
+                    INFO: "green",
+                    DEBUG: "gray",
+                } satisfies Record<LogType, "red" | "blue" | "yellow" | "green" | "gray" | "white">,
             }),
-            winston.format.printf((info) => `[${info.level}] ` + info.message),
+            winston.format.printf((info) => `[${info.level}] ${timestamp()} ${info.message}`),
         ),
-    });
+    }),
+];
 
-    const aws_log_client = new cloudwatch.CloudWatchLogsClient({
-        region: "ap-northeast-2",
-    });
-
-    const LOG_STREAM_TRANSPORT = new winston.transports.Stream({
+const cloudTransports = () => [
+    new winston.transports.Stream({
         stream: new stream.Writable({
             write(chunk, _, callback) {
                 const message = typeof chunk === "string" ? chunk : "";
                 const timestamp = Date.now();
-                return aws_log_client
+                return new cloudwatch.CloudWatchLogsClient()
                     .send(
                         new cloudwatch.PutLogEventsCommand({
-                            logGroupName: "",
-                            logStreamName: "",
+                            logGroupName: "log-group-name",
+                            logStreamName: "log-stream-name",
                             logEvents: [{ message, timestamp }],
                         }),
                     )
@@ -75,41 +95,37 @@ const writer = Once.unit(() => {
                     .catch(callback);
             },
         }),
-        format: winston.format.printf((info) => `[${info.level}] ${timestamp()} ${info.message}`),
-    });
+        format: winston.format.combine(
+            stringify({ colors: false }),
+            winston.format.printf((info) => `[${info.level}] ${timestamp()} ${info.message}`),
+        ),
+    }),
+];
+cloudTransports;
 
-    const PRODUCTION_MODE = config("NODE_ENV") === "production";
-
-    const LOG_LEVEL: keyof LogLevel = PRODUCTION_MODE ? "INFO" : "DEBUG";
-
+const once = Once.unit(() => {
     const winston_logger = winston.createLogger({
-        levels: {
-            FATAL: 0,
-            ERROR: 1,
-            WARN: 2,
-            INFO: 3, // log
-            DEBUG: 4,
-        } satisfies LogLevel,
-        level: LOG_LEVEL,
-        format: winston.format((info) => {
-            info.message = stringify(info.level as keyof LogLevel, ...info.message);
-            return info;
-        })(),
-        transports: PRODUCTION_MODE ? [LOG_STREAM_TRANSPORT] : [CONSOLE_TRANSPORT],
+        levels: levels(),
+        level: config("LOG_LEVEL"),
+        silent: config("SILENT") === true || config("SILENT") === "true",
+        transports: localTransports(),
     });
 
-    return (level: keyof LogLevel, message: unknown[]): void => {
-        winston_logger.log(level, { message });
-    };
+    const _logger =
+        (level: LogType) =>
+        (...message: unknown[]) => {
+            winston_logger.log(level, { message });
+        };
+
+    return freezeObject({
+        fatal: _logger("FATAL"),
+        error: _logger("ERROR"),
+        warn: _logger("WARN"),
+        info: _logger("INFO"),
+        log: _logger("INFO"),
+        debug: _logger("DEBUG"),
+    });
 });
 
-export const logger = Object.freeze({
-    fatal: (...message: unknown[]) => writer.run()("FATAL", message),
-    error: (...message: unknown[]) => writer.run()("ERROR", message),
-    warn: (...message: unknown[]) => writer.run()("WARN", message),
-    info: (...message: unknown[]) => writer.run()("INFO", message),
-    log: (...message: unknown[]) => writer.run()("INFO", message),
-    debug: (...message: unknown[]) => writer.run()("DEBUG", message),
-});
-
-export const initLogger = () => writer.init();
+export const initLogger = once.init;
+export const logger = once.run;
