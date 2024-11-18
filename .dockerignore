@@ -22,3 +22,8 @@ setup_hook.sh
 TEST_REPORT.md
 tsconfig.sdk.json
 tsconfig.test.json
+
+*.log
+*.md
+*.txt
+.DS_Store

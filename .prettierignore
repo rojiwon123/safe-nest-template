@@ -2,7 +2,6 @@ node_modules
 dist
 build
 tbuild
-
 lib
-
 prisma/client
+.dockerignore

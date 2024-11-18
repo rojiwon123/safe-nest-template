@@ -3,18 +3,6 @@ name: Release 🔖
 on:
     workflow_dispatch:
         inputs:
-            image:
-                required: true
-                default: false
-                type: boolean
-            release-note:
-                required: true
-                default: false
-                type: boolean
-            swagger:
-                required: true
-                default: false
-                type: boolean
             sdk:
                 required: true
                 default: false
@@ -27,112 +15,35 @@ permissions:
     pages: write
 
 env:
-    DATABASE_URL: postgresql://test:test@localhost:5432/test
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+concurrency:
+    group: release
+    cancel-in-progress: false
+
 jobs:
     test:
-        runs-on: ubuntu-latest
+        if: startsWith(github.ref, 'refs/heads/main')
+        uses: ./.github/workflows/test.yml
 
-        services:
-            postgres:
-                image: postgres:14
-                env:
-                    POSTGRES_USER: test
-                    POSTGRES_PASSWORD: test
-                    POSTGRES_DB: test
-                options: >-
-                    --health-cmd="pg_isready"
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
-                ports:
-                    - 5432:5432
+    release:
+        needs: test
+        runs-on: ubuntu-latest
 
         steps:
             - name: Checkout 🛎️
               uses: actions/checkout@main
 
-            - name: Setup NodeJS
-              uses: actions/setup-node@main
-              with:
-                  node-version: 20
-
-            - name: Install & Build
-              run: npm ci && npm run build:sdk
-
-            - name: Setup DB
-              run: npm run db:deploy
-
-            - name: Test 🧪
-              run: npm run test
-
-    release-note:
-        if: github.event.inputs.release-note == 'true'
-        runs-on: ubuntu-latest
-        concurrency:
-            group: ${{ github.workflow }}-release-note
-            cancel-in-progress: true
-
-        steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@main
-
-            - name: Create Release Note 🔖
+            - name: Check Version
+              id: version
               run: |
-                  VERSION=v$(node -p "require('./package.json').version")
-                  git config --global user.email "github-actions@github.com"
-                  git config --global user.name "GitHub Actions"
+                  VERSION=$(node -p "require('./package.json').version")
                   if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-                    echo "Tag v$VERSION already exist."
+                    echo "Tag v$VERSION already exist"
                     exit 1
                   fi
-                  git tag -a "$VERSION" -m "release $VERSION"
-                  git push origin "$VERSION"
-                  gh release create "$VERSION" -t "$VERSION" --target "${{ github.sha }}" --generate-notes
-
-    swagger:
-        if: github.event.inputs.swagger == 'true'
-        runs-on: ubuntu-latest
-        concurrency:
-            group: ${{ github.workflow }}-swagger
-            cancel-in-progress: true
-
-        steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@main
-
-            - name: Setup NodeJS
-              uses: actions/setup-node@main
-              with:
-                  node-version: 20
-
-            - name: Setup Pages
-              uses: actions/configure-pages@v5
-
-            - name: Swagger Build
-              run: npm ci && npm run build:swagger
-
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  path: ./packages/swagger
-                  name: github-pages
-
-            - name: Deploy to Github Pages
-              uses: actions/deploy-pages@v4
-
-    sdk:
-        if: github.event.inputs.sdk == 'true'
-        runs-on: ubuntu-latest
-        concurrency:
-            group: ${{ github.workflow }}-sdk
-            cancel-in-progress: true
-
-        steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@main
+                  echo "output=$VERSION" >> "$GITHUB_OUTPUT"
 
             - name: Setup NodeJS
               uses: actions/setup-node@main
@@ -141,34 +52,48 @@ jobs:
                   registry-url: https://npm.pkg.github.com/
                   scope: "@rojiwon123"
 
-            - name: Swagger Build
-              run: npm ci && npm run build:sdk
+            - name: Configure AWS credentials 🔑
+              uses: aws-actions/configure-aws-credentials@main
+              with:
+                  role-to-assume: ${{ vars.AWS_ASSUME_ROLE_ARN }}
+                  aws-region: ${{ vars.AWS_REGION }}
 
-            - name: Publish
-              run: npm publish ./packages/api --access restricted
-#
-#    deploy-image:
-#        runs-on: ubuntu-latest
-#        needs: create-release-note
-#        steps:
-#            - name: Checkout 🛎️
-#              uses: actions/checkout@main
-#
-#            - name: Configure AWS credentials 🔒
-#              uses: aws-actions/configure-aws-credentials@v2
-#              with:
-#                  role-to-assume: ${{ secrets.AWS_ECR_ROLE }}
-#                  aws-region: ${{ env.AWS_REGION }}
-#
-#            - name: Login to Amazon ECR 🔒
-#              id: login-ecr
-#              uses: aws-actions/amazon-ecr-login@v1
-#
-#            - name: Image Build and Push to Amazon ECR ✨
-#              id: build-image
-#              env:
-#                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#                  IMAGE_TAG: ${{ needs.create-release-note.outputs.release }}
-#              run: |
-#                  docker build --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-#                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            - name: Build & Push Docker Image 🐳
+              id: image
+              uses: deploy-actions/push-to-ecr@v1
+              with:
+                  repository-name: ${{ vars.PROJECT_NAME }}
+                  image-tag: ${{ steps.version.outputs.output }}
+                  overwrite: false
+
+            - name: Deploy Lambda
+              uses: deploy-actions/lambda-api@main
+              with:
+                  Name: ${{ vars.PROJECT_NAME }}
+                  ImageUri: ${{ steps.image.outputs.image_uri }}
+                  MemorySize: 1024
+                  Timeout: 10
+
+            - name: Build API Doc/SDK
+              run: npm ci && npm run build:nestia
+
+            - name: Setup Pages
+              uses: actions/configure-pages@v5
+
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./packages/doc
+                  name: github-pages
+
+            - name: Deploy to Github Pages
+              uses: actions/deploy-pages@v4
+
+            - name: Publish SDK
+              if: ${{ inputs.sdk }}
+              run: |
+                  TAG=v${{ steps.version.outputs.output }}
+                  git tag -a "$TAG" -m "release $TAG"
+                  git push origin "$TAG"
+                  gh release create "$TAG" -t "$TAG" --target "${{ github.sha }}" --generate-notes
+                  npm publish ./packages/sdk --access restricted

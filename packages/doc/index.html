@@ -11,10 +11,12 @@
         <div id="swagger-ui"></div>
         <!-- Div to hold the UI component -->
         <script>
+            const params = new URLSearchParams(window.location.search);
+            const version = params.get("version");
             window.onload = function () {
                 // Begin Swagger UI call region
                 const ui = SwaggerUIBundle({
-                    url: "./openapi.json", //Location of Open API spec in the repo
+                    url: version === null ? "./swagger.json" : `./version/${version}.json`, //Location of Open API spec in the repo
                     dom_id: "#swagger-ui",
                     deepLinking: true,
                     presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],

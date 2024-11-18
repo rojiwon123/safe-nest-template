@@ -1,5 +1,6 @@
-import api from "@project/api";
 import typia from "typia";
+
+import api from "../../../packages/sdk";
 
 export const test_health_check = async (connection: api.IConnection) => {
     const result = await api.functional.health.check(connection);

@@ -23,14 +23,14 @@ export default tseslint.config(
             // typescript rules
             "@typescript-eslint/explicit-function-return-type": "off",
             "@typescript-eslint/explicit-module-boundary-types": "off",
-            "@typescript-eslint/no-empty-function": "off",
-            "@typescript-eslint/no-empty-interface": "off",
             "@typescript-eslint/no-empty-object-type": "off",
             "@typescript-eslint/no-explicit-any": "off",
             "@typescript-eslint/no-floating-promises": "error",
             "@typescript-eslint/no-inferrable-types": "off",
             "@typescript-eslint/no-namespace": "off",
-            "@typescript-eslint/no-unused-vars": "warn",
+            "@typescript-eslint/no-empty-function": "off",
+            "@typescript-eslint/no-empty-interface": "off",
+            "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_+$", varsIgnorePattern: "^_+$" }],
             "@typescript-eslint/no-unused-expressions": "off",
 
             // extension rules

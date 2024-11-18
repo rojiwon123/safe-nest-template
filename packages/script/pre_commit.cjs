@@ -9,7 +9,7 @@ const root_package = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), "pac
 const version = "version";
 const dep = "dependencies";
 
-const lib_path = path.resolve(process.cwd(), "packages/api/package.json");
+const lib_path = path.resolve(process.cwd(), "packages/sdk/package.json");
 
 const lib_package = JSON.parse(fs.readFileSync(lib_path, "utf-8"));
 
@@ -20,4 +20,4 @@ lib_package[dep]["@nestia/fetcher"] = root_package[dep]["@nestia/core"];
 
 fs.writeFileSync(lib_path, JSON.stringify(lib_package, null, 2), "utf-8");
 
-cp.execSync("git add ./packages/api/package.json");
+cp.execSync("git add ./packages/sdk/package.json");

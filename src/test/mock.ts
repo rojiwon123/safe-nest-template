@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { isNil } from "@fxts/core";
-import api from "@project/api";
 import { mock } from "node:test";
+
+import api from "../../packages/sdk";
 
 export namespace Mock {
     export type MockFn = ReturnType<typeof mock.method>;

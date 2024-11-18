@@ -1,10 +1,10 @@
 import { DynamicExecutor } from "@nestia/e2e";
-import api from "@project/api";
 
 import { Backend } from "@SRC/backend";
 import { config, initConfig } from "@SRC/infrastructure/config";
 import { initLogger } from "@SRC/infrastructure/logger";
 
+import api from "../../packages/sdk";
 import { TestReport } from "./report";
 import { Seed } from "./seed";
 

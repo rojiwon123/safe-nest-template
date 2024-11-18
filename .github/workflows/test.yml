@@ -1,0 +1,57 @@
+name: Test ✅
+
+on:
+    workflow_call:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+env:
+    DATABASE_URL: postgresql://test:test@localhost:5432/test
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        services:
+            postgres:
+                image: postgres:14
+                env:
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd="pg_isready"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@main
+              with:
+                  node-version: 20
+                  registry-url: https://npm.pkg.github.com/
+
+            - name: Dependency Install
+              run: npm ci
+
+            - name: DB Deploy
+              run: npm run db:deploy
+
+            - name: Test 🧪
+              run: npm test
+              env:
+                  LOG_LEVEL: FATAL
+
+            - name: Upload Test Report 📋
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test_report
+                  path: TEST_REPORT.md
+                  if-no-files-found: "warn"

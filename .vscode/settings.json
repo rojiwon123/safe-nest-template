@@ -1,8 +1,12 @@
 {
     "typescript.tsdk": "node_modules/typescript/lib",
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "typescript.preferences.autoImportFileExcludePatterns": ["./build/**", "./tbuild/**", "./packages/api/**"],
-    "terminal.integrated.defaultProfile.linux": "zsh",
-    "liveServer.settings.root": "/packages/swagger"
+    "liveServer.settings.root": "/packages/swagger",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "prettier.printWidth": 140,
+    "[prisma]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "Prisma.prisma"
+    }
 }

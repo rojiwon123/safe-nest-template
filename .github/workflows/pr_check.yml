@@ -10,59 +10,29 @@ env:
 permissions:
     contents: read
     pull-requests: write
-    packages: read
 
 jobs:
-    Test_Report:
+    test:
+        uses: ./.github/workflows/test.yml
+
+    comment:
+        needs: test
         runs-on: ubuntu-latest
-        if: startsWith(github.head_ref, 'hotfix/') == false
-
-        services:
-            postgres:
-                image: postgres:14
-                env:
-                    POSTGRES_USER: test
-                    POSTGRES_PASSWORD: test
-                    POSTGRES_DB: test
-                options: >-
-                    --health-cmd="pg_isready"
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
-                ports:
-                    - 5432:5432
-
-        strategy:
-            matrix:
-                node-version: [18.x, 19.x, 20.x]
-
         steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@main
+            - name: Download Test Report 📋
+              uses: actions/download-artifact@v4
+              with:
+                  path: .
+                  name: test_report
 
-            - name: Install
-              run: npm ci && npm run build:prisma && npm run build:sdk
-
-            - name: Setup DB
-              run: npm run db:deploy
-
-            - name: Test 🧪
-              run: npm run test -- --report
-
-            - name: Create or Update PR Comment 💬
-              if: matrix.node-version == '18.x'
+            - name: Comment Test Report 💬
               uses: actions/github-script@main
               with:
                   script: |
                       const { owner, repo } = context.repo;
                       const issue_number = context.issue.number;
                       const cmts = await github.rest.issues.listComments({ issue_number, owner, repo });
-
-                      const comment = cmts.data.find(cmt => cmt.user.login === 'github-actions[bot]');
-
                       const fs = require('fs');
-                      const path = './test.md';
+                      const path = './TEST_REPORT.md';
                       const body = fs.readFileSync(path, 'utf8');
-                      comment
-                          ? github.rest.issues.updateComment({ comment_id: comment.id, owner, repo, body })
-                          : github.rest.issues.createComment({ issue_number, owner, repo, body });
+                      await github.rest.issues.createComment({ issue_number, owner, repo, body });

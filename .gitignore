@@ -3,12 +3,11 @@
 dist
 build
 tbuild
-packages/api/lib
+packages/sdk/lib
 prisma/client
 migrated
-sdk
 openapi.json
-
+/sdk
 # Logs
 logs
 *.log
