@@ -28,7 +28,7 @@ export namespace Backend {
                     NestFactory.create(await DynamicModule.mount(__dirname + "/controller", { imports: [InfraModule] }), {
                         ...options,
                         cors: {
-                            origin: config("ALLOWED_ORIGIN")
+                            origin: config("ALLOW_ORIGIN")
                                 .split(/\s+/)
                                 .filter((line) => line !== ""),
                             credentials: true,

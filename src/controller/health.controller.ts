@@ -2,7 +2,7 @@ import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 
 @nest.Controller("health")
-export class SystemController {
+export class HealthController {
     /**
      * Just for health checking API Server liveness.
      *

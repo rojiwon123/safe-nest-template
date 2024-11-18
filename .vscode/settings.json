@@ -1,7 +1,7 @@
 {
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.preferences.autoImportFileExcludePatterns": ["./build/**", "./tbuild/**", "./packages/api/**"],
-    "liveServer.settings.root": "/packages/swagger",
+    "liveServer.settings.root": "/packages/doc",
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "prettier.printWidth": 140,

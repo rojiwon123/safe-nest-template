@@ -16,7 +16,7 @@
             window.onload = function () {
                 // Begin Swagger UI call region
                 const ui = SwaggerUIBundle({
-                    url: version === null ? "./swagger.json" : `./version/${version}.json`, //Location of Open API spec in the repo
+                    url: version === null ? "./openapi.json" : `./version/${version}.json`, //Location of Open API spec in the repo
                     dom_id: "#swagger-ui",
                     deepLinking: true,
                     presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],

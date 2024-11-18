@@ -23,7 +23,7 @@ const once = Once.of(() => {
     return process.env["NODE_ENV"] === "test" ?
             ({
                 PORT: 4000,
-                ALLOWED_ORIGIN: "*",
+                ALLOW_ORIGIN: "*",
                 LOG_LEVEL: "DEBUG",
                 ACCESS_TOKEN_KEY: Random.string({ min: 32 }),
                 ...process.env,
@@ -42,7 +42,7 @@ interface IConfig {
     DATABASE_URL: string;
 
     ACCESS_TOKEN_KEY: string & typia.tags.MinLength<32> & typia.tags.MaxLength<32>;
-    ALLOWED_ORIGIN: string;
+    ALLOW_ORIGIN: string;
     LOG_LEVEL: LogType;
 
     AWS_EXECUTION_ENV?: string;
