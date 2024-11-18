@@ -2,14 +2,14 @@ import { isNull } from "@fxts/core";
 import { DynamicExecutor } from "@nestia/e2e";
 import { appendFileSync, writeFileSync } from "fs";
 
-import { DateTime } from "@SRC/util/datetime";
+import { DateTime } from "@/util/datetime";
 
 export namespace TestReport {
     export type report = (input: DynamicExecutor.IReport) => 0 | -1;
     export const report: report = (input) => {
         init();
         const fail_cases = input.executions.filter((exec): exec is DynamicExecutor.IExecution & { error: Error } => !isNull(exec.error));
-        log(`# Test Report at ${DateTime.unit().toString()}\n`);
+        log(`# Test Report at ${DateTime.of().toString()}\n`);
         log("## Summary\n");
         log("| Total | Success | Fail | Duration |");
         log("| ----- | --------- | ------ | -------- |");

@@ -1,12 +1,11 @@
 import { DynamicExecutor } from "@nestia/e2e";
+import sdk from "@project/sdk";
 
-import { Backend } from "@SRC/backend";
-import { config, initConfig } from "@SRC/infrastructure/config";
-import { initLogger } from "@SRC/infrastructure/logger";
+import { Backend } from "@/backend";
+import { config, initConfig } from "@/infrastructure/config";
+import { initLogger } from "@/infrastructure/logger";
 
-import api from "../../packages/sdk";
 import { TestReport } from "./report";
-import { Seed } from "./seed";
 
 initConfig();
 initLogger();
@@ -18,20 +17,17 @@ const getArg = (key: string): string | undefined => {
 };
 
 const pre_test = async () => {
-    //  await connectPrisma();
-    const backend = await Backend.start({ logger: false });
-    await backend.listen();
+    const backend = Backend.create({ logger: false });
+    await backend.start();
     return backend;
 };
 
 const post_test = async (backend: Backend) => {
     await backend.end();
-    await Seed.reset();
-    //  await disconnectPrisma();
 };
 
 const test = async () => {
-    const connection: api.IConnection = { host: `http://localhost:${config("PORT")}` };
+    const connection: sdk.IConnection = { host: `http://localhost:${config("PORT")}` };
     const skip = getArg("--skip");
     const only = getArg("--only");
     const report = await DynamicExecutor.validate({
@@ -51,10 +47,11 @@ export const run = async () => {
     console.log("SETUP");
     const backend = await pre_test();
     console.log("TESTING ...");
-    process.exitCode = await test();
+    const exitCode = await test();
     console.log("CLEAN UP");
     await post_test(backend);
-    console.log("DONE! Check TEST_REPORT.md");
+    console.log(`${exitCode === 0 ? "Successed!" : "Failed"}! Check TEST_REPORT.md`);
+    process.exitCode = exitCode;
 };
 
 void run();
