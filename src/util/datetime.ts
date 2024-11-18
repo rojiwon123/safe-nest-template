@@ -1,6 +1,6 @@
 import { isNumber, isString, isUndefined } from "@fxts/core";
 
-import { freezeObject } from "./fn";
+import { freeze } from "./fn";
 import { Regex } from "./type";
 
 const kind = Symbol("DateTime");
@@ -9,48 +9,53 @@ export interface DateTime {
     readonly [kind]: typeof kind;
     readonly add: DateTime.Operator;
     readonly sub: DateTime.Operator;
-    readonly toString: () => string;
-    readonly toLcaleString: (input: { locales?: Intl.LocalesArgument; options?: Intl.DateTimeFormatOptions }) => string;
     readonly toTime: () => number;
-    readonly compare: (input: DateTime | number | Regex.RFC3339 | Date) => number;
+    readonly toString: () => Regex.DateTime;
+    readonly toJSON: () => Regex.DateTime;
+    /** DateTiem - ipnut */
+    readonly duration: (end: DateTime) => number;
+    readonly toLocaleString: (input: { locales?: Intl.LocalesArgument; options?: Intl.DateTimeFormatOptions }) => string;
 }
-
 export namespace DateTime {
     export type OperatorInput = Partial<{ day: number; hour: number; minute: number; sec: number; ms: number }>;
     export type Operator = (input: OperatorInput) => DateTime;
-    const sec = (s: number) => s * 1000;
-    const minute = (m: number) => sec(m * 60);
-    const hour = (h: number) => minute(h * 60);
-    const day = (d: number) => hour(d * 24);
-    export const unit = (date?: DateTime | Date | Regex.RFC3339 | number): DateTime => {
+    /** sec to ms */
+    type toMS = (input: number) => number;
+    const sec: toMS = (sec) => sec * 1000;
+    const minute: toMS = (min) => sec(min * 60);
+    const hour: toMS = (hour) => minute(hour * 60);
+    const day: toMS = (day) => hour(day * 24);
+    export const of = (date?: Date | Regex.DateTime | number): DateTime => {
         const ms: number =
             isNumber(date) ? date
             : isString(date) ? new Date(date).getTime()
             : isUndefined(date) ? Date.now()
-            : date instanceof Date ? date.getTime()
-            : date.toTime();
-        return freezeObject({
+            : date.getTime();
+        return freeze({
             [kind]: kind,
             add: (input) =>
-                unit(
+                of(
                     ms +
-                        [input.ms ?? 0 + sec(input.sec ?? 0), minute(input.minute ?? 0), hour(input.hour ?? 0), day(input.day ?? 0)].reduce(
+                        [input.ms ?? 0, sec(input.sec ?? 0), minute(input.minute ?? 0), hour(input.hour ?? 0), day(input.day ?? 0)].reduce(
                             (a, b) => a + b,
                             0,
                         ),
                 ),
             sub: (input) =>
-                unit(
+                of(
                     ms -
-                        [input.ms ?? 0 + sec(input.sec ?? 0), minute(input.minute ?? 0), hour(input.hour ?? 0), day(input.day ?? 0)].reduce(
+                        [input.ms ?? 0, sec(input.sec ?? 0), minute(input.minute ?? 0), hour(input.hour ?? 0), day(input.day ?? 0)].reduce(
                             (a, b) => a + b,
                             0,
                         ),
                 ),
             toString: () => new Date(ms).toISOString(),
-            toLcaleString: (input) => new Date(ms).toLocaleString(input.locales, input.options),
+            toJSON: () => new Date(ms).toISOString(),
             toTime: () => ms,
-            compare: (input) => ms - unit(input).toTime(),
+            toLocaleString: (input) => new Date(ms).toLocaleString(input.locales, input.options),
+            duration: (input) => ms - input.toTime(),
         });
     };
+
+    // export const isExpired = (input: DateTime): boolean => DateTime.of().compare(input) > 0;
 }

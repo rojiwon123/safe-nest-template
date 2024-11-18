@@ -1,10 +1,8 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 
-import { UserDTO } from "@SRC/app/users/application/user.dto";
-import { UserUsecase } from "@SRC/app/users/usecase";
-import { Exception } from "@SRC/util/exception";
-import { Regex } from "@SRC/util/type";
+import { Exception } from "@/common/exception";
+import { Regex } from "@/util/type";
 
 @nest.Controller("users")
 export class UsersController {
@@ -18,9 +16,8 @@ export class UsersController {
      */
     @core.TypedException<Exception.User.NotFound>({ status: nest.HttpStatus.NOT_FOUND })
     @core.TypedRoute.Get(":user_id")
-    async profile(@core.TypedParam("user_id") user_id: Regex.UUID): Promise<UserDTO.Profile> {
-        return UserUsecase.getProfile({ user_id }).then((result) =>
-            result.match((ok) => ok, Exception.Http.throw(nest.HttpStatus.NOT_FOUND)),
-        );
+    async profile(@core.TypedParam("user_id") user_id: Regex.UUID): Promise<void> {
+        user_id;
+        throw Error("not impl");
     }
 }

@@ -5,13 +5,9 @@ import { initLogger, logger } from "./infrastructure/logger";
 initConfig();
 initLogger();
 
-Backend.start({
-    logger: false,
-    // preStart: connectPrisma,
-    // postEnd: disconnectPrisma,
-})
-    .then(Backend.listen)
-    .catch((err) => {
+void Backend.create({ logger: logger() })
+    .start()
+    .catch((err: unknown) => {
         logger().fatal(err);
         throw err;
     });

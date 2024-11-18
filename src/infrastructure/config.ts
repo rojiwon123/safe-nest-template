@@ -1,12 +1,12 @@
 import dotenv from "dotenv";
 import typia from "typia";
 
-import { Once } from "@SRC/util/once";
-import { Random } from "@SRC/util/random";
+import { Once } from "@/util/once";
+import { Random } from "@/util/random";
 
 import { LogType } from "./logger";
 
-const once = Once.unit(() => {
+const once = Once.of(() => {
     switch (process.env["NODE_ENV"]) {
         case "development":
             dotenv.config({ path: ".env", override: true });
@@ -23,16 +23,15 @@ const once = Once.unit(() => {
     return process.env["NODE_ENV"] === "test" ?
             ({
                 PORT: 4000,
-                ORIGIN: "*",
+                ALLOWED_ORIGIN: "*",
                 LOG_LEVEL: "DEBUG",
-                SILENT: true,
-                ACCESS_TOKEN_KEY: Random.string({ min: 32, max: 33 }),
+                ACCESS_TOKEN_KEY: Random.string({ min: 32 }),
                 ...process.env,
             } satisfies Partial<IConfig> as IConfig)
-        :   typia.assert<IConfig>({ PORT: 4000, LOG_LEVEL: "INFO", SILENT: false, ...process.env } satisfies Partial<IConfig>);
+        :   typia.assert<IConfig>({ PORT: 4000, LOG_LEVEL: "INFO", ...process.env } satisfies Partial<IConfig>);
 });
 
-export const config = <T extends keyof IConfig>(key: T): IConfig[T] => once.run()[key];
+export const config = <T extends keyof IConfig>(key: T): IConfig[T] => once.get()[key];
 
 export const initConfig = () => once.init();
 
@@ -43,7 +42,8 @@ interface IConfig {
     DATABASE_URL: string;
 
     ACCESS_TOKEN_KEY: string & typia.tags.MinLength<32> & typia.tags.MaxLength<32>;
-    ORIGIN: string;
+    ALLOWED_ORIGIN: string;
     LOG_LEVEL: LogType;
-    SILENT: boolean | `${boolean}`;
+
+    AWS_EXECUTION_ENV?: string;
 }

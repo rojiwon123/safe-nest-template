@@ -1,16 +1,15 @@
-import * as cloudwatch from "@aws-sdk/client-cloudwatch-logs";
-import stream from "stream";
+import { getCurrentInvoke } from "@codegenie/serverless-express";
+import { isString } from "@fxts/core";
 import util from "util";
 import winston from "winston";
 
-import { DateTime } from "@SRC/util/datetime";
-import { freezeObject } from "@SRC/util/fn";
-import { Once } from "@SRC/util/once";
+import { DateTime } from "@/util/datetime";
+import { freeze } from "@/util/fn";
+import { Once } from "@/util/once";
 
 import { config } from "./config";
 
 type LogLevel = readonly ["FATAL", "ERROR", "WARN", "INFO", "DEBUG"];
-
 export type LogType = LogLevel[number];
 
 type _IndexOf<T extends readonly unknown[], K extends T[number]> = {
@@ -19,22 +18,19 @@ type _IndexOf<T extends readonly unknown[], K extends T[number]> = {
 
 type IndexOf<T extends LogType> = _IndexOf<LogLevel, T> extends `${infer N extends number}` ? N : never;
 
-type LogLevels = { [T in LogType]: IndexOf<T> };
-const levels = (): LogLevels => ({
-    FATAL: 0,
-    ERROR: 1,
-    WARN: 2,
-    INFO: 3,
-    DEBUG: 4,
-});
+type LogLevels = {
+    [T in LogType]: IndexOf<T>;
+};
 
-const timestamp = () => DateTime.unit().toLcaleString({ locales: "ko", options: { timeZone: "Asia/Seoul" } });
+const levels = (): LogLevels => ({ FATAL: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4 });
+
+const timestamp = () => DateTime.of().toLocaleString({ locales: "ko", options: { timeZone: "Asia/Seoul" } });
 const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): util.InspectOptions => {
     switch (level) {
         case "FATAL":
-            return { colors, sorted: false, depth: null };
         case "ERROR":
         case "WARN":
+            return { colors, sorted: false, depth: null };
         case "INFO":
             return { colors, sorted: false };
         case "DEBUG":
@@ -44,26 +40,37 @@ const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): 
     }
 };
 
-const isString = (input: unknown) => typeof input === "string";
-
 const stringify = ({ colors = false }: { colors?: boolean } = {}) =>
     winston.format((info) => {
-        const message = info.message;
+        const message: unknown = info.message;
         if (isString(message)) info.message = message;
         if (Array.isArray(message))
             info.message = message
-                .map((input: unknown) => (isString(input) ? input : util.inspect(input, inspectOptions({ level: info.level, colors }))))
+                .map((input) => (isString(input) ? input : util.inspect(input, inspectOptions({ level: info.level, colors }))))
                 .join(" ");
         return info;
     })();
 
-const localTransports = () => [
+const LAMBDA_TRANSPORTS = () => [
+    new winston.transports.Stream({
+        stream: process.stdout,
+        format: winston.format.combine(
+            stringify(),
+            winston.format.printf(
+                (info) =>
+                    `[${info.level}] ${timestamp()} ${getCurrentInvoke().context?.awsRequestId}\r` +
+                    `${info.message}`.replaceAll("\n", "\r"),
+            ),
+        ),
+    }),
+];
+
+const LOCAL_TRANSPORTS = () => [
     new winston.transports.Stream({
         stream: process.stdout,
         format: winston.format.combine(
             stringify({ colors: true }),
             winston.format.colorize({
-                level: true,
                 colors: {
                     FATAL: "red",
                     ERROR: "blue",
@@ -71,53 +78,27 @@ const localTransports = () => [
                     INFO: "green",
                     DEBUG: "gray",
                 } satisfies Record<LogType, "red" | "blue" | "yellow" | "green" | "gray" | "white">,
+                level: true,
             }),
             winston.format.printf((info) => `[${info.level}] ${timestamp()} ${info.message}`),
         ),
     }),
 ];
 
-const cloudTransports = () => [
-    new winston.transports.Stream({
-        stream: new stream.Writable({
-            write(chunk, _, callback) {
-                const message = typeof chunk === "string" ? chunk : "";
-                const timestamp = Date.now();
-                return new cloudwatch.CloudWatchLogsClient()
-                    .send(
-                        new cloudwatch.PutLogEventsCommand({
-                            logGroupName: "log-group-name",
-                            logStreamName: "log-stream-name",
-                            logEvents: [{ message, timestamp }],
-                        }),
-                    )
-                    .then(() => callback(null))
-                    .catch(callback);
-            },
-        }),
-        format: winston.format.combine(
-            stringify({ colors: false }),
-            winston.format.printf((info) => `[${info.level}] ${timestamp()} ${info.message}`),
-        ),
-    }),
-];
-cloudTransports;
-
-const once = Once.unit(() => {
-    const winston_logger = winston.createLogger({
+const define = Once.of(() => {
+    const winstonLogger = winston.createLogger({
         levels: levels(),
         level: config("LOG_LEVEL"),
-        silent: config("SILENT") === true || config("SILENT") === "true",
-        transports: localTransports(),
+        transports: config("AWS_EXECUTION_ENV")?.startsWith("AWS_Lambda") ? LAMBDA_TRANSPORTS() : LOCAL_TRANSPORTS(),
     });
 
     const _logger =
         (level: LogType) =>
-        (...message: unknown[]) => {
-            winston_logger.log(level, { message });
+        (...message: unknown[]): void => {
+            winstonLogger.log(level, { message });
         };
 
-    return freezeObject({
+    return freeze({
         fatal: _logger("FATAL"),
         error: _logger("ERROR"),
         warn: _logger("WARN"),
@@ -127,5 +108,5 @@ const once = Once.unit(() => {
     });
 });
 
-export const initLogger = once.init;
-export const logger = once.run;
+export const initLogger = define.init;
+export const logger = define.get;

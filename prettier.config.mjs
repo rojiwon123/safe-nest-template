@@ -6,7 +6,7 @@ const PRETTIER_CONFIG = {
     trailingComma: "all",
     experimentalTernaries: true,
     plugins: ["@trivago/prettier-plugin-sort-imports"],
-    importOrder: ["<THIRD_PARTY_MODULES>", "@PRISMA", "^@SRC/(.*)$", "^@TEST/(.*)$", "^[./]"],
+    importOrder: ["<THIRD_PARTY_MODULES>", "@PRISMA", "^@/(.*)$", "^[./]"],
     importOrderSeparation: true,
     importOrderSortSpecifiers: true,
     importOrderParserPlugins: ["decorators-legacy", "typescript"],

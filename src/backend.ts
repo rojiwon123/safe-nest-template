@@ -1,59 +1,55 @@
-import core from "@nestia/core";
+import { DynamicModule } from "@nestia/core";
 import * as nest from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
 import { config } from "./infrastructure/config";
+import { connectPrisma } from "./infrastructure/db";
 import { InfraModule } from "./infrastructure/infra.module";
 import { logger } from "./infrastructure/logger";
+import { Once } from "./util/once";
 import { OmitKeyof } from "./util/type";
 
 export interface Backend {
+    start: () => Promise<void>;
     end: () => Promise<void>;
-    listen: () => Promise<void>;
+    get: () => Promise<nest.INestApplication<unknown>>;
 }
 
 export namespace Backend {
-    interface IOptions extends OmitKeyof<nest.NestApplicationOptions, "cors"> {
-        /**
-         * nest application 생성 전 실행되는 함수
-         */
-        preStart?: () => void | Promise<void>;
-        /**
-         * nest application이 종료된 후 실행되는 함수
-         */
-        postEnd?: () => void | Promise<void>;
-    }
+    interface IOptions extends OmitKeyof<nest.NestApplicationOptions, "cors"> {}
 
-    const callAsync = async (fn?: () => unknown | Promise<unknown>) => (fn ? fn() : null);
-
-    export const start = (options: IOptions = {}): Promise<Backend> =>
-        callAsync(options.preStart)
-            .then(async () =>
-                NestFactory.create(core.DynamicModule.mount(`${__dirname}/controller`, { imports: [InfraModule] }), {
-                    ...options,
-                    cors: {
-                        origin: config("ORIGIN")
-                            .split(/\s+/)
-                            .filter((line) => line !== ""),
-                        credentials: true,
-                    },
-                }),
-            )
-            .then((app) => app.use(cookieParser(), helmet({ contentSecurityPolicy: true, hidePoweredBy: true })).init())
-            .then((app) => {
-                const end = () =>
-                    app
-                        .close()
-                        .then(options.postEnd)
-                        .then(() => logger().log("Nest Application end"));
-                const listen = () => app.listen(config("PORT")).then(() => logger().log(`Nest Application listening on ${config("PORT")}`));
-                process.on("SIGINT", () => end().then(() => process.exit(process.exitCode)));
-                logger().log("Nest Application start");
-                return { end, listen };
-            });
-
-    export const end = (backend: Backend) => backend.end();
-    export const listen = (backend: Backend) => backend.listen();
+    export const create = (options: IOptions = {}): Backend => {
+        const app = Once.of(async () =>
+            Promise.resolve()
+                .then(connectPrisma)
+                .then(async () =>
+                    NestFactory.create(await DynamicModule.mount(__dirname + "/controller", { imports: [InfraModule] }), {
+                        ...options,
+                        cors: {
+                            origin: config("ALLOWED_ORIGIN")
+                                .split(/\s+/)
+                                .filter((line) => line !== ""),
+                            credentials: true,
+                        },
+                    }),
+                )
+                .then((app) => app.use(cookieParser(), helmet({ contentSecurityPolicy: true, hidePoweredBy: true })).init()),
+        );
+        process.on("SIGINT", () =>
+            app
+                .get()
+                .then((b) => b.close())
+                .then(() => process.exit(process.exitCode)),
+        );
+        return {
+            start: async () =>
+                app
+                    .map(async (b) => (await b).listen(config("PORT")))
+                    .then(() => logger().log(`Nest Application listening on ${config("PORT")}`)),
+            end: () => app.map(async (b) => (await b).close()).then(() => logger().log("Nest Application end")),
+            get: app.get,
+        };
+    };
 }
