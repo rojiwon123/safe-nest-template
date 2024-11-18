@@ -31,10 +31,7 @@
         "moduleResolution": "Node10",
         // "moduleSuffix": [],
         // "noResolve": false,
-        "paths": {
-            "@PRISMA": ["./prisma/client/index"],
-            "@/*": ["./src/*"]
-        },
+        "paths": { "@/*": ["./src/*"] },
         "resolveJsonModule": true,
         // "resolvePackageJsonExports": false,
         // "resolvePackageJsonImports": false,

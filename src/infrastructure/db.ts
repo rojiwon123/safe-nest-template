@@ -1,6 +1,5 @@
 import { identity, isObject } from "@fxts/core";
-
-import { Prisma, PrismaClient } from "@PRISMA";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 import { freeze } from "@/util/fn";
 import { Once } from "@/util/once";
