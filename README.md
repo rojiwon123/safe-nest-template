@@ -26,9 +26,8 @@ nestjs 프레임워크 환경에서 nestia, prisma를 적용한 보일러플레�
 ### 예시
 
 ```ts
-import { Controller, Get, Param } from "@nestjs/common";
-
 import { Article } from "@SRC/app/article/article.dto";
+import { Controller, Get, Param } from "@nestjs/common";
 
 @Controller("articles")
 export class ArticlesController {

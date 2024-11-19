@@ -2,8 +2,8 @@ FROM  node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
-COPY  ./prisma/schemas ./prisma/schemas
 COPY  package*.json tsconfig*.json ./
+COPY  ./prisma/schemas ./prisma/schemas
 RUN npm i -g npm && npm ci
 
 COPY . .
@@ -14,7 +14,6 @@ FROM public.ecr.aws/lambda/nodejs:20 AS runner
 WORKDIR /var/task
 
 COPY  --from=builder /usr/src/app/node_modules ./node_modules
-COPY  --from=builder /usr/src/app/prisma/client ./prisma/client
 COPY  --from=builder /usr/src/app/build ./build
 
 ENTRYPOINT [ "/lambda-entrypoint.sh" ]
@@ -29,7 +28,6 @@ CMD [ "build/lambda.handler" ]
 # WORKDIR /usr/src/app
 
 # COPY  --from=builder /usr/src/app/node_modules ./node_modules
-# COPY  --from=builder /usr/src/app/prisma/client ./prisma/client
 # COPY  --from=builder /usr/src/app/build ./build
 
 # EXPOSE  4000
