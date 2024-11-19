@@ -93,6 +93,8 @@ jobs:
               if: ${{ inputs.sdk }}
               run: |
                   TAG=v${{ steps.version.outputs.output }}
+                  git config --global user.email "github-actions@github.com"
+                  git config --global user.name "GitHub Actions"
                   git tag -a "$TAG" -m "release $TAG"
                   git push origin "$TAG"
                   gh release create "$TAG" -t "$TAG" --target "${{ github.sha }}" --generate-notes
