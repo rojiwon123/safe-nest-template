@@ -9,7 +9,7 @@ import { LogType } from "./logger";
 const once = Once.of(() => {
     switch (process.env["NODE_ENV"]) {
         case "development":
-            dotenv.config({ path: ".env", override: true });
+            dotenv.config({ path: ".env.dev", override: true });
             break;
         case "test":
             dotenv.config({ path: ".env.test", override: true });
@@ -23,7 +23,6 @@ const once = Once.of(() => {
     return process.env["NODE_ENV"] === "test" ?
             ({
                 PORT: 4000,
-                ALLOW_ORIGIN: "*",
                 LOG_LEVEL: "DEBUG",
                 ACCESS_TOKEN_KEY: Random.string({ min: 32 }),
                 ...process.env,
@@ -42,7 +41,7 @@ interface IConfig {
     DATABASE_URL: string;
 
     ACCESS_TOKEN_KEY: string & typia.tags.MinLength<32> & typia.tags.MaxLength<32>;
-    ALLOW_ORIGIN: string;
+    ALLOW_ORIGIN?: string;
     LOG_LEVEL: LogType;
 
     AWS_EXECUTION_ENV?: string;

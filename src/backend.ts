@@ -24,17 +24,22 @@ export namespace Backend {
         const app = Once.of(async () =>
             Promise.resolve()
                 .then(connectPrisma)
-                .then(async () =>
-                    NestFactory.create(await DynamicModule.mount(__dirname + "/controller", { imports: [InfraModule] }), {
+                .then(async () => {
+                    const origins =
+                        config("ALLOW_ORIGIN")
+                            ?.split(/\s+/)
+                            .filter((line) => line !== "") ?? [];
+                    return NestFactory.create(await DynamicModule.mount(__dirname + "/controller", { imports: [InfraModule] }), {
                         ...options,
-                        cors: {
-                            origin: config("ALLOW_ORIGIN")
-                                .split(/\s+/)
-                                .filter((line) => line !== ""),
-                            credentials: true,
-                        },
-                    }),
-                )
+                        cors:
+                            origins.length > 0 ?
+                                {
+                                    origin: origins,
+                                    credentials: true,
+                                }
+                            :   undefined,
+                    });
+                })
                 .then((app) => app.use(cookieParser(), helmet({ contentSecurityPolicy: true, hidePoweredBy: true })).init()),
         );
         process.on("SIGINT", () =>
