@@ -13,7 +13,7 @@
             "autoAttachChildProcesses": true,
             "internalConsoleOptions": "openOnSessionStart",
             "console": "integratedTerminal",
-            "skipFiles": ["**/<node_internals>/**", "**/node_modules/**", "prisma/client"]
+            "skipFiles": ["**/<node_internals>/**", "**/node_modules/**"]
         }
     ]
 }
