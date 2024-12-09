@@ -6,14 +6,14 @@
     "typings": "./index.d.ts",
     "repository": {
         "type": "git",
-        "url": "https://github.com/rojiwon123/nestia-template/packages/sdk"
+        "url": "https://github.com/rojiwon123/safe-nest-template/packages/sdk"
     },
     "author": "rojiwon123",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/rojiwon123/nestia-template/issues"
+        "url": "https://github.com/rojiwon123/safe-nest-template/issues"
     },
-    "homepage": "https://github.com/rojiwon123/nestia-template/packages/sdk#readme",
+    "homepage": "https://github.com/rojiwon123/safe-nest-template/packages/sdk#readme",
     "dependencies": {
         "typia": "^7.1.0",
         "@nestia/fetcher": "^4.0.5"
