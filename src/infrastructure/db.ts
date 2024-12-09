@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Effect, FiberRef } from "effect";
 
-import { Once } from "@/common/once";
+import { Once } from "@/util/once";
 
 import { config } from "./config";
 import { logger } from "./logger";

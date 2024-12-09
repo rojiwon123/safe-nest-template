@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { LogLevel } from "effect";
 import typia from "typia";
 
-import { Once } from "@/common/once";
+import { Once } from "@/util/once";
 
 export interface Config {
     NODE_ENV: "development" | "production" | "test";

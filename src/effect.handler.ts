@@ -3,10 +3,10 @@ import { Request } from "express";
 
 import { AppModule } from "@/app/app.module";
 import { Err } from "@/common/err/err";
-import { Make } from "@/common/make";
 import { PrismaErr } from "@/infrastructure/db";
+import { Make } from "@/util/make";
 
-import { Once } from "./common/once";
+import { Once } from "./util/once";
 
 export namespace EffectHandler {
     export const runtime = Once.make(() => ManagedRuntime.make(AppModule())).get;

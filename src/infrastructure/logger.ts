@@ -3,7 +3,7 @@ import { Array, Layer, LogLevel, Logger, String } from "effect";
 import { InspectOptions, inspect } from "util";
 import winston from "winston";
 
-import { Once } from "@/common/once";
+import { Once } from "@/util/once";
 
 import { Config, config } from "./config";
 
