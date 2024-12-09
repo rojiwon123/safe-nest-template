@@ -22,8 +22,9 @@ nestia, prisma, effect-ts를 적용했습니다.
 ### TS 타입 기반 API 문서 자동화
 
 ```ts
-import { Article } from "@SRC/app/article/article.dto";
 import { Controller, Get, Param } from "@nestjs/common";
+
+import { Article } from "@/app/article/article.dto";
 
 @Controller("articles")
 export class ArticlesController {
@@ -75,7 +76,7 @@ export class ArticlesController {
 
 ## Appendix
 
+- [Effect-ts](https://effect.website/)
 - [Nestia 공식 가이드](https://nestia.io/docs/)
 - [Typia 공식 가이드](https://typia.io/docs/)
 - [prisma-markdown](https://www.npmjs.com/package/prisma-markdown)
-- [Effect-ts](https://effect.website/)
