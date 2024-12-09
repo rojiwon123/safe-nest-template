@@ -1,33 +1,30 @@
-import sls from "@codegenie/serverless-express";
-import type { Handler } from "aws-lambda";
+import serverless from "@codegenie/serverless-express";
+import { Handler } from "aws-lambda";
+import { Option } from "effect";
 
-import { Backend } from "./backend";
-import { Exception } from "./common/exception";
-import { initConfig } from "./infrastructure/config";
-import { initLogger, logger } from "./infrastructure/logger";
-import { Once } from "./util/once";
+import { createBackend } from "@/backend";
+import { SystemErr } from "@/common/err/err_code/system.code";
+import { logger } from "@/infrastructure/logger";
 
-initConfig();
-initLogger();
+let app: Option.Option<Handler> = Option.none();
 
-const backend = Once.of(() =>
-    Backend.create({ logger: false })
-        .get()
-        .then((app) => sls({ app: app.getHttpAdapter().getInstance() })),
-);
-
-backend.init();
-export const handler: Handler = (event, context, callback) =>
-    backend
-        .map(async (f) => (await f)(event, context, callback))
-        .catch((err: unknown) => {
-            logger().fatal(context.awsRequestId, err);
-            return {
-                statusCode: 500,
-                body: JSON.stringify({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "서비스가 불가능합니다.",
-                } satisfies Exception.INTERNAL_SERVER_ERROR),
-                headers: { "Content-Type": "application/json" },
-            };
+export const handler: Handler = async (e, c, cb) => {
+    try {
+        const sls: Handler = await Option.match(app, {
+            onSome: (i) => i,
+            onNone: async () => serverless({ app: (await createBackend({ logger: false })).app.getHttpAdapter().getInstance() }),
         });
+        app = Option.some(sls);
+        return await sls(e, c, cb);
+    } catch (error: unknown) {
+        logger("fatal")(error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "서비스가 불가능합니다.",
+            } satisfies SystemErr.INTERNAL_SERVER_ERROR),
+            headers: { "Content-Type": "application/json" },
+        };
+    }
+};

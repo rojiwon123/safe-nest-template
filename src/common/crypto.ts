@@ -1,7 +1,6 @@
-import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
-
-import { Option } from "@/util/option";
+import { Option } from "effect";
+import { isUndefined } from "effect/Predicate";
 
 export namespace Crypto {
     /**
@@ -21,7 +20,7 @@ export namespace Crypto {
      *
      * 잘못된 토큰을 전달시 INVALID_TOKEN 에러를 리턴한다.
      */
-    export type decrypt = (input: { token: string; key: string }) => Option<string>;
+    export type decrypt = (input: { token: string; key: string }) => Option.Option<string>;
 
     ///
 
@@ -41,11 +40,11 @@ export namespace Crypto {
     export const decrypt: decrypt = ({ token, key }) => {
         try {
             const [iv, tag, encrypted] = token.split(".");
-            if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted)) return Option.None();
+            if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted)) return Option.none();
             const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64")).setAuthTag(Buffer.from(tag, "base64"));
-            return Option.Some(decipher.update(encrypted, "base64", "utf-8") + decipher.final("utf-8"));
+            return Option.some(decipher.update(encrypted, "base64", "utf-8") + decipher.final("utf-8"));
         } catch {
-            return Option.None();
+            return Option.none();
         }
     };
 }

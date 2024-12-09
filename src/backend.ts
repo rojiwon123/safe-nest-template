@@ -4,57 +4,46 @@ import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
+import { OmitKeyof } from "./common/type";
 import { config } from "./infrastructure/config";
-import { connectPrisma } from "./infrastructure/db";
+import { DB } from "./infrastructure/db";
 import { InfraModule } from "./infrastructure/infra.module";
 import { logger } from "./infrastructure/logger";
-import { Once } from "./util/once";
-import { OmitKeyof } from "./util/type";
 
 export interface Backend {
+    app: nest.INestApplication;
     start: () => Promise<void>;
     end: () => Promise<void>;
-    get: () => Promise<nest.INestApplication<unknown>>;
 }
 
-export namespace Backend {
-    interface IOptions extends OmitKeyof<nest.NestApplicationOptions, "cors"> {}
+const dirname = __dirname;
 
-    export const create = (options: IOptions = {}): Backend => {
-        const app = Once.of(async () =>
-            Promise.resolve()
-                .then(connectPrisma)
-                .then(async () => {
-                    const origins =
-                        config("ALLOW_ORIGIN")
-                            ?.split(/\s+/)
-                            .filter((line) => line !== "") ?? [];
-                    return NestFactory.create(await DynamicModule.mount(__dirname + "/controller", { imports: [InfraModule] }), {
-                        ...options,
-                        cors:
-                            origins.length > 0 ?
-                                {
-                                    origin: origins,
-                                    credentials: true,
-                                }
-                            :   undefined,
-                    });
-                })
-                .then((app) => app.use(cookieParser(), helmet({ contentSecurityPolicy: true, hidePoweredBy: true })).init()),
-        );
-        process.on("SIGINT", () =>
-            app
-                .get()
-                .then((b) => b.close())
-                .then(() => process.exit(process.exitCode)),
-        );
-        return {
-            start: async () =>
-                app
-                    .map(async (b) => (await b).listen(config("PORT")))
-                    .then(() => logger().log(`Nest Application listening on ${config("PORT")}`)),
-            end: () => app.map(async (b) => (await b).close()).then(() => logger().log("Nest Application end")),
-            get: app.get,
-        };
+export const createBackend = async (options: OmitKeyof<nest.NestApplicationOptions, "cors"> = {}): Promise<Backend> => {
+    const origin =
+        config("ALLOW_ORIGIN")
+            ?.split(/\s+/)
+            .filter((line) => line !== "") ?? [];
+    const module = await DynamicModule.mount(dirname + "/controller", { imports: [InfraModule] });
+    await DB().$connect();
+    const app = await NestFactory.create(module, { ...options, ...(origin.length > 0 ? { cors: { origin, credentials: true } } : {}) });
+    app.use(cookieParser(), helmet({ contentSecurityPolicy: true, hidePoweredBy: true }));
+    await app.init();
+    const end = async () => {
+        await app.close();
+        await DB().$disconnect();
+        logger()("Nest Application end");
     };
-}
+    process.on("SIGINT", async () => {
+        await end();
+        process.exit(process.exitCode);
+    });
+    logger()("Nest Application Initailized");
+    return {
+        app,
+        start: async () => {
+            await app.listen(config("PORT"));
+            logger()(`Nest Application listening on ${config("PORT")}`);
+        },
+        end,
+    };
+};

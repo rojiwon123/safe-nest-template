@@ -1,31 +1,15 @@
 import { getCurrentInvoke } from "@codegenie/serverless-express";
-import { isString } from "@fxts/core";
-import util from "util";
+import { Array, Layer, LogLevel, Logger, String } from "effect";
+import { InspectOptions, inspect } from "util";
 import winston from "winston";
 
-import { DateTime } from "@/util/datetime";
-import { freeze } from "@/util/fn";
-import { Once } from "@/util/once";
+import { Once } from "@/common/once";
 
-import { config } from "./config";
+import { Config, config } from "./config";
 
-type LogLevel = readonly ["FATAL", "ERROR", "WARN", "INFO", "DEBUG"];
-export type LogType = LogLevel[number];
+/// 로그 메시지 형식을 맞추기 위한 함수들입니다.
 
-type _IndexOf<T extends readonly unknown[], K extends T[number]> = {
-    [I in keyof T]: T[I] extends K ? I : never;
-}[number];
-
-type IndexOf<T extends LogType> = _IndexOf<LogLevel, T> extends `${infer N extends number}` ? N : never;
-
-type LogLevels = {
-    [T in LogType]: IndexOf<T>;
-};
-
-const levels = (): LogLevels => ({ FATAL: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4 });
-
-const timestamp = () => DateTime.of().toLocaleString({ locales: "ko", options: { timeZone: "Asia/Seoul" } });
-const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): util.InspectOptions => {
+const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): InspectOptions => {
     switch (level) {
         case "FATAL":
         case "ERROR":
@@ -34,6 +18,7 @@ const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): 
         case "INFO":
             return { colors, sorted: false };
         case "DEBUG":
+        case "TRACE":
             return { colors, sorted: false, depth: null, showHidden: true, showProxy: true, maxArrayLength: null, numericSeparator: true };
         default:
             return { colors };
@@ -43,27 +28,13 @@ const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): 
 const stringify = ({ colors = false }: { colors?: boolean } = {}) =>
     winston.format((info) => {
         const message: unknown = info.message;
-        if (isString(message)) info.message = message;
         if (Array.isArray(message))
             info.message = message
-                .map((input) => (isString(input) ? input : util.inspect(input, inspectOptions({ level: info.level, colors }))))
+                .map((input) => (String.isString(input) ? input : inspect(input, inspectOptions({ level: info.level, colors }))))
                 .join(" ");
+        else if (!String.isString(message)) info.message = inspect(message, inspectOptions({ level: info.level, colors }));
         return info;
     })();
-
-const LAMBDA_TRANSPORTS = () => [
-    new winston.transports.Stream({
-        stream: process.stdout,
-        format: winston.format.combine(
-            stringify(),
-            winston.format.printf(
-                (info) =>
-                    `[${info.level}] ${timestamp()} ${getCurrentInvoke().context?.awsRequestId}\r` +
-                    `${info.message}`.replaceAll("\n", "\r"),
-            ),
-        ),
-    }),
-];
 
 const LOCAL_TRANSPORTS = () => [
     new winston.transports.Stream({
@@ -71,42 +42,94 @@ const LOCAL_TRANSPORTS = () => [
         format: winston.format.combine(
             stringify({ colors: true }),
             winston.format.colorize({
-                colors: {
-                    FATAL: "red",
-                    ERROR: "blue",
-                    WARN: "yellow",
-                    INFO: "green",
-                    DEBUG: "gray",
-                } satisfies Record<LogType, "red" | "blue" | "yellow" | "green" | "gray" | "white">,
                 level: true,
+                colors: {
+                    TRACE: "gray",
+                    DEBUG: "gray",
+                    INFO: "green",
+                    WARN: "yellow",
+                    ERROR: "blue",
+                    FATAL: "red",
+                } satisfies Record<
+                    Exclude<LogLevel.LogLevel["label"], "ALL" | "OFF">,
+                    "red" | "blue" | "yellow" | "green" | "gray" | "white"
+                >,
             }),
-            winston.format.printf((info) => `[${info.level}] ${timestamp()} ${info.message}`),
+            winston.format.printf(
+                (info) => `[${info.level}] ${new Date().toLocaleString("ko", { timeZone: "Asia/Seoul" })} ${info.message}`,
+            ),
         ),
     }),
 ];
 
-const define = Once.of(() => {
-    const winstonLogger = winston.createLogger({
-        levels: levels(),
+const LAMBDA_TRANSPORTS = () => [
+    new winston.transports.Stream({
+        stream: process.stdout,
+        format: winston.format.combine(
+            stringify({ colors: false }),
+            winston.format.printf(
+                (info) =>
+                    `[${info.level}] ${new Date().toISOString()} ${getCurrentInvoke().context?.awsRequestId}\r` +
+                    `${info.message}`.replaceAll("\n", "\r"),
+            ),
+        ),
+    }),
+];
+
+type LogLabel = LogLevel.LogLevel["label"];
+
+const winstonLogger = Once.make(() =>
+    winston.createLogger({
+        levels: { FATAL: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4, TRACE: 5 } satisfies Record<Exclude<LogLabel, "ALL" | "OFF">, number>,
         level: config("LOG_LEVEL"),
         transports: config("AWS_EXECUTION_ENV")?.startsWith("AWS_Lambda") ? LAMBDA_TRANSPORTS() : LOCAL_TRANSPORTS(),
-    });
+    }),
+);
 
-    const _logger =
-        (level: LogType) =>
-        (...message: unknown[]): void => {
-            winstonLogger.log(level, { message });
-        };
+export const logger =
+    (level: Exclude<Lowercase<Config["LOG_LEVEL"]>, "all" | "off"> = "info") =>
+    (...message: unknown[]) => {
+        winstonLogger.get().log(level.toUpperCase(), { message });
+    };
 
-    return freeze({
-        fatal: _logger("FATAL"),
-        error: _logger("ERROR"),
-        warn: _logger("WARN"),
-        info: _logger("INFO"),
-        log: _logger("INFO"),
-        debug: _logger("DEBUG"),
-    });
-});
+// for effect system
 
-export const initLogger = define.init;
-export const logger = define.get;
+const fromLabel = (label: LogLabel): LogLevel.LogLevel =>
+    (
+        ({
+            ALL: LogLevel.All,
+            DEBUG: LogLevel.Debug,
+            ERROR: LogLevel.Error,
+            FATAL: LogLevel.Fatal,
+            INFO: LogLevel.Info,
+            OFF: LogLevel.None,
+            TRACE: LogLevel.Trace,
+            WARN: LogLevel.Warning,
+        }) satisfies Record<LogLabel, LogLevel.LogLevel>
+    )[label];
+
+export const EffectLogger = Once.make(() =>
+    Logger.replace(
+        Logger.defaultLogger,
+
+        Logger.make((options) => {
+            const level = options.logLevel;
+            const annotations = [...options.annotations].flatMap(([key, value]) => [`\n[${key}]`, value]);
+            const body = Array.isArray(options.message) ? options.message : [options.message];
+            const lowercase = (
+                {
+                    ALL: "all",
+                    OFF: "off",
+                    DEBUG: "debug",
+                    ERROR: "error",
+                    FATAL: "fatal",
+                    INFO: "info",
+                    TRACE: "trace",
+                    WARN: "warn",
+                } satisfies Record<LogLabel, Lowercase<LogLabel>>
+            )[level.label];
+            if (lowercase === "all" || lowercase === "off") return;
+            logger(lowercase)(...annotations, ...body);
+        }),
+    ).pipe(Layer.provide(Logger.minimumLogLevel(fromLabel(config("LOG_LEVEL"))))),
+);

@@ -1,14 +1,10 @@
 import { DynamicExecutor } from "@nestia/e2e";
 import sdk from "@project/sdk";
 
-import { Backend } from "@/backend";
-import { config, initConfig } from "@/infrastructure/config";
-import { initLogger } from "@/infrastructure/logger";
+import { Backend, createBackend } from "@/backend";
+import { config } from "@/infrastructure/config";
 
 import { TestReport } from "./report";
-
-initConfig();
-initLogger();
 
 const getArg = (key: string): string | undefined => {
     const key_index = process.argv.findIndex((val) => val === key);
@@ -17,7 +13,7 @@ const getArg = (key: string): string | undefined => {
 };
 
 const pre_test = async () => {
-    const backend = Backend.create({ logger: false });
+    const backend = await createBackend({ logger: false });
     await backend.start();
     return backend;
 };
@@ -26,7 +22,7 @@ const post_test = async (backend: Backend) => {
     await backend.end();
 };
 
-const test = async () => {
+const execute = async () => {
     const connection: sdk.IConnection = { host: `http://localhost:${config("PORT")}` };
     const skip = getArg("--skip");
     const only = getArg("--only");
@@ -47,7 +43,7 @@ export const run = async () => {
     console.log("SETUP");
     const backend = await pre_test();
     console.log("TESTING ...");
-    const exitCode = await test();
+    const exitCode = await execute();
     console.log("CLEAN UP");
     await post_test(backend);
     console.log(`${exitCode === 0 ? "Successed!" : "Failed"}! Check TEST_REPORT.md`);

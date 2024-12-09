@@ -1,12 +1,30 @@
 import dotenv from "dotenv";
+import { LogLevel } from "effect";
 import typia from "typia";
 
-import { Once } from "@/util/once";
-import { Random } from "@/util/random";
+import { Once } from "@/common/once";
 
-import { LogType } from "./logger";
+export interface Config {
+    NODE_ENV: "development" | "production" | "test";
+    /** @default 4000 */
+    PORT: number | `${number}`;
+    /**
+     * 런타임 ID로서 앞에 AWS_Lambda_가 붙습니다(예: AWS_Lambda_java8). 이 환경 변수는 OS 전용 런타임(provided 런타임 제품군)에서 정의되지 않았습니다.
+     */
+    AWS_EXECUTION_ENV?: string;
+    // DATABASE_URL: string;
 
-const once = Once.of(() => {
+    ALLOW_ORIGIN?: string;
+    /**
+     * 일반 모드에서 기본값은 INFO
+     *
+     * 테스트 모드에서는 기본값 FATAL을 사용
+     *
+     */
+    LOG_LEVEL: LogLevel.LogLevel["label"];
+}
+
+const loadConfig = (): Config => {
     switch (process.env["NODE_ENV"]) {
         case "development":
             dotenv.config({ path: ".env.dev", override: true });
@@ -19,30 +37,14 @@ const once = Once.of(() => {
         default:
             throw Error("NODE_ENV should be one of (development|production|test)");
     }
-
     return process.env["NODE_ENV"] === "test" ?
             ({
                 PORT: 4000,
-                LOG_LEVEL: "DEBUG",
-                ACCESS_TOKEN_KEY: Random.string({ min: 32 }),
+                LOG_LEVEL: "FATAL",
                 ...process.env,
-            } satisfies Partial<IConfig> as IConfig)
-        :   typia.assert<IConfig>({ PORT: 4000, LOG_LEVEL: "INFO", ...process.env } satisfies Partial<IConfig>);
-});
+            } satisfies Partial<Config> as Config)
+        :   typia.assert<Config>({ PORT: 4000, LOG_LEVEL: "INFO", ...process.env } satisfies Partial<Config>);
+};
 
-export const config = <T extends keyof IConfig>(key: T): IConfig[T] => once.get()[key];
-
-export const initConfig = () => once.init();
-
-interface IConfig {
-    NODE_ENV: "development" | "production" | "test";
-    /** @default 4000 */
-    PORT: number;
-    DATABASE_URL: string;
-
-    ACCESS_TOKEN_KEY: string & typia.tags.MinLength<32> & typia.tags.MaxLength<32>;
-    ALLOW_ORIGIN?: string;
-    LOG_LEVEL: LogType;
-
-    AWS_EXECUTION_ENV?: string;
-}
+const once = Once.make(loadConfig);
+export const config = <T extends keyof Config>(key: T) => once.get()[key];

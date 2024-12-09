@@ -1,7 +1,7 @@
 import { randomBytes, randomInt, randomUUID } from "crypto";
 import typia from "typia";
 
-export namespace Random {
+export namespace Make {
     export const uuid = (): string => randomUUID();
     /** `min <= n < max` */
     export const int = ({ min = 0, max = min + 1 }: { min?: number; max?: number }): number => randomInt(min, max);

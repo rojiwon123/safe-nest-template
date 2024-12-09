@@ -1,11 +1,11 @@
 import * as nest from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
+import { isUndefined } from "effect/Predicate";
 import { Response } from "express";
 
-import { Exception } from "@/common/exception";
-import { OmitKeyof } from "@/util/type";
+import { Err } from "@/common/err/err";
+import { SystemErr } from "@/common/err/err_code/system.code";
 
-import { config } from "./config";
 import { logger } from "./logger";
 
 @nest.Catch()
@@ -17,42 +17,38 @@ export class AllExceptionFilter implements nest.ExceptionFilter {
         const res = ctx.getResponse<Response>();
 
         const SYSTEM_ERROR: {
-            400: Exception.INPUT_INVALID["code"];
-            404: Exception.API_NOT_FOUND["code"];
+            400: SystemErr.INPUT_INVALID["code"];
+            404: SystemErr.API_NOT_FOUND["code"];
             [x: number]: string | undefined;
         } = {
             400: "INPUT_INVALID",
             404: "API_NOT_FOUND",
         };
 
-        const [body, status]: [Exception<string>, number] =
-            exception instanceof Exception.Http ?
-                (() => {
-                    logger().warn(exception);
-                    return [exception.body, exception.status];
-                })()
+        const [body, status]: [Err.Body<string>, number] =
+            exception instanceof Err.Http ? [exception.body, exception.status]
             : this.isHttpException(exception) ?
-                [
-                    {
-                        code: SYSTEM_ERROR[exception.getStatus()],
-                        message: exception.message,
-                        detail: exception,
-                    },
-                    exception.getStatus(),
-                ]
+                (() => {
+                    const status = exception.getStatus();
+                    const code = SYSTEM_ERROR[status];
+                    if (isUndefined(code)) {
+                        logger("fatal")("[AllExceptionFilter]", exception);
+                        return [{ code: "INTERNAL_SERVER_ERROR", message: exception.message }, nest.HttpStatus.INTERNAL_SERVER_ERROR];
+                    }
+                    return [{ code, message: exception.message }, status];
+                })()
             :   (() => {
-                    logger().fatal(exception);
+                    logger("fatal")("[AllExceptionFilter]", exception);
                     return [
                         {
                             code: "INTERNAL_SERVER_ERROR",
                             message: "요청을 처리할 수 없습니다.",
-                            detail: exception,
-                        } satisfies Exception.INTERNAL_SERVER_ERROR,
+                        } satisfies SystemErr.INTERNAL_SERVER_ERROR,
                         nest.HttpStatus.INTERNAL_SERVER_ERROR,
                     ];
                 })();
 
-        return this.httpAdapterHost.httpAdapter.reply(res, this.toBody(body), status);
+        return this.httpAdapterHost.httpAdapter.reply(res, body, status);
     }
 
     isHttpException(error: unknown): error is nest.HttpException {
@@ -64,10 +60,5 @@ export class AllExceptionFilter implements nest.ExceptionFilter {
             return this.isHttpException(prototype);
         }
         return false;
-    }
-
-    toBody(input: Exception<string>): Exception<string> {
-        if (config("NODE_ENV") !== "production") return input;
-        return { code: input.code, message: input.message } satisfies OmitKeyof<Exception<string>, "detail">;
     }
 }
