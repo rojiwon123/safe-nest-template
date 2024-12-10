@@ -18,6 +18,6 @@ title: "[BUG] "
 
 포함되어야 하는 내용
 
--   사용된 데이터(input)
--   예상한 결과(expected)
--   실제 결과(actual)
+- 사용된 데이터(input)
+- 예상한 결과(expected)
+- 실제 결과(actual)

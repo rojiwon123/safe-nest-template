@@ -4,7 +4,6 @@
     "liveServer.settings.root": "/packages/doc",
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
-    "prettier.printWidth": 140,
     "[prisma]": {
         "editor.tabSize": 4,
         "editor.defaultFormatter": "Prisma.prisma"
