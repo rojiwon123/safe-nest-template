@@ -4,6 +4,4 @@ import { EffectLogger } from "@/infrastructure/logger";
 
 import { UserModule } from "./user/user.module";
 
-const layers = [UserModule] as const;
-
-export const AppModule = () => Layer.mergeAll(...layers).pipe(Layer.provide(EffectLogger.get()));
+export const AppModule = () => Layer.mergeAll(UserModule()).pipe(Layer.provide(EffectLogger.get()));
