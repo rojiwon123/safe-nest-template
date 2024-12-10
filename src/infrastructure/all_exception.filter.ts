@@ -26,7 +26,7 @@ export class AllExceptionFilter implements nest.ExceptionFilter {
         };
 
         const [body, status]: [Err.Body<string>, number] =
-            exception instanceof Err.Http ? [exception.body, exception.status]
+            Err.Http.is(exception) ? [exception.body, exception.status]
             : this.isHttpException(exception) ?
                 (() => {
                     const status = exception.getStatus();
