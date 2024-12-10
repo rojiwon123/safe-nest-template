@@ -28,11 +28,13 @@ const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): 
 const stringify = ({ colors = false }: { colors?: boolean } = {}) =>
     winston.format((info) => {
         const message: unknown = info.message;
-        if (Array.isArray(message))
-            info.message = message
-                .map((input) => (String.isString(input) ? input : inspect(input, inspectOptions({ level: info.level, colors }))))
-                .join(" ");
-        else if (!String.isString(message)) info.message = inspect(message, inspectOptions({ level: info.level, colors }));
+        info.message =
+            Array.isArray(message) ?
+                message
+                    .map((input) => (String.isString(input) ? input : inspect(input, inspectOptions({ level: info.level, colors }))))
+                    .join(" ")
+            : String.isString(message) ? message
+            : inspect(message, inspectOptions({ level: info.level, colors }));
         return info;
     })();
 
