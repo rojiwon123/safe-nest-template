@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
-import { LogLevel } from "effect";
 import typia from "typia";
 
 import { Once } from "@/util/once";
+
+import { LogLevelType } from "./logger";
 
 export interface Config {
     NODE_ENV: "development" | "production" | "test";
@@ -21,7 +22,7 @@ export interface Config {
      * 테스트 모드에서는 기본값 FATAL을 사용
      *
      */
-    LOG_LEVEL: LogLevel.LogLevel["label"];
+    LOG_LEVEL: LogLevelType;
 }
 
 const loadConfig = (): Config => {

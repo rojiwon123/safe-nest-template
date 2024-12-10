@@ -7,6 +7,8 @@ import { Once } from "@/util/once";
 
 import { Config, config } from "./config";
 
+export type LogLevelType = LogLevel.LogLevel["label"];
+
 /// 로그 메시지 형식을 맞추기 위한 함수들입니다.
 
 const inspectOptions = ({ level, colors }: { level: string; colors: boolean }): InspectOptions => {
@@ -52,10 +54,7 @@ const LOCAL_TRANSPORTS = () => [
                     WARN: "yellow",
                     ERROR: "blue",
                     FATAL: "red",
-                } satisfies Record<
-                    Exclude<LogLevel.LogLevel["label"], "ALL" | "OFF">,
-                    "red" | "blue" | "yellow" | "green" | "gray" | "white"
-                >,
+                } satisfies Record<Exclude<LogLevelType, "ALL" | "OFF">, "red" | "blue" | "yellow" | "green" | "gray" | "white">,
             }),
             winston.format.printf(
                 (info) => `[${info.level}] ${new Date().toLocaleString("ko", { timeZone: "Asia/Seoul" })} ${info.message}`,
@@ -78,11 +77,9 @@ const LAMBDA_TRANSPORTS = () => [
     }),
 ];
 
-type LogLabel = LogLevel.LogLevel["label"];
-
 const winstonLogger = Once.make(() =>
     winston.createLogger({
-        levels: { FATAL: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4, TRACE: 5 } satisfies Record<Exclude<LogLabel, "ALL" | "OFF">, number>,
+        levels: { FATAL: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4, TRACE: 5 } satisfies Record<Exclude<LogLevelType, "ALL" | "OFF">, number>,
         level: config("LOG_LEVEL"),
         transports: config("AWS_EXECUTION_ENV")?.startsWith("AWS_Lambda") ? LAMBDA_TRANSPORTS() : LOCAL_TRANSPORTS(),
     }),
@@ -96,7 +93,7 @@ export const logger =
 
 // for effect system
 
-const fromLabel = (label: LogLabel): LogLevel.LogLevel =>
+const fromLabel = (label: LogLevelType): LogLevel.LogLevel =>
     (
         ({
             ALL: LogLevel.All,
@@ -107,7 +104,7 @@ const fromLabel = (label: LogLabel): LogLevel.LogLevel =>
             OFF: LogLevel.None,
             TRACE: LogLevel.Trace,
             WARN: LogLevel.Warning,
-        }) satisfies Record<LogLabel, LogLevel.LogLevel>
+        }) satisfies Record<LogLevelType, LogLevel.LogLevel>
     )[label];
 
 export const EffectLogger = Once.make(() =>
@@ -128,7 +125,7 @@ export const EffectLogger = Once.make(() =>
                     INFO: "info",
                     TRACE: "trace",
                     WARN: "warn",
-                } satisfies Record<LogLabel, Lowercase<LogLabel>>
+                } satisfies Record<LogLevelType, Lowercase<LogLevelType>>
             )[level.label];
             if (lowercase === "all" || lowercase === "off") return;
             logger(lowercase)(...annotations, ...body);
