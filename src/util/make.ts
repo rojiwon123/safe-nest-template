@@ -1,4 +1,5 @@
 import { randomBytes, randomInt, randomUUID } from "crypto";
+import { Option } from "effect";
 import typia from "typia";
 
 export namespace Make {
@@ -14,4 +15,18 @@ export namespace Make {
     };
     export const base64 = (byteLength: number) => randomBytes(byteLength).toString("base64url");
     export const datetime = typia.createRandom<string & typia.tags.Format<"date-time">>();
+
+    /**
+     * 전달된 `closure`를 한 번만 실행하며 결과값을 공유합니다.
+     *
+     * 지연 평가된 sigleton 객체를 정의할 때 사용합니다.
+     */
+    export const once = <T>(closure: () => T) => {
+        let value: Option.Option<T> = Option.none();
+        return (): T => {
+            const some = Option.match(value, { onSome: (i) => i, onNone: closure });
+            value = Option.some(some);
+            return some;
+        };
+    };
 }

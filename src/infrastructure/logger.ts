@@ -3,7 +3,7 @@ import { Array, Layer, LogLevel, Logger, String } from "effect";
 import { InspectOptions, inspect } from "util";
 import winston from "winston";
 
-import { Once } from "@/util/once";
+import { Make } from "@/util/make";
 
 import { Config, config } from "./config";
 
@@ -77,7 +77,7 @@ const LAMBDA_TRANSPORTS = () => [
     }),
 ];
 
-const winstonLogger = Once.make(() =>
+const winstonLogger = Make.once(() =>
     winston.createLogger({
         levels: { FATAL: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4, TRACE: 5 } satisfies Record<Exclude<LogLevelType, "ALL" | "OFF">, number>,
         level: config("LOG_LEVEL"),
@@ -88,7 +88,7 @@ const winstonLogger = Once.make(() =>
 export const logger =
     (level: Exclude<Lowercase<Config["LOG_LEVEL"]>, "all" | "off"> = "info") =>
     (...message: unknown[]) => {
-        winstonLogger.get().log(level.toUpperCase(), { message });
+        winstonLogger().log(level.toUpperCase(), { message });
     };
 
 // for effect system
@@ -107,7 +107,7 @@ const fromLabel = (label: LogLevelType): LogLevel.LogLevel =>
         }) satisfies Record<LogLevelType, LogLevel.LogLevel>
     )[label];
 
-export const EffectLogger = Once.make(() =>
+export const EffectLogger = Make.once(() =>
     Logger.replace(
         Logger.defaultLogger,
 

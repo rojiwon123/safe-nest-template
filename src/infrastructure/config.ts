@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import typia from "typia";
 
-import { Once } from "@/util/once";
+import { Make } from "@/util/make";
 
 import { LogLevelType } from "./logger";
 
@@ -25,7 +25,7 @@ export interface Config {
     LOG_LEVEL: LogLevelType;
 }
 
-const loadConfig = (): Config => {
+const loadConfig = Make.once((): Config => {
     switch (process.env["NODE_ENV"]) {
         case "development":
             dotenv.config({ path: ".env.dev", override: true });
@@ -45,7 +45,6 @@ const loadConfig = (): Config => {
                 ...process.env,
             } satisfies Partial<Config> as Config)
         :   typia.assert<Config>({ PORT: 4000, LOG_LEVEL: "INFO", ...process.env } satisfies Partial<Config>);
-};
+});
 
-const once = Once.make(loadConfig);
-export const config = <T extends keyof Config>(key: T) => once.get()[key];
+export const config = <T extends keyof Config>(key: T) => loadConfig()[key];

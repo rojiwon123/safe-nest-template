@@ -1,7 +1,7 @@
 import { Layer } from "effect";
 
-import { Once } from "@/util/once";
+import { Make } from "@/util/make";
 
 import { UsersUsecase } from "./users.usecase";
 
-export const UserModule = Once.make(() => Layer.mergeAll(UsersUsecase.layer())).get;
+export const UserModule = Make.once(() => Layer.mergeAll(UsersUsecase.layer()));

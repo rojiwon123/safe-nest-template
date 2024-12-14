@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Effect, FiberRef } from "effect";
 
-import { Once } from "@/util/once";
+import { Make } from "@/util/make";
 
 import { config } from "./config";
 import { logger } from "./logger";
@@ -38,7 +38,7 @@ const createClient = () => {
  *
  * transaction을 구성하기 위해서는 명시적으로 DB().$transaction을 사용해야 한다.
  */
-export const DB = Once.make<PrismaClient>(createClient).get;
+export const DB = Make.once<PrismaClient>(createClient);
 
 export interface TransactionOptions {
     /**
@@ -56,23 +56,23 @@ export interface TransactionOptions {
     isolationLevel?: Prisma.TransactionIsolationLevel;
 }
 
-const DBRef = Once.make(() => FiberRef.unsafeMake<Prisma.TransactionClient>(DB()));
+const DBRef = Make.once(() => FiberRef.unsafeMake<Prisma.TransactionClient>(DB()));
 /**
  * effect system 내에서 transactionable client를 적용하기 위해 사용하는 client
  *
  * `DB`와 다르게 동적으로 transaction client가 될 수도 있고 전역 client가 될 수도 있다.
  */
-export const DBTx = Once.make(() => FiberRef.get(DBRef.get())).get;
+export const DBTx = Make.once(() => FiberRef.get(DBRef()));
 export const Transaction =
     (options: TransactionOptions = {}) =>
     <A, E, R>(self: Effect.Effect<A, E, R>): Effect.Effect<A, E, R> =>
         Effect.gen(function* () {
-            const db = yield* FiberRef.get(DBRef.get());
+            const db = yield* FiberRef.get(DBRef());
             const isIn = (db as PrismaClient)["$transaction"] === undefined;
             if (isIn) return yield* self;
             const tx = yield* Effect.promise(() => createTransaction(options));
             return yield* Effect.locally(
-                DBRef.get(),
+                DBRef(),
                 tx.tx,
             )(self).pipe(
                 Effect.tap(() => Effect.sync(tx.emitCommit)),

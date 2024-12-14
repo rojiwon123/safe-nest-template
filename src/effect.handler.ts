@@ -6,10 +6,8 @@ import { Err } from "@/common/err/err";
 import { PrismaErr } from "@/infrastructure/db";
 import { Make } from "@/util/make";
 
-import { Once } from "./util/once";
-
 export namespace EffectHandler {
-    export const runtime = Once.make(() => ManagedRuntime.make(AppModule())).get;
+    export const runtime = Make.once(() => ManagedRuntime.make(AppModule()));
     export const respond = <A, Code extends string>(exit: Exit.Exit<A, Err<Err.Body<Code>> | PrismaErr>, mapper: Record<Code, number>): A =>
         Exit.match(exit, {
             onSuccess: (i) => i,

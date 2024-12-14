@@ -3,13 +3,13 @@ import { Effect, Layer } from "effect";
 import { Err } from "@/common/err/err";
 import { UserErr } from "@/common/err/err_code/user.code";
 import { DBTx, PrismaErr, queryEffect } from "@/infrastructure/db";
-import { Once } from "@/util/once";
+import { Make } from "@/util/make";
 
 import { User } from "./user.model";
 import { IUsersUsecase, UsersUsecaseToken } from "./users.usecase.interface";
 
 export class UsersUsecase implements IUsersUsecase {
-    static readonly layer = Once.make(() => Layer.succeed(UsersUsecaseToken, new UsersUsecase())).get;
+    static readonly layer = Make.once(() => Layer.succeed(UsersUsecaseToken, new UsersUsecase()));
 
     profile(input: User.Id): Effect.Effect<IUsersUsecase.Profile, Err<UserErr.NotFound> | PrismaErr> {
         return Effect.gen(function* () {
