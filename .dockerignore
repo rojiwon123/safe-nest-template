@@ -18,7 +18,7 @@ eslint.config.mjs
 nestia.config.ts
 prettierconfig.mjs
 README.md
-setup_hook.sh
+setup.sh
 TEST_REPORT.md
 tsconfig.sdk.json
 tsconfig.test.json

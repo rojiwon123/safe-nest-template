@@ -15,7 +15,7 @@
     },
     "homepage": "https://github.com/rojiwon123/safe-nest-template/packages/sdk#readme",
     "dependencies": {
-        "typia": "^7.1.0",
-        "@nestia/fetcher": "^4.0.5"
+        "typia": "^7.5.1",
+        "@nestia/fetcher": "^4.5.2"
     }
 }
