@@ -10,10 +10,6 @@ export type Mandatory<T extends object> = Required<{
     [key in keyof T]: NonNullable<T[key]>;
 }>;
 
-export type Optional<T extends object> = {
-    [key in keyof T]?: T[key];
-};
-
 export type Nullable<T extends object> = {
     [key in keyof T]: T[key] | null;
 };
