@@ -1,5 +1,5 @@
-import { createBackend } from "./backend";
-import { logger } from "./infrastructure/logger";
+import { createBackend } from "@/backend";
+import { logger } from "@/infrastructure/logger";
 
 const bootstrap = async () => {
     try {
