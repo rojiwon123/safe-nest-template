@@ -1,6 +1,6 @@
 import typia from "typia";
 
-import { Num, Regex } from "../util/type";
+import { Num, Regex } from "@/util/type";
 
 export namespace Page {
     export interface Paginated<T> {

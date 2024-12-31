@@ -3,9 +3,8 @@ import { Array, Layer, LogLevel, Logger, String } from "effect";
 import { InspectOptions, inspect } from "util";
 import winston from "winston";
 
+import { Config, config } from "@/infrastructure/config";
 import { Make } from "@/util/make";
-
-import { Config, config } from "./config";
 
 export type LogLevelType = LogLevel.LogLevel["label"];
 

@@ -1,4 +1,4 @@
-import { Err } from "../err";
+import { Err } from "@/common/err/err";
 
 export namespace SystemErr {
     export interface API_NOT_FOUND extends Err.Body<"API_NOT_FOUND"> {}

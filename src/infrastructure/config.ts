@@ -1,9 +1,8 @@
 import dotenv from "dotenv";
 import typia from "typia";
 
+import { LogLevelType } from "@/infrastructure/logger";
 import { Make } from "@/util/make";
-
-import { LogLevelType } from "./logger";
 
 export interface Config {
     NODE_ENV: "development" | "production" | "test";

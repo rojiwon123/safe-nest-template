@@ -1,10 +1,9 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Effect, FiberRef } from "effect";
 
+import { config } from "@/infrastructure/config";
+import { logger } from "@/infrastructure/logger";
 import { Make } from "@/util/make";
-
-import { config } from "./config";
-import { logger } from "./logger";
 
 const createClient = () => {
     const client = new PrismaClient({
