@@ -24,8 +24,8 @@ const createClient = () => {
     client.$on("error", logger("error"));
     client.$on("warn", logger("warn"));
     if (config("NODE_ENV") === "development") {
-        client.$on("query", logger());
-        client.$on("info", logger());
+        client.$on("query", logger("debug"));
+        client.$on("info", logger("debug"));
     }
     return client;
 };

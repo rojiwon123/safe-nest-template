@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import typia from "typia";
 
-import { LogLevelType } from "@/infrastructure/logger";
+import { LogLevelType } from "@/infrastructure/logger/level.type";
 import { Make } from "@/util/make";
 
 export interface Config {
