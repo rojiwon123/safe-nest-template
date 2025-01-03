@@ -2,7 +2,17 @@ name: Test ✅
 
 on:
     workflow_call:
+        inputs:
+            LOG_LEVEL:
+                required: false
+                default: OFF
+                type: string
     workflow_dispatch:
+        inputs:
+            LOG_LEVEL:
+                required: false
+                default: INFO
+                type: string
 
 permissions:
     contents: read
@@ -47,7 +57,7 @@ jobs:
             - name: Test 🧪
               run: npm test
               env:
-                  LOG_LEVEL: FATAL
+                  LOG_LEVEL: ${{ inputs.LOG_LEVEL }}
 
             - name: Upload Test Report 📋
               uses: actions/upload-artifact@v4

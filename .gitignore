@@ -4,9 +4,8 @@ dist
 build
 tbuild
 packages/sdk/lib
-prisma/client
-migrated
 openapi.json
+packages/doc/version/*
 /sdk
 # Logs
 logs

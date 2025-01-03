@@ -1,6 +1,6 @@
 import { Layer } from "effect";
 
-import { EffectLogger } from "@/infrastructure/logger";
+import { EffectLogger } from "@/infrastructure/logger/effect";
 import { Make } from "@/util/make";
 
 import { UserModule } from "./user/user.module";

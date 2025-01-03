@@ -3,7 +3,7 @@ name: Release 🔖
 on:
     workflow_dispatch:
         inputs:
-            sdk:
+            doc:
                 required: true
                 default: false
                 type: boolean
@@ -12,7 +12,6 @@ permissions:
     id-token: write
     contents: write
     packages: write
-    pages: write
 
 env:
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,6 +31,8 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            # 1. Setup Workflow
+
             - name: Checkout 🛎️
               uses: actions/checkout@main
 
@@ -43,7 +44,7 @@ jobs:
                     echo "Tag v$VERSION already exist"
                     exit 1
                   fi
-                  echo "output=$VERSION" >> "$GITHUB_OUTPUT"
+                  echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
             - name: Setup NodeJS
               uses: actions/setup-node@main
@@ -58,41 +59,77 @@ jobs:
                   role-to-assume: ${{ vars.AWS_ASSUME_ROLE_ARN }}
                   aws-region: ${{ vars.AWS_REGION }}
 
-            - name: Build & Push Docker Image 🐳
-              id: image
-              uses: deploy-actions/push-to-ecr@v1
+            # 2. Build & Deploy Docker Image to Amanzon ECR Repository
+
+            - name: Login to ECR
+              id: ecr
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Setup ECR Repository
+              uses: deploy-actions/setup-ecr@main
               with:
-                  repository-name: ${{ vars.PROJECT_NAME }}
-                  image-tag: ${{ steps.version.outputs.output }}
-                  overwrite: false
+                  RepositoryName: ${{ vars.PROJECT_NAME }}
+
+            - name: Image Tag
+              id: image
+              run: echo "tag=${{ steps.ecr.outputs.registry }}/${{ vars.PROJECT_NAME }}:${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            # Builder Stage Caching Step
+            - name: Docker Build Builder Stage
+              uses: docker/build-push-action@v6
+              with:
+                  load: true
+                  target: builder
+                  tags: ${{ steps.image.outputs.tag }}
+                  cache-from: type=gha, ref=main
+                  cache-to: type=gha, ref=main, mode=max
+
+            - name: Docker Build Runner Stage
+              uses: docker/build-push-action@v6
+              with:
+                  load: true
+                  tags: ${{ steps.image.outputs.tag }}
+                  cache-from: type=gha, ref=main
+
+            - name: Push to ECR
+              id: target
+              run: |
+                  docker push ${{ steps.image.outputs.tag }}
+                  echo "image=$(docker inspect --format '{{index .RepoDigests 0}}' ${{ steps.image.outputs.tag }})" >> "$GITHUB_OUTPUT"
+
+            # 3. Deploy Server
 
             - name: Deploy Lambda
               uses: deploy-actions/lambda-api@main
               with:
                   Name: ${{ vars.PROJECT_NAME }}
-                  ImageUri: ${{ steps.image.outputs.image_uri }}
+                  ImageUri: ${{ steps.target.outputs.image }}
                   MemorySize: 1024
                   Timeout: 10
+                  Environment: |
+                      Variables:
+                          NODE_ENV: production
+
+            # 4. Build & Deploy API Doc & SDK
 
             - name: Build API Doc/SDK
+              if: ${{ inputs.doc }}
               run: npm ci && npm run build:nestia
 
-            - name: Setup Pages
-              uses: actions/configure-pages@v5
-
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  path: ./packages/doc
-                  name: github-pages
-
-            - name: Deploy to Github Pages
-              uses: actions/deploy-pages@v4
+            - name: Update API Doc
+              if: ${{ inputs.doc }}
+              run: |
+                  aws s3 cp --recursive "./packages/doc" s3://${{ vars.S3 }}
+                  aws s3 cp "./packages/doc/openapi.json" s3://${{ vars.S3 }}/version/${{ steps.version.outputs.version }}.json
+                  aws cloudfront create-invalidation --distribution-id ${{ vars.CF_ID }} --paths "/openapi.json"
 
             - name: Publish SDK
-              if: ${{ inputs.sdk }}
+              if: ${{ inputs.doc }}
               run: |
-                  TAG=v${{ steps.version.outputs.output }}
+                  TAG=v${{ steps.version.outputs.version }}
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
                   git tag -a "$TAG" -m "release $TAG"
