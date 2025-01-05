@@ -25,7 +25,10 @@ export const createBackend = async (options: OmitKeyof<nest.NestApplicationOptio
             .filter((line) => line !== "") ?? [];
     const module = await DynamicModule.mount(dirname + "/controller", { imports: [InfraModule] });
     await DB().$connect();
-    const app = await NestFactory.create(module, { ...options, ...(origin.length > 0 ? { cors: { origin, credentials: true } } : {}) });
+    const app = await NestFactory.create(module, {
+        ...options,
+        ...(origin.length > 0 ? { cors: { origin, credentials: true } } : { cors: { origin: "*", credentials: false } }),
+    });
     app.use(cookieParser(), helmet({ contentSecurityPolicy: true, hidePoweredBy: true }));
     await app.init();
     const end = async () => {
