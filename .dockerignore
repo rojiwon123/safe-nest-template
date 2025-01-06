@@ -4,7 +4,7 @@ build
 hooks
 node_modules
 packages
-prisma/migrations
+prisma
 src/test
 tbuild
 .env
