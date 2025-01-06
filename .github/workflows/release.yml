@@ -161,3 +161,6 @@ jobs:
 
             - name: Publish SDK
               run: npm publish ./packages/sdk --access restricted
+
+            - name: Show URL of SPA
+              run: echo "https://${{ steps.spa.outputs.DomainName }}"
