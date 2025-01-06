@@ -3,7 +3,11 @@ name: Release 🔖
 on:
     workflow_dispatch:
         inputs:
-            doc:
+            deployment:
+                required: true
+                default: false
+                type: boolean
+            documentation:
                 required: true
                 default: false
                 type: boolean
@@ -26,25 +30,18 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/main')
         uses: ./.github/workflows/test.yml
 
-    release:
+    deployment:
         needs: test
+        if: ${{ inputs.deployment }}
         runs-on: ubuntu-latest
 
         steps:
-            # 1. Setup Workflow
-
             - name: Checkout 🛎️
               uses: actions/checkout@main
 
-            - name: Check Version
-              id: version
-              run: |
-                  VERSION=$(node -p "require('./package.json').version")
-                  if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-                    echo "Tag v$VERSION already exist"
-                    exit 1
-                  fi
-                  echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            - name: Get Version
+              id: release
+              run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
             - name: Setup NodeJS
               uses: actions/setup-node@main
@@ -59,8 +56,6 @@ jobs:
                   role-to-assume: ${{ vars.AWS_ASSUME_ROLE_ARN }}
                   aws-region: ${{ vars.AWS_REGION }}
 
-            # 2. Build & Deploy Docker Image to Amanzon ECR Repository
-
             - name: Login to ECR
               id: ecr
               uses: aws-actions/amazon-ecr-login@v2
@@ -69,10 +64,11 @@ jobs:
               uses: deploy-actions/setup-ecr@main
               with:
                   RepositoryName: ${{ vars.PROJECT_NAME }}
+                  ImageTagMutability: IMMUTABLE
 
             - name: Image Tag
               id: image
-              run: echo "tag=${{ steps.ecr.outputs.registry }}/${{ vars.PROJECT_NAME }}:${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+              run: echo "tag=${{ steps.ecr.outputs.registry }}/${{ vars.PROJECT_NAME }}:${{ steps.release.outputs.version }}" >> "$GITHUB_OUTPUT"
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
@@ -91,6 +87,7 @@ jobs:
               uses: docker/build-push-action@v6
               with:
                   load: true
+                  target: runner
                   tags: ${{ steps.image.outputs.tag }}
                   cache-from: type=gha, ref=main
 
@@ -98,41 +95,69 @@ jobs:
               id: target
               run: |
                   docker push ${{ steps.image.outputs.tag }}
-                  echo "image=$(docker inspect --format '{{index .RepoDigests 0}}' ${{ steps.image.outputs.tag }})" >> "$GITHUB_OUTPUT"
-
-            # 3. Deploy Server
+                  echo "digest=$(docker inspect --format '{{index .RepoDigests 0}}' ${{ steps.image.outputs.tag }})" >> "$GITHUB_OUTPUT"
 
             - name: Deploy Lambda
-              uses: deploy-actions/lambda-api@main
+              uses: deploy-actions/lambda-api@v1
               with:
                   Name: ${{ vars.PROJECT_NAME }}
-                  ImageUri: ${{ steps.target.outputs.image }}
+                  ImageUri: ${{ steps.target.outputs.digest }}
                   MemorySize: 1024
                   Timeout: 10
                   Environment: |
                       Variables:
                           NODE_ENV: production
 
-            # 4. Build & Deploy API Doc & SDK
+    documentation:
+        needs: test
+        if: ${{ inputs.documentation }}
+        runs-on: ubuntu-latest
 
-            - name: Build API Doc/SDK
-              if: ${{ inputs.doc }}
-              run: npm ci && npm run build:nestia
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
 
-            - name: Update API Doc
-              if: ${{ inputs.doc }}
+            - name: Generate Release Note
+              id: release
               run: |
-                  aws s3 cp --recursive "./packages/doc" s3://${{ vars.S3 }}
-                  aws s3 cp "./packages/doc/openapi.json" s3://${{ vars.S3 }}/version/${{ steps.version.outputs.version }}.json
-                  aws cloudfront create-invalidation --distribution-id ${{ vars.CF_ID }} --paths "/openapi.json"
+                  VERSION=$(node -p "require('./package.json').version")
+                  TAG=v$VERSION
 
-            - name: Publish SDK
-              if: ${{ inputs.doc }}
-              run: |
-                  TAG=v${{ steps.version.outputs.version }}
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
                   git tag -a "$TAG" -m "release $TAG"
                   git push origin "$TAG"
                   gh release create "$TAG" -t "$TAG" --target "${{ github.sha }}" --generate-notes
-                  npm publish ./packages/sdk --access restricted
+
+                  echo "version=VERSION" >> "$GITHUB_OUTPUT"
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@main
+              with:
+                  node-version: 20
+                  registry-url: https://npm.pkg.github.com/
+                  scope: "@rojiwon123"
+
+            - name: Configure AWS credentials 🔑
+              uses: aws-actions/configure-aws-credentials@main
+              with:
+                  role-to-assume: ${{ vars.AWS_ASSUME_ROLE_ARN }}
+                  aws-region: ${{ vars.AWS_REGION }}
+
+            - name: Build Doc & SDK
+              run: npm ci && npm run build:nestia
+
+            - name: Setup Page
+              id: spa
+              uses: deploy-actions/s3-spa@main
+              with:
+                  BucketName: ${{ vars.S3 }}
+
+            - name: Deploy Doc
+              run: |
+                  aws s3 cp --recursive "./packages/doc" s3://${{ vars.S3 }}
+                  aws s3 cp "./packages/doc/openapi.json" s3://${{ vars.S3 }}/version/${{ steps.release.outputs.version }}.json
+                  aws cloudfront create-invalidation --distribution-id ${{ steps.spa.outputs.DistributionId }} --paths "/openapi.json"
+
+            - name: Publish SDK
+              run: npm publish ./packages/sdk --access restricted
