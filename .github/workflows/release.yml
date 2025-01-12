@@ -79,7 +79,6 @@ jobs:
               with:
                   load: true
                   target: builder
-                  tags: ${{ steps.image.outputs.tag }}
                   cache-from: type=gha, ref=main
                   cache-to: type=gha, ref=main, mode=max
 
@@ -87,7 +86,6 @@ jobs:
               uses: docker/build-push-action@v6
               with:
                   load: true
-                  target: runner
                   tags: ${{ steps.image.outputs.tag }}
                   cache-from: type=gha, ref=main
 
