@@ -4,7 +4,8 @@ build
 hooks
 node_modules
 packages
-prisma
+prisma/**
+!prisma/schemas
 src/test
 tbuild
 .env
