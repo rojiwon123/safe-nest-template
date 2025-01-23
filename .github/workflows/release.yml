@@ -98,6 +98,7 @@ jobs:
                   echo "digest=$(docker inspect --format '{{index .RepoDigests 0}}' ${{ steps.image.outputs.tag }})" >> "$GITHUB_OUTPUT"
 
             - name: Deploy Lambda
+              id: api
               uses: deploy-actions/lambda-api@v1
               with:
                   Name: ${{ vars.PROJECT_NAME }}
@@ -107,6 +108,9 @@ jobs:
                   Environment: |
                       Variables:
                           NODE_ENV: production
+
+            - name: Show URL of Server
+              run: echo "https://${{ steps.api.outputs.DomainName }}"
 
     documentation:
         needs: test
