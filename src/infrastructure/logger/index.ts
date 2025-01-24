@@ -3,8 +3,8 @@ import winston from "winston";
 import { config } from "@/infrastructure/config";
 import { LAMBDA_TRANSPORTS } from "@/infrastructure/logger/transport/lambda.transport";
 import { LOCAL_TRANSPORTS } from "@/infrastructure/logger/transport/local.transport";
+import { Exclude } from "@/util/exclude";
 import { Make } from "@/util/make";
-import { Exclude } from "@/util/type";
 
 import { LogLevelType } from "./level.type";
 

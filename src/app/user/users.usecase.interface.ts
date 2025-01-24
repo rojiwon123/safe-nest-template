@@ -1,9 +1,9 @@
 import { Context, Effect } from "effect";
 
-import { Err } from "@/common/err/err";
-import { UserErr } from "@/common/err/err_code/user.code";
+import { Err } from "@/common/err";
+import { UserErr } from "@/common/err/code/user.code";
 import { PrismaErr } from "@/infrastructure/db";
-import { Regex } from "@/util/type";
+import { Regex } from "@/util/regex";
 
 import { User } from "./user.model";
 

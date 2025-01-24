@@ -1,7 +1,7 @@
 import winston from "winston";
 
 import { LogLevelType } from "@/infrastructure/logger/level.type";
-import { Exclude } from "@/util/type";
+import { Exclude } from "@/util/exclude";
 
 import { stringifyLogFormat } from "./stringify.format";
 

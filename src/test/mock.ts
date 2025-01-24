@@ -2,7 +2,7 @@ import sdk from "@project/sdk";
 import { Either, ManagedRuntime } from "effect";
 import ntest from "node:test";
 
-import { AppModule } from "@/app/app.module";
+import { AppModule } from "@/app/app.layer";
 import { EffectHandler } from "@/effect.handler";
 
 export const mock =

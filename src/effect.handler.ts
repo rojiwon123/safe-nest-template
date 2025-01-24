@@ -1,13 +1,13 @@
 import { Effect, Exit, ManagedRuntime, pipe } from "effect";
 import { Request } from "express";
 
-import { AppModule } from "@/app/app.module";
-import { Err } from "@/common/err/err";
+import { AppLayer } from "@/app/app.layer";
+import { Err } from "@/common/err";
 import { PrismaErr } from "@/infrastructure/db";
 import { Make } from "@/util/make";
 
 export namespace EffectHandler {
-    export const runtime = Make.once(() => ManagedRuntime.make(AppModule()));
+    export const runtime = Make.once(() => ManagedRuntime.make(AppLayer()));
     export const respond = <A, Code extends string>(exit: Exit.Exit<A, Err<Err.Body<Code>> | PrismaErr>, mapper: Record<Code, number>): A =>
         Exit.match(exit, {
             onSuccess: (i) => i,

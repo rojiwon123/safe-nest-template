@@ -1,7 +1,7 @@
 import { Effect, Layer } from "effect";
 
-import { Err } from "@/common/err/err";
-import { UserErr } from "@/common/err/err_code/user.code";
+import { Err } from "@/common/err";
+import { UserErr } from "@/common/err/code/user.code";
 import { DBTx, PrismaErr, queryEffect } from "@/infrastructure/db";
 import { Make } from "@/util/make";
 

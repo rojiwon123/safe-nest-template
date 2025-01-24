@@ -3,12 +3,24 @@ import { Option } from "effect";
 import { isUndefined } from "effect/Predicate";
 
 export namespace Crypto {
+    const IV_LEN = 12;
+    const TAG_LEN = 16;
+
     /**
      * 문자열 암호화
      * - plain: 평문
      * - key: 암호화 키, 32 byte string
      */
-    export type encrypt = (input: { plain: string; key: string }) => string;
+    export const encrypt = ({ plain, key }: { plain: string; key: string }): string => {
+        const iv = crypto.randomBytes(IV_LEN);
+        const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
+            authTagLength: TAG_LEN,
+        });
+        const encrypted = cipher.update(plain, "utf8", "base64") + cipher.final("base64");
+        const tag = cipher.getAuthTag();
+        return `${iv.toString("base64")}.${tag.toString("base64")}.${encrypted}`;
+    };
+
     /**
      * 암호문 해독
      * - token: encrypt 결과로 얻은 문자열
@@ -20,24 +32,7 @@ export namespace Crypto {
      *
      * 잘못된 토큰을 전달시 INVALID_TOKEN 에러를 리턴한다.
      */
-    export type decrypt = (input: { token: string; key: string }) => Option.Option<string>;
-
-    ///
-
-    const IV_LEN = 12;
-    const TAG_LEN = 16;
-
-    export const encrypt: encrypt = ({ plain, key }) => {
-        const iv = crypto.randomBytes(IV_LEN);
-        const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
-            authTagLength: TAG_LEN,
-        });
-        const encrypted = cipher.update(plain, "utf8", "base64") + cipher.final("base64");
-        const tag = cipher.getAuthTag();
-        return `${iv.toString("base64")}.${tag.toString("base64")}.${encrypted}`;
-    };
-
-    export const decrypt: decrypt = ({ token, key }) => {
+    export const decrypt = ({ token, key }: { token: string; key: string }): Option.Option<string> => {
         try {
             const [iv, tag, encrypted] = token.split(".");
             if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted)) return Option.none();

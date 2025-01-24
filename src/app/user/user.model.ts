@@ -1,4 +1,4 @@
-import { Regex } from "@/util/type";
+import { Regex } from "@/util/regex";
 
 export namespace User {
     export interface Id {

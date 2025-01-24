@@ -5,9 +5,9 @@ import { Request } from "express";
 
 import { UserProfileDTO } from "@/app/user/user.dto";
 import { UsersUsecaseToken } from "@/app/user/users.usecase.interface";
-import { UserErr } from "@/common/err/err_code/user.code";
+import { UserErr } from "@/common/err/code/user.code";
 import { EffectHandler } from "@/effect.handler";
-import { Regex } from "@/util/type";
+import { Regex } from "@/util/regex";
 
 @nest.Controller("users")
 export class UsersController {
