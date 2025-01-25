@@ -12,22 +12,20 @@ export interface IAuthService {
      *
      * code는 일회성이며 만료 주기가 짧다.
      */
-    createCode: (input: User.Id) => Effect.Effect<IAuthService.Code>;
-    verifyCode: (
-        input: IAuthService.Code,
-    ) => Effect.Effect<IAuthService.CodeId, Err<Err.Body<"CODE_INVALID">> | Err<Err.Body<"CODE_EXPIRED">>>;
+    createCode(input: User.Id): Effect.Effect<IAuthService.Code>;
+    verifyCode(input: IAuthService.Code): Effect.Effect<IAuthService.CodeId, Err<Err.Body<"CODE_INVALID">> | Err<Err.Body<"CODE_EXPIRED">>>;
 
-    createAccessToken: (input: User.Id) => Effect.Effect<Token>;
-    createRefreshToken: (input: User.Id) => Effect.Effect<Token>;
-    parseAccessToken: (input: {
+    createAccessToken(input: User.Id): Effect.Effect<Token>;
+    createRefreshToken(input: User.Id): Effect.Effect<Token>;
+    parseAccessToken(input: {
         access_token: string;
-    }) => Effect.Effect<AccessTokenPayload, Err<Err.Body<"TOKEN_INVALID">> | Err<Err.Body<"TOKEN_EXPIRED">>>;
-    parseRefreshToken: (input: { refresh_token: string }) => Effect.Effect<RefreshTokenPayload, Err<Err.Body<"TOKEN_INVALID">>>;
+    }): Effect.Effect<AccessTokenPayload, Err<Err.Body<"TOKEN_INVALID">> | Err<Err.Body<"TOKEN_EXPIRED">>>;
+    parseRefreshToken(input: { refresh_token: string }): Effect.Effect<RefreshTokenPayload, Err<Err.Body<"TOKEN_INVALID">>>;
 
-    removeRefreshToken: (input: RefreshTokenPayload) => Effect.Effect<void>;
-    extendRefreshToken: (
+    removeRefreshToken(input: RefreshTokenPayload): Effect.Effect<void>;
+    extendRefreshToken(
         input: RefreshTokenPayload,
-    ) => Effect.Effect<IAuthService.ExtendRefreshTokenOutput, Err<Err.Body<"TOKEN_INVALID">> | Err<Err.Body<"TOKEN_EXPIRED">>>;
+    ): Effect.Effect<IAuthService.ExtendRefreshTokenOutput, Err<Err.Body<"TOKEN_INVALID">> | Err<Err.Body<"TOKEN_EXPIRED">>>;
 }
 
 export namespace IAuthService {
